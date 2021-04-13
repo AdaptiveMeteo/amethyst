@@ -16,33 +16,30 @@
 # along with Cris2observation. If not, see <http://www.gnu.org/licenses/>.
 
 """
-VIIRS/CRIS 2 Mirto Cloud Mask
+VIIRS/CRIS 2 Amethyst Cloud Mask
 
 This script is an open source software written to convert
 
-:copyright: 2020 by AdaptieMeteo S.r.l.
+:copyright: 2021 by AdaptieMeteo S.r.l.
 """
-
 import logging
 from argparse import ArgumentParser
 from sys import exit as sysexit
 from traceback import format_exc
-
 import numpy as np
-
-from utilities.gclos_wrapper import GCLOS_Wrapper
-from utilities.scris_wrapper import SCrISWrapper
-from utilities.viirs_wrapper import VIIRS_Wrapper
-from utilities.boxes import Rectangle
-from utilities.atmos_tools import cris_viirs_cloudmask
-from datetime import datetime, timedelta
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.gclos_wrapper import GCLOS_Wrapper
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.scris_wrapper import SCrISWrapper
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.viirs_wrapper import VIIRS_Wrapper
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.boxes         import Rectangle
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.atmos_tools   import cris_viirs_cloudmask
+from datetime import datetime
 
 __author__ = 'Paolo Antonelli<paolo.antonelli@adaptivementeo.com>'
-__copyright__ = "Copyright 2020, AdaptiveMeteo S.r.l."
+__copyright__ = "Copyright 2021, AdaptiveMeteo S.r.l."
 __credits__ = ["Paolo Antonelli", "Paolo Scaccia"]
 __license__ = "GPL"
 __version__ = "1.0"
-__maintainer__ = "Paolo Antonelli"
+__maintainer__ = [ "Paolo Antonelli", "Paolo Scaccia"]
 __email__ = "paolo.antonelli@adaptivemeteo.com"
 
 
@@ -121,7 +118,7 @@ def merge_viirs_dataset(viirs_dataset,new_dataset ):
 
 def write_output(cris_dataset, viirs_dataset, indices, cloud_stats, outfile):
     from netCDF4 import Dataset
-    from utilities.array_reshapers import array_1d, transform_index
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_1d, transform_index
 
     #outfile = 'cloudmask.nc'
 
@@ -163,7 +160,7 @@ def write_output(cris_dataset, viirs_dataset, indices, cloud_stats, outfile):
     return
 
 def write_ASCII(cris_dataset, viirs_dataset, indices, cloud_stats):
-    from utilities.array_reshapers import array_1d, transform_index
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_1d, transform_index
 
     # Output files
     cris_file  = open('cris_table.dat','w')

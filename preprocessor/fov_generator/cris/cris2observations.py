@@ -31,20 +31,20 @@ from traceback import format_exc
 import numpy as np
 import netCDF4 as nc
 
-from utilities.gc_wrapper import GCWrapper
-from utilities.scris_wrapper import SCrISWrapper
-from utilities.fov_file import FovFile
-from utilities.obs_indices import ObsMap
-from utilities.boxes import Rectangle
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.gc_wrapper    import GCWrapper
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.scris_wrapper import SCrISWrapper
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.fov_file      import FovFile
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.obs_indices   import ObsMap
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.boxes         import Rectangle
 
 
-__author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
-__copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
+__author__ = 'Stefano Piani'
+__copyright__ = "Copyright 2021, eXact-lab and Paolo Antonelli"
 __credits__ = ["Stefano Piani", "Paolo Antonelli"]
 __license__ = "GPL"
 __version__ = "1.0"
 __maintainer__ = "Stefano Piani"
-__email__ = "stefano.piani@exact-lab.it"
+__email__      = "paolo.antonelli@adaptivemeteo.com"
 
 
 if __name__ == '__main__':
