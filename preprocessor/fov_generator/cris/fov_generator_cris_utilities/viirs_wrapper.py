@@ -140,7 +140,7 @@ class VIIRS_Wrapper(object):
                 self.cloudmask = []                   # default empty mask
             
     def read_gmodo_cloudmask(self,path):
-        from utilities.array_reshapers import array_1d, transform_index
+        from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_1d, transform_index
         """
         Read cloudmask from GMODO file. Read Ref for bytes interpretation. 
         Ref: https://www.star.nesdis.noaa.gov/jpss/documents/ATBD/D0001-M01-S01-011_JPSS_ATBD_VIIRS-Cloud-Mask_E.pdf

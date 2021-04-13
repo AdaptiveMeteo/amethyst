@@ -38,7 +38,7 @@ def check_dir(dir_path,instr):
     return False    
     
 def preprocess_geoloc_data(geoloc_cris,geoloc_viirs,selected_cris_fovs):
-    from utilities.array_reshapers import array_1d, transform_index
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_1d, transform_index
     
     MAX_LON_DIFF = 0.25  # max degree diff. 
     MAX_LAT_DIFF = 0.25  # max degree diff.     
@@ -80,7 +80,7 @@ def preprocess_geoloc_data(geoloc_cris,geoloc_viirs,selected_cris_fovs):
     
 
 def get_collocation(geoloc_cris, geoloc_viirs, selected_cris_fovs):
-    from utilities.compute_los import select_LOS
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.compute_los import select_LOS
     
     # IMPROVE THIS PART MERGING THE TWO FUNCTIONS (preprocc.. and select_LOS)
     LOGGER.debug("Preprocessing geolocation VIIRS data...")
@@ -93,9 +93,9 @@ def get_collocation(geoloc_cris, geoloc_viirs, selected_cris_fovs):
 
 
 def test(cris_file_path,viirs_file_path, selected_cris_fovs):
-    from utilities.array_reshapers import transform_index
-    from utilities.cris_wrapper import GCLOS_Wrapper
-    from utilites.viirs_wrapper import VIIRS_Wrapper
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import transform_index
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.cris_wrapper import GCLOS_Wrapper
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.viirs_wrapper import VIIRS_Wrapper
 
     # Read files
     geoloc_cris  = GCLOS_Wrapper(cris_file_path)
@@ -118,8 +118,8 @@ def test(cris_file_path,viirs_file_path, selected_cris_fovs):
     
     """
     RAPID TEST: COMMENT UPPER LINE AND UNCOMMENT THIS PART
-    from utilities.gclos_wrapper import GCLOS_Wrapper
-    from utilities.viirs_wrapper import VIIRS_Wrapper
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.gclos_wrapper import GCLOS_Wrapper
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.viirs_wrapper import VIIRS_Wrapper
     geoloc_cris = GCLOS_Wrapper(cris_file_path)
     geoloc_viirs = VIIRS_Wrapper(viirs_file_path)    
     indices =  [ [] for i in range(geoloc_cris.longs.size)]

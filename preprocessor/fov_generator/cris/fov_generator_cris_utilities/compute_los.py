@@ -4,14 +4,14 @@ This module belongs to the 'collocation' tool of AdaptiveTools
 import numpy as np
 import logging
 
-__author__    = "Paolo Scaccia and Paolo Antonelli"
-__copyright__ = "Copyright 2017, AdaptiveMeteo S.r.l."
-__credits__   = ["Paolo Scaccia", "Paolo Antonelli"]
-__license__   = "--"
-__version__ = "0.0.1"
+__author__     = "Paolo Scaccia and Paolo Antonelli"
+__copyright__  = "Copyright 2016, AdaptiveMeteo S.r.l."
+__credits__    = ["Paolo Scaccia", "Paolo Antonelli"]
+__license__    = "--"
+__version__    = "1.0"
 __maintainer__ = "Paolo Scaccia"
-__email__ = "paolo.scaccia@adaptivemeteo.com"
-__status__ = "Development"
+__email__      = "paolo.scaccia@adaptivemeteo.com"
+__status__     = "Development"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -85,8 +85,8 @@ def select_LOS(cris_dataset, viirs_dataset, indices):
 
     Dev NOTE:  adapt function to different methods
     """
-    from utilities.array_reshapers import transform_index
-    from utilities.earth_geometry import compute_FOV_position_ECEF
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import transform_index
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.earth_geometry  import compute_FOV_position_ECEF
 
     cris_shape     = cris_dataset.longs.shape
     

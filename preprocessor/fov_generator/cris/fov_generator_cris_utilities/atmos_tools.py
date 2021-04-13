@@ -321,8 +321,8 @@ def cris_viirs_cloudmask(cris_dataset,viirs_dataset,selected_cris_fovs):
     OUTPUT:     - cloud_stats:   Matrix od four dimensional vector withs cloud statistics
                                  (N_CRIS_SCAN_LINES x N_CRIS_FOV_4SCAN_LINE x 4) 
     """
-    from utilities.collocation import get_collocation
-    from utilities.array_reshapers import transform_index
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.collocation import get_collocation
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import transform_index
     indices = get_collocation(cris_dataset, viirs_dataset, selected_cris_fovs)
 
     cris_shape = cris_dataset.longs.shape

@@ -342,7 +342,7 @@ def compute_FOV_position_ECEF(dataset):
     """
     Compute G VECTOR using a VIIRS dataset
     """
-    from utilities.array_reshapers import array_1d
+    from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_1d
 
     r_squared = (b*b)/(a*a)    
     datashape = dataset.longs.shape

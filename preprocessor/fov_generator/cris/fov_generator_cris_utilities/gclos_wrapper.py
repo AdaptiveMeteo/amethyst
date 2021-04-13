@@ -10,7 +10,7 @@ import h5py
 import logging
 import numpy as np
 
-from utilities.array_reshapers import array_twist, array_spread
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_twist, array_spread
 
 __author__    = "Paolo Scaccia and Paolo Antonelli"
 __copyright__ = "Copyright 2017, AdaptiveMeteo S.r.l."

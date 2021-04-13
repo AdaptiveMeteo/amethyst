@@ -25,7 +25,7 @@ import logging
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
-from utilities.array_reshapers import array_twist
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_twist
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
