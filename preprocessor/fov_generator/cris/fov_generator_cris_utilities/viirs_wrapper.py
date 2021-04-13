@@ -246,7 +246,6 @@ class VIIRS_Wrapper(object):
                 self.CMQ       = np.ma.masked_where(self.CMQ != 0 , self.CMQ)
                 if type(self.cloudmask.mask) == np.bool_:
                          self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool)
-                print('--->',self.cloudmask.mask.sum())
         else:
             raise ValueError("Unknown Cloud Mask file")
                             
