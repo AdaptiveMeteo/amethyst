@@ -186,7 +186,7 @@ class VIIRS_Wrapper(object):
         Ref: https://www.star.nesdis.noaa.gov/jpss/documents/ATBD/D0001-M01-S01-011_JPSS_ATBD_VIIRS-Cloud-Mask_E.pdf
         """
 
-        from utilities.array_reshapers import array_1d, transform_index
+        from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_1d, transform_index
 
         self.cloudmask = np.zeros(shape = self.longs.shape , dtype  = np.int8)
         self.CMQ       = np.zeros( shape = self.longs.shape , dtype = np.int8)
