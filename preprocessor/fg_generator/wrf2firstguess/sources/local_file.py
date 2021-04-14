@@ -19,14 +19,14 @@ import logging
 import numpy as np
 
 from sources.source import Source
-from utilities.wrf_file import WrfFile
-from utilities.split_by_time import split_by_time
-from utilities.geometry import min_distance_indx, dist_on_earth
-from utilities.temp_extrapolator import TempExtrapolator
-from utilities.level_interpolations import interp_temperature_over_levels, \
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.wrf_file             import WrfFile
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.split_by_time        import split_by_time
+from utilities.geometry                                                                     import min_distance_indx, dist_on_earth
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.temp_extrapolator    import TempExtrapolator
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.level_interpolations import interp_temperature_over_levels, \
                                            interp_water_vapour_over_levels
-from utilities.climatology import generate_ozone_profile
-from utilities.first_guess import NetcdfAtmosphericFirstGuess
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.climatology          import generate_ozone_profile
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.first_guess          import NetcdfAtmosphericFirstGuess
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"

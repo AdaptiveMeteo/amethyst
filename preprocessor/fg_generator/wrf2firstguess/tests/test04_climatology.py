@@ -18,8 +18,8 @@ from os.path import isfile
 import numpy as np
 
 
-from utilities.climatology import OZONE_PROFILE_FILES, CLIMAT_MATRIX, Belt,\
-                                  generate_ozone_profile
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.climatology import OZONE_PROFILE_FILES, CLIMAT_MATRIX, Belt,\
+                                                                                          generate_ozone_profile
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"

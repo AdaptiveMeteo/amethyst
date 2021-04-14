@@ -15,7 +15,7 @@
 
 import numpy as np
 
-from utilities.split_by_time import split_by_time
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.split_by_time import split_by_time
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"

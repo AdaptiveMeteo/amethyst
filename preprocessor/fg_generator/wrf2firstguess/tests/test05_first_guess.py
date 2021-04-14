@@ -16,7 +16,7 @@
 from nose.tools import raises
 import numpy as np
 
-from utilities.first_guess import AtmosphericFirstGuess
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.first_guess import AtmosphericFirstGuess
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
