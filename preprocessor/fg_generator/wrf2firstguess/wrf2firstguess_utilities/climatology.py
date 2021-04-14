@@ -29,7 +29,7 @@ __email__ = "stefano.piani@exact-lab.it"
 
 # Get the main dir of the software (we expect that the current file
 # is one level inside the tree directory)
-SCRIPT_DIR = path.join(path.dirname(path.realpath(__file__)), '..')
+SCRIPT_DIR =path.realpath(__file__).split('amethyst/')[0]+'amethyst'
 
 # The path of a valid file for the ozone profiles
 OZONE_PROFILE_FILES = path.join(SCRIPT_DIR, 'ancillary/atmosphere/fg_ozone_profiles.nc')
