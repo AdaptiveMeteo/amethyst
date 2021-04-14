@@ -181,7 +181,9 @@ def main():
                 log.debug('Saving observation {} as it was on land'.format(i))
                 emiss = land_climatology.associate(igbp_class)
                 output.save(i, 1, *emiss.data())
-
+                
+    log.info('Execution complete!')
+    return 0
 
 if __name__ == '__main__':
     exit(main())
