@@ -36,7 +36,7 @@ from netCDF4 import Dataset
 from constants import OBSERVATIONS
 from igbp.igbp import Igbp, IGBP_CLASSES
 from land.land_climatology import LandClimatology
-from sea.M_climatology import MasudaClimatology
+from sea.masuda_climatology import MasudaClimatology
 from output_formats.memory import MemoryOutput as Output
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
