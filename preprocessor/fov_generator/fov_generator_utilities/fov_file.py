@@ -78,7 +78,7 @@ class FovFile(object):
         - *n_of_channels*
     """
 
-    def __init__(self, netcdf_file, fov_num, n_of_channels):
+    def __init__(self, netcdf_file, fov_num, n_of_channels, instr):
         logging.debug('Writing {}'.format(netcdf_file))
 
         self.file = netcdf_file
@@ -112,10 +112,9 @@ class FovFile(object):
             create_var(SOLZENITHTABLE)
             
             LOGGER.debug(path.realpath(__file__))
-            if 'cris' in path.realpath(__file__):
+            if   instr == 'cris':
                 create_var(AZIMUTHTABLE)
-            elif 'iasi' in path.realpath(__file__):
-                # iasi
+            elif instr == 'iasi':
                 create_var(AVHRRCLOUDFRACTIONTABLE, type='u1', fill_val = 0)
             else:
                 IOError("Cannot choose between IASI and CRIS. Error with script path!")

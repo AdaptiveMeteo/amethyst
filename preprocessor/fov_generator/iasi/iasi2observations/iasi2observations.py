@@ -204,7 +204,7 @@ def main():
 
     LOGGER.info('Writing the output file')
     try:
-        fov_file = FovFile(argv.output, numobs, num_channels)
+        fov_file = FovFile(argv.output, numobs, num_channels,'iasi')
     except:
         LOGGER.error('Write of the output file failed!')
         LOGGER.debug(format_exc())
