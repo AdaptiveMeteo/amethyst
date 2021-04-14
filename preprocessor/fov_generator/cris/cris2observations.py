@@ -33,13 +33,12 @@ import netCDF4 as nc
 
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.gc_wrapper    import GCWrapper
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.scris_wrapper import SCrISWrapper
-from preprocessor.fov_generator.cris.fov_generator_cris_utilities.fov_file      import FovFile
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.obs_indices   import ObsMap
 from preprocessor.fov_generator.fov_generator_utilities.boxes                   import Rectangle
-
+from preprocessor.fov_generator.fov_generator_utilities.fov_file                import FovFile
 
 __author__ = 'Stefano Piani'
-__copyright__ = "Copyright 2021, eXact-lab and Paolo Antonelli"
+__copyright__ = "Copyright 2021, Paolo Antonelli"
 __credits__ = ["Stefano Piani", "Paolo Antonelli"]
 __license__ = "GPL"
 __version__ = "1.0"
