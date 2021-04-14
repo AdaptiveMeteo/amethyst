@@ -23,7 +23,7 @@ import h5py
 import logging
 import numpy as np
 
-from utilities.array_reshapers import array_twist, array_spread
+from preprocessor.fov_generator.cris.fov_generator_cris_utilities.array_reshapers import array_twist, array_spread
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
