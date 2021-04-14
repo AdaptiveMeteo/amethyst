@@ -111,9 +111,10 @@ class FovFile(object):
             create_var(SOLAZIMUTHTABLE)
             create_var(SOLZENITHTABLE)
             
-            if 'cris' in path.__file__:
+            LOGGER.debug(path.realpath(__file__))
+            if 'cris' in path.realpath(__file__):
                 create_var(AZIMUTHTABLE)
-            elif 'iasi' in path.__file__:
+            elif 'iasi' in path.realpath(__file__):
                 # iasi
                 create_var(AVHRRCLOUDFRACTIONTABLE, type='u1', fill_val = 0)
             else:
