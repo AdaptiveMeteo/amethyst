@@ -132,13 +132,13 @@ def main():
     n_levs = argv.levels
     top_lev = np.float32(argv.top)
 
-    try:
-        wrf_source.read_and_save(obs_times, lons, lats,
+    #try:
+    wrf_source.read_and_save(obs_times, lons, lats,
                                  n_levs, top_lev, argv.output)
-    except:
-        log.error('Error converting data!')
-        log.debug(format_exc())
-        return 100
+    #except:
+    #    log.error('Error converting data!')
+    #   log.debug(format_exc())
+    #    return 100
 
     log.info('Execution complete!')
     return 0
