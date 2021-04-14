@@ -35,7 +35,7 @@ from preprocessor.fov_generator.cris.fov_generator_cris_utilities.gc_wrapper    
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.scris_wrapper import SCrISWrapper
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.fov_file      import FovFile
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.obs_indices   import ObsMap
-from preprocessor.fov_generator.cris.fov_generator_cris_utilities.boxes         import Rectangle
+from preprocessor.fov_generator.fov_generator_utilities.boxes                   import Rectangle
 
 
 __author__ = 'Stefano Piani'

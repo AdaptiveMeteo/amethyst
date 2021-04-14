@@ -30,8 +30,8 @@ import numpy as np
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.gclos_wrapper import GCLOS_Wrapper
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.scris_wrapper import SCrISWrapper
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.viirs_wrapper import VIIRS_Wrapper
-from preprocessor.fov_generator.cris.fov_generator_cris_utilities.boxes         import Rectangle
 from preprocessor.fov_generator.cris.fov_generator_cris_utilities.atmos_tools   import cris_viirs_cloudmask
+from preprocessor.fov_generator.fov_generator_utilities.boxes                   import Rectangle
 from datetime import datetime
 
 __author__ = 'Paolo Antonelli<paolo.antonelli@adaptivementeo.com>'
