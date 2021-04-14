@@ -40,7 +40,7 @@ __email__ = "stefano.piani@exact-lab.it"
 SCRIPT_DIR = path.join(path.dirname(path.realpath(__file__)), '..')
 TEMP_EXTRAPOLATOR_COEFFICIENTS = path.join(
                                            SCRIPT_DIR,
-                                           'data/temperature_coefficients.nc'
+                                           'ancillary/atmosphere/fg_temperature_coefficients.nc'
                                            )
 
 log = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class LocalFile(Source):
     
     The coefficients for the temperature extrapolator required by the
     :meth:`utilities.level_interpolations.interp_temperature_over_levels`
-    function are read from the file data/temperature_coefficients.nc.
+    function are read from the file amethyst/ancillary/atmosphere/fg_temperature_coefficients.nc.
     
     Args:
         - *wrf_file*: the path of the file with the data from the WRF model

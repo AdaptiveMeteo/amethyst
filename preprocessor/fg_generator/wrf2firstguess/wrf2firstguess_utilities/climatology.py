@@ -32,7 +32,7 @@ __email__ = "stefano.piani@exact-lab.it"
 SCRIPT_DIR = path.join(path.dirname(path.realpath(__file__)), '..')
 
 # The path of a valid file for the ozone profiles
-OZONE_PROFILE_FILES = path.join(SCRIPT_DIR, 'data/ozone_profiles.nc')
+OZONE_PROFILE_FILES = path.join(SCRIPT_DIR, 'ancillary/atmosphere/fg_ozone_profiles.nc')
 
 log = logging.getLogger(__name__)
 
