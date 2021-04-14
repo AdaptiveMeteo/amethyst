@@ -32,8 +32,8 @@ from traceback import format_exc
 
 import numpy as np
 
-from utilities.fov_file import FovFile
-from utilities.boxes import Rectangle
+from preprocessor.fov_generator.fov_generator_utilities.fov_file import FovFile
+from preprocessor.fov_generator.fov_generator_utilities.boxes import Rectangle
 
 # Check if the piasi_reader library is installed
 try:

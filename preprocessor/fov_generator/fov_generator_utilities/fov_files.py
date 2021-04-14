@@ -1,17 +1,17 @@
-# This file is part of Cris2observations.
+# This file is part of Cris2observations and Iasi2observations.
 #
-# Cris2observations is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# Cris2observations and IASI2observation are free softwares: you can redistribute 
+# it and/or modify it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# Cris2observations is distributed in the hope that it will be useful,
+# Both software are distributed in the hope that they will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with Cris2observation. If not, see <http://www.gnu.org/licenses/>.
+# along with Cris2observation and Iasi2observation. If not, see <http://www.gnu.org/licenses/>.
 
 """
 Inside the fov_file module there is a class (FovFile) which is
@@ -24,12 +24,12 @@ from os import path
 from netCDF4 import Dataset
 import numpy as np
 
-__author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
-__copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
+__author__ = 'Stefano Piani'
+__copyright__ = "Copyright 2021, Adaptive Meteo S.r.l"
 __credits__ = ["Stefano Piani", "Paolo Antonelli"]
 __license__ = "GPL"
 __maintainer__ = "Stefano Piani"
-__email__ = "stefano.piani@exact-lab.it"
+__email__ = "paolo.scaccia@adaptivemeteo.com"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,6 +47,7 @@ AZIMUTHTABLE = 'Satellite_azimuth_angle'
 ZENITHTABLE = 'Satellite_zenith_angle'
 SOLAZIMUTHTABLE = 'Solar_azimuth_angle'
 SOLZENITHTABLE = 'Solar_zenith_angle'
+AVHRRCLOUDFRACTIONTABLE = 'AVHRR_cloud_fraction'
 
 
 
@@ -102,16 +103,21 @@ class FovFile(object):
 
             create_var(LATTABLE)
             create_var(LONTABLE)
-            #PaoloA 06/08/2020
             create_var(TIMETABLE, type='i8', fill_val = -1)
             create_var(RADTABLE, dim=(FOVNUM, NCHANNEL))
             create_var(WAVENUMBERS, dim=(NCHANNEL,))
             create_var(FOVANGLETABLE)
-            create_var(AZIMUTHTABLE)
             create_var(ZENITHTABLE)
             create_var(SOLAZIMUTHTABLE)
             create_var(SOLZENITHTABLE)
-
+            
+            if 'cris' in path.__file__:
+                create_var(AZIMUTHTABLE)
+            elif 'iasi' in path.__file__:
+                # iasi
+                create_var(AVHRRCLOUDFRACTIONTABLE, type='u1', fill_val = 0)
+            else:
+                IOError("Cannot choose between IASI and CRIS. Error with script path!")
             fovf.sync()
 
     def __enter__(self):
@@ -207,4 +213,11 @@ class FovFile(object):
                           ' while the file is closed')        
         LOGGER.debug('Saving solar zenith angle on {}'.format(self.file))
         self.filepointer.variables[SOLZENITHTABLE][:] = angl.flatten()[filter]
-    
+        
+    def save_avhrr_cloud_mask(self, cloud_fraction, filter=None):
+        if self.filepointer is None:
+            raise IOError('Can not read or write the AVHRR cloud mask'
+                          ' while the file is closed')        
+        LOGGER.debug('Saving AVHRR cloud mask on {}'.format(self.file))
+        mask = cloud_fraction.flatten()[filter]
+        self.filepointer.variables[AVHRRCLOUDFRACTIONTABLE][:] = mask
