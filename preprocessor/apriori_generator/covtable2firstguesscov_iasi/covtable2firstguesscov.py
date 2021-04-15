@@ -34,7 +34,6 @@ from os import path
 
 from netCDF4 import Dataset
 import numpy as np
-import random
 
 from utilities.geometry import min_distance_indx, dist_on_earth
 
@@ -144,7 +143,7 @@ def main():
         mode = 'a'
 
     # Open the output and the covtable
-    with Dataset(argv.output, mode, format = 'NETCDF4') as output_f:
+    with Dataset(argv.output, mode) as output_f:
         # Get the number of the FOVs
         numobs = lats.size
 
@@ -243,9 +242,6 @@ def main():
             # file
             cov_profiles = cov_table.groups[PROFILES]
             nlevs = len(cov_profiles.dimensions[NATMLEVELS])
-
-            print('NATMLEVELS: {}'.format(nlevs))
-
             if NATMLEVELS in atm.dimensions:
                 output_file_nlevs = len(atm.dimensions[NATMLEVELS])
                 if output_file_nlevs != nlevs:
@@ -354,9 +350,6 @@ def main():
                     # Read the relevant info of the associated profile
                     cov_matrix_diag = cov_profiles.variables[mol][profile_number, :]
                     z_over_h = cov_profiles.variables[ZOVERHVAR][profile_number,:]
-                    
-                    #print("DIAG input: {}".format(cov_matrix_diag))
-                    #print("Z OVER H input: {}".format(z_over_h))
                  
                     LOG.debug('Diagonal of covariance matrix for the observation'
                              ' {} of the variable {}; var {}'.format(cov_profiles.variables[mol][profile_number, :], i, mol))
@@ -368,7 +361,7 @@ def main():
                     output_tables[mol][i, :] = fill_cov_matrix(cov_matrix_diag,
                                                                z_over_h,
                                                                output_tables[mol][i, :])
-                    #LOG.debug('Covariance matrix for the observation'
+                    #LOG.debug('Ccovariance matrix for the observation'
                     #         ' {} of the mol {}, variable {}'.format(output_tables[mol][i, :], mol, i))
                 
 
@@ -380,16 +373,13 @@ def fill_cov_matrix(diag,z_over_h,output_table):
     
     EDGE = 20
     N = len(diag)
-
-    #print("N: {}".format(N))
     
     for i in range(0,N):
         for j in range(i+1,N):
-            arg = np.abs(  (-7/3) * (z_over_h[i]-z_over_h[j]) )
-            #print("i: {}, j: {}, z(i): {}, z(j): {}, arg: {}".format(i,j,z_over_h[i],z_over_h[j],arg))
             #arg = np.abs(  (i-j)* (z_over_h[i]-z_over_h[j]))
+            arg = np.abs( z_over_h[i]-z_over_h[j] )
             #output_table[i,j] = diag[i]*np.exp(-arg) if arg < EDGE else np.exp(-EDGE)
-            output_table[i,j] = np.sqrt(diag[j])*np.sqrt(diag[i])*np.exp(-arg) 
+            output_table[i,j] = diag[i]*np.exp(-arg) 
             output_table[j,i] = output_table[i,j]
         output_table[i,i] = diag[i]
     
