@@ -22,7 +22,7 @@ This script is an open source software written to use climatological data
 for emissivity for generating a first guess for Mirto, an open source software
 for elaborating metereological interferometer data
 
-:copyright: 2016 by eXact-lab and Paolo Antonelli
+:copyright: 2016 by Paolo Antonelli
 """
 
 import logging
@@ -38,20 +38,32 @@ from igbp.igbp import Igbp, IGBP_CLASSES
 from land.land_climatology  import LandClimatology
 from sea.masuda_climatology import MasudaClimatology
 from output_formats.memory  import MemoryOutput as Output
+from os import path
 
-__author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
-__copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
+__author__ = 'Stefano Piani'
+__copyright__ = "Copyright 2021, Adaptive Meteo S.r.l"
 __credits__ = ["Stefano Piani", "Paolo Antonelli"]
 __license__ = "GPL"
 __version__ = "1.0"
 __maintainer__ = "Stefano Piani"
-__email__ = "stefano.piani@exact-lab.it"
+__email__ = "paolo.scaccia@adaptivemeteo.com"
 
 if __name__ == '__main__':
     log = logging.getLogger()
 else:
     log = logging.getLogger(__name__)
 
+# Read Climatology Data
+SCRIPT_DIR =path.realpath(__file__).split('amethyst/')[0]+'amethyst'
+IGBPTABLE            = path.join(SCRIPT_DIR,
+                                 'ancillary/surface/IGBP_18.map'
+                                 )
+LANDEMISSCLIMATOLOGY = path.join(SCRIPT_DIR,
+                                 'ancillary/surface/SE_Clima_Model_Functions_Land.nc'
+                                 )
+SEAEMISSCLIMATOLOGY  = path.join(SCRIPT_DIR,
+                                 'ancillary/surface/masuda_climatology.nc'
+                                 )
 
 def main():
     v_levels = ['debug', 'info', 'warning']
@@ -59,12 +71,6 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('observations', type=str,
                         help='A valid observation file for Mirto')
-    parser.add_argument('igbp', type=str,
-                        help='The file with the IGBP map')
-    parser.add_argument('land', type=str,
-                        help='The file with the climatology for the land')
-    parser.add_argument('sea', type=str,
-                        help='The file with the climatology for the sea')
     parser.add_argument('output', type=str,
                         help='The first guess NetCDF file that will be'
                              ' generated')
@@ -101,7 +107,7 @@ def main():
 
     log.info('Opening IGBP file')
     try:
-        igbp = Igbp(argv.igbp)
+        igbp = Igbp(IGBPTABLE)
     except:
         log.error('Read of the IGBP map failed!')
         log.debug(format_exc())
@@ -109,7 +115,7 @@ def main():
 
     log.info('Opening the file for the land climatology')
     try:
-        land_climatology = LandClimatology(argv.land)
+        land_climatology = LandClimatology(LANDEMISSCLIMATOLOGY)
     except:
         log.error('Read of the file for the land climatology failed!')
         log.debug(format_exc())
@@ -117,7 +123,7 @@ def main():
 
     log.info('Opening the file for the sea climatology')
     try:
-        masuda_climatology = MasudaClimatology(argv.sea)
+        masuda_climatology = MasudaClimatology(SEAEMISSCLIMATOLOGY)
     except:
         log.error('Read of the file for the sea climatology failed!')
         log.debug(format_exc())

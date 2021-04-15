@@ -4,7 +4,7 @@
 #
 # Wrf2firstguess is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
+# the Free Software Foundation, either version 3 of the License, or1
 # (at your option) any later version.
 
 # Wrf2firstguess is distributed in the hope that it will be useful,
@@ -35,13 +35,12 @@ from netCDF4 import Dataset
 
 from sources.local_file import LocalFile
 
-__author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
-__copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
+__author__ = 'Stefano Piani '
+__copyright__ = "Copyright 2016, Paolo Antonelli"
 __credits__ = ["Stefano Piani", "Paolo Antonelli"]
 __license__ = "GPL"
 __version__ = "1.0"
 __maintainer__ = "Stefano Piani"
-__email__ = "stefano.piani@exact-lab.it"
 
 if __name__ == '__main__':
     log = logging.getLogger()
