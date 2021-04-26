@@ -208,7 +208,7 @@ def launch_preprocessing(argv):
                                                            
                              ]
 
-            # Logger Printouts
+            # CrIS Logger Printouts
             logger_cascade = ["Generating CloudMask for CrIS...",
                               "Generating CrIS observations...",
                               "Generating atmospheric first guess...",
@@ -216,20 +216,19 @@ def launch_preprocessing(argv):
                               "Generating atmospheric first guess covariance..."]
 
         else:
-            
+            iasi_native_file = [  x for x in os.listdir(argv.iasi)  if 'IASI_xxx' in x  ]
+            if len(iasi_native_file) == 0:
+                sysexit("IASI Native file not found in {}".format(argv.iasidir))
+            else:
+                iasi_native_file = iasi_native_file[0]
+
             # Calls to IASI preprocessor scripts
-            cmd_cascade = [  "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
-                                                           "--outfile {}/cloudmask.nc -v info "
-                                                           "--lonmin {} --lonmax {} --latmin {} "
-                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
-                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-                                                           
-                             "python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc "
-                                                           "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
-                                                           "--lonmin {} --lonmax {} --latmin {}  "
-                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
-                                                                                argv.output,argv.cmt,argv.output,
-                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+            cmd_cascade = [  
+                             "python {}/preprocessor/fov_generator/iasi/iasi2observations.py {} "
+                                                           "{}/fov.nc -cmt {} -v info "
+                                                           "--lonmin {} --lonmax {} "
+                                                           "--latmin {} --latmax {} ".format(AMETHYST_PATH,iasi_native_file,argv.output,
+                                                                                argv.cmt, argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                     
                              "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {} "
                                                            " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
@@ -245,7 +244,7 @@ def launch_preprocessing(argv):
                                                            
                              ]
 
-            # Logger Printouts
+            # IASI Logger Printouts
             logger_cascade = ["Generating IASI observations...",
                               "Generating atmospheric first guess...",
                               "Generating surface first guess...",
@@ -265,8 +264,7 @@ def launch_preprocessing(argv):
             
             # Check if subprocess fails
             if bool(proc.returncode):
-                log.info("Preprocessing failed in {}!".format(printout.lower()))
-                break
+                sysexit("Preprocessing failed in {}!".format(printout.lower()))
             
     return proc.returncode
 
