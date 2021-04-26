@@ -210,7 +210,7 @@ def launch_preprocessing(argv):
             # Run cascade
             for cmd, printout in zip(cmd_cascade,logger_cascade):
                 log.info(cmd)
-                subprocess.run(cmd.replace('  ',' ').split(),capture_output=True)
+                subprocess.run(cmd.replace('  ',' ').split())
                 
         else:
             # Iasi
