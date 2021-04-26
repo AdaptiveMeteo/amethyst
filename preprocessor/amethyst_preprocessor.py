@@ -264,7 +264,7 @@ def launch_preprocessing(argv):
             
             # Check if subprocess fails
             if bool(proc.returncode):
-                sysexit("Preprocessing failed in {}!".format(printout.lower()))
+                sysexit("Preprocessing failed in {}!".format(printout.lower().replace('...','')))
             
     return proc.returncode
 

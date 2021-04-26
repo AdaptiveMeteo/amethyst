@@ -124,7 +124,7 @@ def prepare_logger(verbosity_level):
 def main():
     parser = prepare_parser()
     argv = parser.parse_args()
-
+    print(argv.iasifile)
     verbosity_level = argv.verbose.upper()
     prepare_logger(verbosity_level)
 
