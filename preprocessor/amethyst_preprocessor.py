@@ -259,8 +259,14 @@ def main():
                         help='Max Longitude')
     parser.add_argument('--cluster_mode', type=bool, default = False,
                         help='Cluster Mode Flag')
+    parser.add_argument('--cmt', type=str, default = None,
+                    help='Max Longitude')
     argv = parser.parse_args()
-
+    
+    # If missing set Cloudmask threshold ???
+    if argv.cmt == None:
+        argv.cmt = preprocessor_vars['{}_cmt'.format(argv.instrument)]
+        
     # Prepare the log class
     verbosity = getattr(logging, argv.verbose.upper())
     log.setLevel(verbosity)
