@@ -249,7 +249,7 @@ def main():
                 LOG.debug('Reading T_q cov')
                 static_sa_dict['T_q'] = sa_file.groups['atmospheric_components'].groups['Covariances'].variables['T_q'][:]
         else:
-            LOG.info('Reading file {}'.format(table))
+            LOG.info('Reading file {}'.format(argv.covtable))
             with Dataset(argv.covtable, 'r') as cov_table:
                 # Generate a list of valid molecules from the cov_table file
                 assoc = cov_table.groups[ASSOCIATIONS]
