@@ -221,6 +221,7 @@ def launch_preprocessing(argv):
 
                 log.debug(cmd)  # Debug printout
                 
+                log.info("\n________________________________________\n")
                 log.info(printout)
                 subprocess.run(cmd.replace('  ',' ').split())
                 
