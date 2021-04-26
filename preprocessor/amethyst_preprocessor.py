@@ -292,7 +292,7 @@ def preproccessor_parser():
     print(argv.logdir)
     # Create logdir if it doesn't exist    
     if not os.path.isdir(argv.logdir):
-        os.system("mkduir -p {}".format(argv.logdir))
+        os.system("mkdir -p {}".format(argv.logdir))
 
     return argv
 
