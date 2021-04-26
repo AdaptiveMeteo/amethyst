@@ -37,7 +37,6 @@ else:
 
 
 def get_wrf_dir_time(list_date,base_date):
-    print('---->',list_date)
 
     #http://stackoverflow.com/a/17249529/846892
     sat_fmt = '%Y%m%d_%H%M%S'
@@ -141,7 +140,7 @@ def launch_preprocessing(argv):
     if not os.path.isfile(   argv.wrfdir + sel_wrf_run + '/wrf/' + 'DONE'):
         prev_wrf_dir = datetime.strptime(sel_wrf_run, wrf_fmt)-timedelta(hours=6)
         sel_wrf_run = prev_wrf_dir.strftime(wrf_fmt)
-        wrffile = argv.wrkdir + sel_wrf_run + '/wrf/' + wrffilename
+        wrffile = argv.wrfdir + sel_wrf_run + '/wrf/' + wrffilename
 
     if not os.path.isfile(wrffile):
          sysexit('WRF file to be used as retrieval FG: {} NOT FOUND\n'
