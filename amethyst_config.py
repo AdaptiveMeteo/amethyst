@@ -30,11 +30,11 @@ common_vars = {
              }
 
 preprocessor_vars = {
-                  "basedir"   : "/home/mirto",
+                  "basedir"   : "/mnt/satellite/amethyst_test_data",
                   "iasidir"   : "/mnt/satellite/amethyst_test_data/iasi/20201120_062454/",
                   "gcrso"     : "/mnt/satellite/amethyst_test_data/cris/20201120_002622/GCRSO_npp_d20201120_t0028319_e0040137_b46969_c20210315153613150425_cspp_dev.h5",
                   "scris"     : "/mnt/satellite/amethyst_test_data/cris/20201120_002622/SCRIS_npp_d20201120_t0028319_e0040137_b46969_c20210315153613291913_cspp_dev.h5",
-                  "l1dir"     : "/home/mirto",
+                  "l1dir"     : "/mnt/satellite/amethyst_test_data/cris",
                   "iasi_cmt"  : 5,
                   "cris_cmt"  : .95
             }
