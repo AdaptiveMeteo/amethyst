@@ -183,25 +183,25 @@ def launch_preprocessing(argv):
             
             
             # Calls to CrIS preprocessor scripts
-            cmd_cascade = [  "python preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
+            cmd_cascade = [  "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
                                                            "--outfile {}/cloudmask.nc -v info "
                                                            "--lonmin {} --lonmax {} --latmin {} "
-                                                           "--latmax {}".format(argv.gcrso, argv.scris,argv.output,
+                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                            
-                             "python preprocessor/fov_generator/cris/cris2observation.py {} {} {}/fov.nc"
+                             "python {}/preprocessor/fov_generator/cris/cris2observation.py {} {} {}/fov.nc"
                                                            "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
                                                            "--lonmin {} --lonmax {} --latmin {}  "
-                                                           "--latmax {}".format(argv.gcrso,argv.scris,argv.output,
+                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
                                                                                 argv.output,argv.cmt,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                     
-                             "python preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {}"
-                                                           " {}/fov.nc {}/fg.nc -v info --levels 81".format(wrffile,argv.output,argv.output,
+                             "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {}"
+                                                           " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                            
-                             "python preprocessor/apriori_generator/emiss2firstguess/covtable2firstguesscov.py {}/fov.nc"
-                                                           " {}/apriori.nc {} {} {} {} -v info --compression 9".format(argv.output,argv.output,
+                             "python {}/preprocessor/apriori_generator/emiss2firstguess/covtable2firstguesscov.py {}/fov.nc"
+                                                           " {}/apriori.nc {} {} {} {} -v info --compression 9".format(AMETHYST_PATH,argv.output,argv.output,
                                                                                                                        argv.lonmin,argv.lonmax,argv.latmin,argv.latmax) 
                              ]
 
