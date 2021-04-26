@@ -37,8 +37,7 @@ preprocessor_vars = {
                   "l1dir"     : "/mnt/satellite/amethyst_test_data/cris",
                   "iasi_cmt"  : 5,
                   "cris_cmt"  : .95
-            }   
-
+            }
 preprocessor_vars["bindir"] = preprocessor_vars["basedir"] + "/bin/"
 preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto/"
 preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris/",

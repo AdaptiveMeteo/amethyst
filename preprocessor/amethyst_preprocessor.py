@@ -198,6 +198,9 @@ def launch_preprocessing(argv):
                              "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {} "
                                                            " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+
+                             "python {}/preprocessor/fg_generator/emissivity2firstguess/emiss2firstguess.py {}/fov.nc"
+                                                           " {}/fg.nc -v info".format(AMETHYST_PATH,argv.output,argv.output),
                                                            
                              "python {}/preprocessor/apriori_generator/covtable2firstguesscov.py {}/fov.nc "
                                                            " {}/apriori.nc {} {} {} {} -v info --compression 9".format(AMETHYST_PATH,argv.output,argv.output,
@@ -208,7 +211,7 @@ def launch_preprocessing(argv):
             logger_cascade = ["Generating CloudMask for CrIS...",
                               "Generating CrIS observations...",
                               "Generating atmospheric first guess...",
-                              "Generating surfcae first guess...",
+                              "Generating surface first guess...",
                               "Generating atmospheric first guess covariance..."]
 
             # Run cascade
