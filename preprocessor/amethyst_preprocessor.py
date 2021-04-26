@@ -236,7 +236,7 @@ def preproccessor_parser():
     from argparse         import ArgumentParser
     
     
-    v_levels = ['debug', 'info', 'warning']
+    v_level     s = ['debug', 'info', 'warning']
     
     parser = ArgumentParser()
     parser.add_argument('--output','-o',type=str,required=True,
@@ -285,7 +285,7 @@ def preproccessor_parser():
 def main():
 
     # Read inline arguments if the script is called from terminal    
-    argv = preproccessor_parser
+    argv = preproccessor_parser()
          
     # Prepare the log class
     verbosity = getattr(logging, argv.verbose.upper())
