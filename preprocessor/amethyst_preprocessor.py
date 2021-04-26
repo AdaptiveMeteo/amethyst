@@ -108,7 +108,7 @@ def launch_preprocessing(argv):
     ready = "/".join([ argv.l1dir, sat_pass_date,'ready4processing'])
     if not os.path.isfile(ready):
             sysexit('{}{} exists but not all needed data have been downloaded yet!\n'
-                    '... retrying in 3 min\n'
+                    '... retrying in 3 min\n'   
                     '... exiting for now'.format(argv.l1dir,sat_pass_date))
         
     # Check if this passage has already been processed, if so exit;
@@ -119,7 +119,7 @@ def launch_preprocessing(argv):
        open(argv.logdir + '/' + ret_status[0] , 'a').close()
  
     # sat_ov_time = datetime.strptime(sat_pass_date, "%Y%m%d_%H%M%S")
-    
+       
     #Find colosest wrf output (previous to overpass) to be used as retrieval first guess 
     sel_wrf_run=get_wrf_dir_time(wrf_fct_times,sat_pass_date)
     log.info('Selected WRF run: {}'.format(sel_wrf_run))
@@ -148,8 +148,6 @@ def launch_preprocessing(argv):
                  '... exiting for now\n'.format(wrffilename))
 
     log.info('WRF file to be used as retrieval FG: {}'.format(wrffilename))   
-
-
 
     if argv.cluster_mode:
         #######################
@@ -262,7 +260,7 @@ def main():
                         help='Cluster Mode Flag')
 
     argv = parser.parse_args()
-    
+    print(argv.overpass)
     # Prepare the log class
     verbosity = getattr(logging, argv.verbose.upper())
     log.setLevel(verbosity)
