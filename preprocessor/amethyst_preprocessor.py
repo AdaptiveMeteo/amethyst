@@ -93,9 +93,9 @@ def launch_preprocessing(argv):
             sysexit('{} {} does not exist. Exiting'.format("Directory" if mode == "dir" else "File",name))
         
     get_wrf_times = lambda x : [ glob.glob(x + '2*'), [ os.path.split(d)[-1] for d in glob.glob(x + '2*') ] ]
+    print('--->',get_wrf_times( argv.l1dir ))
     sat_ov_times                = if_exists_runs(argv.l1dir, os.listdir,'dir')
     wrf_fct_dirs, wrf_fct_times = if_exists_runs(argv.l1dir,get_wrf_times,'dir')  
-    print(wrf_fct_times)
     sat_ov_times.sort(reverse=True)
     
     if argv.overpass == None:
