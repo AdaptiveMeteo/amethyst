@@ -91,8 +91,7 @@ def launch_preprocessing(argv):
             return function(name)    
         else:
             sysexit('{} {} does not exist. Exiting'.format("Directory" if mode == "dir" else "File",name))
-    get_wrf_times = lambda x : [ glob.glob(x + '2*'), [ os.path.split(d)[-1] for d in glob.glob(x + '2*') ] ]
-    print(glob.glob(argv.wrfdir + '/2*'))
+    get_wrf_times = lambda x : [ glob.glob(x + '/2*'), [ os.path.split(d)[-1] for d in glob.glob(x + '/2*') ] ]
 
     sat_ov_times                = if_exists_runs(argv.l1dir, os.listdir,'dir')
     wrf_fct_dirs, wrf_fct_times = if_exists_runs(argv.wrfdir,get_wrf_times,'dir')  
@@ -126,7 +125,7 @@ def launch_preprocessing(argv):
     log.info('Selected WRF run: {}'.format(sel_wrf_run))
 
     #Get available wrf forecast  times
-    get_wrf_file_times = lambda x: [ glob.glob(x + '/wrf/' + 'wrfout_d01*') , [os.path.split(f)[-1] for f in glob.glob(x + '/wrf/' + 'wrfout_d01*') ]]
+    get_wrf_file_times = lambda x: [ glob.glob(x + '/wrf/wrfout_d01*') , [os.path.split(f)[-1] for f in glob.glob(x + '/wrf/wrfout_d01*') ]]
     wrf_fct_files, wrf_fct_file_times = if_exists_runs("/".join([argv.wrfdir,sel_wrf_run]), get_wrf_file_times, 'dir')
                         
     sel_wrf_run_file = get_wrf_file_time(wrf_fct_file_times, sat_pass_date)
