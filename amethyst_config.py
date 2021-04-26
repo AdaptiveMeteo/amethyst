@@ -20,7 +20,7 @@ __version__ = "1.0"
 __maintainer__ = "Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>"
 __email__      = "paolo.scaccia@adaptivemeteo.com"
 
-common_vasr = {
+common_vars = {
                   "levels"  : 81,
                   "wrfdir"  : "/mnt/satellite/amethyst_test_data/wrf",
                   "geobox"  : { "lonmin" : -166.0,
