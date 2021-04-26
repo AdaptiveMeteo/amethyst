@@ -125,8 +125,7 @@ def launch_preprocessing(argv):
 
     #Get available wrf forecast  times
     get_wrf_file_times = lambda x: [ glob.glob(x + '/wrf/wrfout_d01*') , [os.path.split(f)[-1] for f in glob.glob(x + '/wrf/wrfout_d01*') ]]
-    wrf_fct_files, wrf_fct_file_times = if_exists_runs("/".join([argv.wrfdir,sel_wrf_run]), get_wrf_file_times, 'dir')
-                        
+    wrf_fct_files, wrf_fct_file_times = if_exists_runs("/".join([argv.wrfdir,sel_wrf_run]), get_wrf_file_times, 'dir')                       
     sel_wrf_run_file = get_wrf_file_time(wrf_fct_file_times, sat_pass_date)
     log.info('Selected WRF Run File: {}'.format(sel_wrf_run_file))
 
@@ -136,8 +135,8 @@ def launch_preprocessing(argv):
     wrf_o_fmt = 'wrfout_d01_%Y-%m-%d_%H:%M:%S'
     wrffilename = datetime.strptime(sel_wrf_run_file[11:], wrf_f_fmt).strftime(wrf_o_fmt)
     wrffile = argv.wrfdir + sel_wrf_run + '/wrf/' + wrffilename
- 
-    if not os.path.isfile(   argv.wrfdir + sel_wrf_run + '/wrf/' + 'DONE'):
+    print( wrffile.replace(os.path.basename(wrffile),'DONE') )
+    if not os.path.isfile(   wrffile.replace(os.path.basename(wrffile),'DONE') ):
         prev_wrf_dir = datetime.strptime(sel_wrf_run, wrf_fmt)-timedelta(hours=6)
         sel_wrf_run = prev_wrf_dir.strftime(wrf_fmt)
         wrffile = "/".join([argv.wrfdir,sel_wrf_run,'wrf',wrffilename])
