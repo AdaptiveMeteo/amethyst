@@ -196,7 +196,7 @@ def launch_preprocessing(argv):
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                            
                              "python preprocessor/apriori_generator/emiss2firstguess/covtable2firstguesscov.py {}/fov.nc"
-                                                           " {}/apriori.nc {} {} {} {} -v info --compression 9".format(argv.output,
+                                                           " {}/apriori.nc {} {} {} {} -v info --compression 9".format(argv.output,argv.output,
                                                                                                                        argv.lonmin,argv.lonmax,argv.latmin,argv.latmax) 
                              ]
 
