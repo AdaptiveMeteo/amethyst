@@ -220,8 +220,8 @@ def launch_preprocessing(argv):
             for cmd, printout in zip(cmd_cascade,logger_cascade):
 
                 log.debug(cmd)  # Debug printout
-                
-                log.info("\n________________________________________\n")
+                    
+                log.info("_____________________________________________\n")
                 log.info(printout)
                 subprocess.run(cmd.replace('  ',' ').split())
                 
