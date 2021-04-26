@@ -240,7 +240,7 @@ def main():
                         help='')
     parser.add_argument('--scris', type=str, default=preprocessor_vars['scris'],
                         help='')
-    parser.add_argument('--iasi_native', type=str, default=preprocessor_vars['iasinat'],
+    parser.add_argument('--iasidir', type=str, default=preprocessor_vars['iasidir'],
                         help='')
     parser.add_argument('--logdir', type=str, default=preprocessor_vars['logdir'],
                         help='Directory with log files')
