@@ -48,7 +48,7 @@ __email__ = "stefano.piani@exact-lab.it"
 
 if __name__ == '__main__':
     LOG = logging.getLogger()
-    AMETHYST_PATH = [ x for x in sys.path if os.path.basename(x) == 'amethyst' ][0]
+    AMETHYST_PATH = [ x for x in sys.path if path.basename(x) == 'amethyst' ][0]
 
 else:
     LOG = logging.getLogger(__name__)
