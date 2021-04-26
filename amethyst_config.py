@@ -38,10 +38,10 @@ preprocessor_vars = {
                   "iasi_cmt"  : 5,
                   "cris_cmt"  : .95
             }
-preprocessor_vars["bindir"] = preprocessor_vars["basedir"] + "/bin/"
-preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto/"
-preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris/",
-                                "iasi" : preprocessor_vars["basedir"] + "/run_iasi/"
+preprocessor_vars["bindir"] = preprocessor_vars["basedir"] + "/bin"
+preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto"
+preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris",
+                                "iasi" : preprocessor_vars["basedir"] + "/run_iasi"
                                }
 
 processor_vars = {
