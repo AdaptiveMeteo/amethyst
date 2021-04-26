@@ -52,7 +52,7 @@ def get_wrf_dir_time(list_date,base_date):
     return list_date[min_index]
 
 def get_wrf_file_time(list_file_date,base_date):
-
+    print(list_file_date)
     #http://stackoverflow.com/a/17249529/846892
     sat_fmt = '%Y%m%d_%H%M%S'
     wrf_f_fmt = '%Y-%m-%d_%H:%M:%S'
@@ -107,7 +107,7 @@ def launch_preprocessing(argv):
         # Check if all the L1 data have been downloaded or are still downloading
     ready = "/".join([ argv.l1dir, sat_pass_date,'ready4processing'])
     if not os.path.isfile(ready):
-            sysexit('{}{} exists but not all needed data have been downloaded yet!\n'
+            sysexit('{}/{} exists but not all needed data have been downloaded yet!\n'
                     '... retrying in 3 min\n'   
                     '... exiting for now'.format(argv.l1dir,sat_pass_date))
         
