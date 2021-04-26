@@ -305,7 +305,7 @@ def preproccessor_parser():
                         help='The level of verbosity of the software')
     parser.add_argument('--levels', '-l', type=int, default=amethyst_config.common_vars['levels'],
                         help='The total number of levels')
-    parser.add_argument('--instrument', type=str, required=True,choices=['cris','info'],
+    parser.add_argument('--instrument', type=str, required=True,choices=['cris','iasi'],
                         help='Instrument type')
     parser.add_argument('--latmin', type=str, default = amethyst_config.common_vars['geobox']['latmin'],
                         help='Min Latitude')
