@@ -37,7 +37,7 @@ else:
 
 
 def get_wrf_dir_time(list_date,base_date):
-    print(list_date)
+    print('---->',list_date)
 
     #http://stackoverflow.com/a/17249529/846892
     sat_fmt = '%Y%m%d_%H%M%S'
