@@ -37,6 +37,7 @@ else:
 
 
 def get_wrf_dir_time(list_date,base_date):
+    print(list_date)
 
     #http://stackoverflow.com/a/17249529/846892
     sat_fmt = '%Y%m%d_%H%M%S'
@@ -52,7 +53,6 @@ def get_wrf_dir_time(list_date,base_date):
     return list_date[min_index]
 
 def get_wrf_file_time(list_file_date,base_date):
-    print(list_file_date)
     #http://stackoverflow.com/a/17249529/846892
     sat_fmt = '%Y%m%d_%H%M%S'
     wrf_f_fmt = '%Y-%m-%d_%H:%M:%S'
@@ -258,9 +258,8 @@ def main():
                         help='Max Longitude')
     parser.add_argument('--cluster_mode', type=bool, default = False,
                         help='Cluster Mode Flag')
-
     argv = parser.parse_args()
-    print(argv.overpass)
+
     # Prepare the log class
     verbosity = getattr(logging, argv.verbose.upper())
     log.setLevel(verbosity)
