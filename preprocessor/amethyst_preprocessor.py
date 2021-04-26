@@ -230,7 +230,7 @@ def main():
                         help='Output directory containing all NETCDF preprocessed data')
     parser.add_argument('--overpass',default = None,type=str,
                         help='Overpass date and time YYYYMMDD_HHMMSS')
-    parser.add_argument('--wrf', '-w', type=str, default=common_vars['wrfdir'],
+    parser.add_argument('--wrfdir', '-w', type=str, default=common_vars['wrfdir'],
                         help='Where are the Wrf model data.')
     parser.add_argument('--l1dir', type=str, default=preprocessor_vars['l1dir'],
                         help='Where the L1 products are.')
