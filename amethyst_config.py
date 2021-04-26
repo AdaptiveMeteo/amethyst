@@ -20,7 +20,7 @@ __version__ = "1.0"
 __maintainer__ = "Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>"
 __email__      = "paolo.scaccia@adaptivemeteo.com"
 
-common_var = {
+common_vasr = {
                   "levels"  : 81,
                   "wrfdir"  : "/mnt/satellite/amethyst_test_data/wrf",
                   "geobox"  : { "lonmin" : -166.0,
@@ -38,6 +38,7 @@ preprocessor_vars = {
                   "iasi_cmt"  : 5,
                   "cris_cmt"  : .95
             }
+
 preprocessor_vars["bindir"] = preprocessor_vars["basedir"] + "/bin/"
 preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto/"
 preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris/",
