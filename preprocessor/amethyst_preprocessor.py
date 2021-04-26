@@ -142,6 +142,7 @@ def launch_preprocessing(argv):
         sel_wrf_run = prev_wrf_dir.strftime(wrf_fmt)
         wrffile = argv.wrfdir + sel_wrf_run + '/wrf/' + wrffilename
 
+    print(wrffile)
     if not os.path.isfile(wrffile):
          sysexit('WRF file to be used as retrieval FG: {} NOT FOUND\n'
                  '... exiting for now\n'.format(wrffilename))
