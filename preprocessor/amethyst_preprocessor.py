@@ -16,7 +16,7 @@ import logging
 from sys              import exit as sysexit
 import sys
 from datetime         import datetime, timedelta
-from amethyst_config  import preprocessor_vars, common_vars
+import amethyst_config
 import os
 import glob
 import numpy as np
@@ -253,31 +253,31 @@ def preproccessor_parser():
                         help='Output directory containing all NETCDF preprocessed data')
     parser.add_argument('--overpass',default = None,type=str,
                         help='Overpass date and time YYYYMMDD_HHMMSS')
-    parser.add_argument('--wrfdir', '-w', type=str, default=common_vars['wrfdir'],
+    parser.add_argument('--wrfdir', '-w', type=str, default=amethyst_config.common_vars['wrfdir'],
                         help='Where are the Wrf model data.')
-    parser.add_argument('--l1dir', type=str, default=preprocessor_vars['l1dir'],
+    parser.add_argument('--l1dir', type=str, default=amethyst_config.preprocessor_vars['l1dir'],
                         help='Where the L1 products are.')
-    parser.add_argument('--gcrso', type=str, default=preprocessor_vars['gcrso'],
+    parser.add_argument('--gcrso', type=str, default=amethyst_config.preprocessor_vars['gcrso'],
                         help='')
-    parser.add_argument('--scris', type=str, default=preprocessor_vars['scris'],
+    parser.add_argument('--scris', type=str, default=amethyst_config.preprocessor_vars['scris'],
                         help='')
-    parser.add_argument('--iasidir', type=str, default=preprocessor_vars['iasidir'],
+    parser.add_argument('--iasidir', type=str, default=amethyst_config.preprocessor_vars['iasidir'],
                         help='')
-    parser.add_argument('--logdir', type=str, default=preprocessor_vars['logdir'],
+    parser.add_argument('--logdir', type=str, default=amethyst_config.preprocessor_vars['logdir'],
                         help='Directory with log files')
     parser.add_argument('--verbose', '-v', choices=v_levels, default='info',
                         help='The level of verbosity of the software')
-    parser.add_argument('--levels', '-l', type=int, default=common_vars['levels'],
+    parser.add_argument('--levels', '-l', type=int, default=amethyst_config.common_vars['levels'],
                         help='The total number of levels')
     parser.add_argument('--instrument', type=str, required=True,choices=['cris','info'],
                         help='Instrument type')
-    parser.add_argument('--latmin', type=str, default = common_vars['geobox']['latmin'],
+    parser.add_argument('--latmin', type=str, default = amethyst_config.common_vars['geobox']['latmin'],
                         help='Min Latitude')
-    parser.add_argument('--latmax', type=str, default = common_vars['geobox']['latmax'],
+    parser.add_argument('--latmax', type=str, default = amethyst_config.common_vars['geobox']['latmax'],
                         help='Max Latitude')
-    parser.add_argument('--lonmin', type=str, default = common_vars['geobox']['lonmin'],
+    parser.add_argument('--lonmin', type=str, default = amethyst_config.common_vars['geobox']['lonmin'],
                         help='Min Longitude')
-    parser.add_argument('--lonmax', type=str, default = common_vars['geobox']['lonmax'],
+    parser.add_argument('--lonmax', type=str, default = amethyst_config.common_vars['geobox']['lonmax'],
                         help='Max Longitude')
     parser.add_argument('--cluster_mode', type=bool, default = False,
                         help='Cluster Mode Flag')
@@ -287,7 +287,7 @@ def preproccessor_parser():
     
     # If missing set Cloudmask threshold 
     if argv.cmt == None:
-        argv.cmt = preprocessor_vars['{}_cmt'.format(argv.instrument)]   
+        argv.cmt = amethyst_config.preprocessor_vars['{}_cmt'.format(argv.instrument)]   
     
     return argv
 
