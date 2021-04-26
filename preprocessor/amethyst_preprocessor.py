@@ -15,6 +15,7 @@ elaborating meteorological interferometer data
 import logging
 from argparse         import ArgumentParser
 from sys              import exit as sysexit
+import sys
 from datetime         import datetime, timedelta
 from amethyst_config  import preprocessor_vars, common_vars
 import os
@@ -35,6 +36,9 @@ if __name__ == '__main__':
 else:
     log = logging.getLogger(__name__)
 
+# Improve this
+AMETHYST_PATH = [ x for x in sys.path if os.path.basename(x) == 'amethyst' ][0]
+print(AMETHYST_PATH)
 
 def get_wrf_dir_time(list_date,base_date):
 
@@ -174,8 +178,11 @@ def launch_preprocessing(argv):
         #                      #
         ########################
 
+
+        
         #Build command cascade for qsub
         if argv.instrument == 'cris':
+            
             
             # Calls to CrIS preprocessor scripts
             cmd_cascade = [  "python preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
