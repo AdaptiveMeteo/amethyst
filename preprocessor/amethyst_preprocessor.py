@@ -13,7 +13,6 @@ elaborating meteorological interferometer data
 """
 
 import logging
-from argparse         import ArgumentParser
 from sys              import exit as sysexit
 import sys
 from datetime         import datetime, timedelta
@@ -224,10 +223,18 @@ def launch_preprocessing(argv):
     return
 
     
+def preproccessor_parser():
+    """
+        This function parses all the arguments necessary for the preprocessor.
+        Default variables are taken from amethyst/amethyst_config.py
 
+    Returns
+    -------
+        argv : ArgumentParser
 
-
-def main():
+    """
+    from argparse         import ArgumentParser
+    
     
     v_levels = ['debug', 'info', 'warning']
     
@@ -268,14 +275,21 @@ def main():
                     help='Max Longitude')
     argv = parser.parse_args()
     
-    # If missing set Cloudmask threshold ???
+    # If missing set Cloudmask threshold 
     if argv.cmt == None:
-        argv.cmt = preprocessor_vars['{}_cmt'.format(argv.instrument)]
-        
+        argv.cmt = preprocessor_vars['{}_cmt'.format(argv.instrument)]   
+    
+    return argv
+
+
+def main():
+
+    # Read inline arguments if the script is called from terminal    
+    argv = preproccessor_parser
+         
     # Prepare the log class
     verbosity = getattr(logging, argv.verbose.upper())
     log.setLevel(verbosity)
-
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
                                   '%(funcName)s: %(message)s',
                                   datefmt='%m/%d/%Y %H:%M:%S')
@@ -289,5 +303,6 @@ def main():
     launch_preprocessing(argv)
 
     return
+
 if __name__ == '__main__':
     sysexit(main())
