@@ -250,13 +250,13 @@ def main():
                         help='The total number of levels')
     parser.add_argument('--instrument', type=str, required=True,choices=['cris','info'],
                         help='Instrument type')
-    parser.add_argument('--latmin', type=str, default = preprocessor_vars['geobox']['latmin'],
+    parser.add_argument('--latmin', type=str, default = common_vars['geobox']['latmin'],
                         help='Min Latitude')
-    parser.add_argument('--latmax', type=str, default = preprocessor_vars['geobox']['latmax'],
+    parser.add_argument('--latmax', type=str, default = common_vars['geobox']['latmax'],
                         help='Max Latitude')
-    parser.add_argument('--lonmin', type=str, default = preprocessor_vars['geobox']['lonmin'],
+    parser.add_argument('--lonmin', type=str, default = common_vars['geobox']['lonmin'],
                         help='Min Longitude')
-    parser.add_argument('--lonmax', type=str, default = preprocessor_vars['geobox']['lonmax'],
+    parser.add_argument('--lonmax', type=str, default = common_vars['geobox']['lonmax'],
                         help='Max Longitude')
     parser.add_argument('--cluster_mode', type=bool, default = False,
                         help='Cluster Mode Flag')
