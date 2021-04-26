@@ -81,7 +81,7 @@ def main():
     log.setLevel(verbosity)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
-                                  '%(funcName)s: %(message)s',
+                                  '%(filename)s: %(message)s',
                                   datefmt='%m/%d/%Y %H:%M:%S')
 
     streamhandler = logging.StreamHandler()
@@ -139,7 +139,7 @@ def main():
     #   log.debug(format_exc())
     #    return 100
 
-    log.info('Execution complete!')
+    log.info('Execution complete')
     return 0
 
 

@@ -83,7 +83,7 @@ def main():
     log.setLevel(verbosity)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
-                                  '%(funcName)s: %(message)s',
+                                  '%(filename)s: %(message)s',
                                   datefmt='%m/%d/%Y %H:%M:%S')
 
     sh = logging.StreamHandler()
