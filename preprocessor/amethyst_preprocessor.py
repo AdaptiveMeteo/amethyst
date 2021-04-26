@@ -33,12 +33,10 @@ __email__      = "paolo.scaccia@adaptivemeteo.com"
 
 if __name__ == '__main__':
     log = logging.getLogger()
+    AMETHYST_PATH = [ x for x in sys.path if os.path.basename(x) == 'amethyst' ][0]
 else:
     log = logging.getLogger(__name__)
 
-# Improve this
-AMETHYST_PATH = [ x for x in sys.path if os.path.basename(x) == 'amethyst' ][0]
-print(AMETHYST_PATH)
 
 def get_wrf_dir_time(list_date,base_date):
 
