@@ -236,7 +236,7 @@ def preproccessor_parser():
     from argparse         import ArgumentParser
     
     
-    v_level     s = ['debug', 'info', 'warning']
+    v_levels = ['debug', 'info', 'warning']
     
     parser = ArgumentParser()
     parser.add_argument('--output','-o',type=str,required=True,
