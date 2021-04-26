@@ -179,8 +179,7 @@ def launch_preprocessing(argv):
         
         #Build command cascade for qsub
         if argv.instrument == 'cris':
-            
-            
+                        
             # Calls to CrIS preprocessor scripts
             cmd_cascade = [  "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
                                                            "--outfile {}/cloudmask.nc -v info "
@@ -216,26 +215,60 @@ def launch_preprocessing(argv):
                               "Generating surface first guess...",
                               "Generating atmospheric first guess covariance..."]
 
-            # Run cascade
-            for cmd, printout in zip(cmd_cascade,logger_cascade):
-
-                log.debug(cmd)  # Debug printout
-                    
-                log.info(" ")
-                log.info(printout)
-                
-                # Run process
-                proc = subprocess.run(cmd.replace('  ',' ').split())
-                
-                # Check if subprocess fails
-                if bool(proc.returncode):
-                    log.info("Preprocessing failed in {}!".format(printout.lower()))
-                    break
         else:
-            # Iasi
-            sysexit("To be added...")
             
-    return
+            # Calls to IASI preprocessor scripts
+            cmd_cascade = [  "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
+                                                           "--outfile {}/cloudmask.nc -v info "
+                                                           "--lonmin {} --lonmax {} --latmin {} "
+                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
+                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+                                                           
+                             "python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc "
+                                                           "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
+                                                           "--lonmin {} --lonmax {} --latmin {}  "
+                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
+                                                                                argv.output,argv.cmt,argv.output,
+                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+                                                    
+                             "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {} "
+                                                           " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
+                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+
+    
+                             "python {}/preprocessor/fg_generator/emissivity2firstguess/emiss2firstguess.py {}/fov.nc"
+                                                           " {}/fg.nc -v info".format(AMETHYST_PATH,argv.output,argv.output),
+
+                                                           
+                             "python {}/preprocessor/apriori_generator/covtable2firstguesscov.py {}/fov.nc "
+                                                           " {}/apriori.nc -v info --compression 9".format(AMETHYST_PATH,argv.output,argv.output)
+                                                           
+                             ]
+
+            # Logger Printouts
+            logger_cascade = ["Generating IASI observations...",
+                              "Generating atmospheric first guess...",
+                              "Generating surface first guess...",
+                              "Generating atmospheric first guess covariance..."]
+
+
+        # Run cascade
+        for cmd, printout in zip(cmd_cascade,logger_cascade):
+
+            log.debug(cmd)  # Debug printout
+                
+            log.info(" ")
+            log.info(printout)
+            
+            # Run process
+            proc = subprocess.run(cmd.replace('  ',' ').split())
+            
+            # Check if subprocess fails
+            if bool(proc.returncode):
+                log.info("Preprocessing failed in {}!".format(printout.lower()))
+                break
+            
+    return proc.returncode
 
     
 def preproccessor_parser():
