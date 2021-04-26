@@ -220,7 +220,7 @@ def launch_preprocessing(argv):
             if len(iasi_native_file) == 0:
                 sysexit("IASI Native file not found in {}".format(argv.iasidir))
             else:
-                iasi_native_file = iasi_native_file[0]
+                iasi_native_file = argv.iasidir + '/' + iasi_native_file[0]
 
             # Calls to IASI preprocessor scripts
             cmd_cascade = [  
