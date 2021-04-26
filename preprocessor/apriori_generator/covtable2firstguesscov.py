@@ -74,8 +74,8 @@ def main():
     parser.add_argument('output', type=str,
                         help='The first guess NetCDF file that will be '
                              'generated')
-    parser.add_argument('--covtable', '-cov', type=str, default = AMETHYST_PATH + '/ancillary/atmosphere/hawaii_apriori.nc',help='The covariance table file')
-    parser.add_argument('--static_apriori', '-sa', type=str, default=None,
+    parser.add_argument('--covtable', '-cov', type=str,help='The covariance table file')
+    parser.add_argument('--static_apriori', '-sa', type=str, default = AMETHYST_PATH + '/ancillary/atmosphere/hawaii_apriori.nc',
                         help='The static apriori covariance file')
     parser.add_argument('--verbose', '-v', choices=v_levels, default='info',
                         help='the level of verbosity of the software')
