@@ -216,7 +216,7 @@ def launch_preprocessing(argv):
                               "Generating atmospheric first guess covariance..."]
 
         else:
-            iasi_native_file = [  x for x in os.listdir(argv.iasi)  if 'IASI_xxx' in x  ]
+            iasi_native_file = [  x for x in os.listdir(argv.iasidir)  if 'IASI_xxx' in x  ]
             if len(iasi_native_file) == 0:
                 sysexit("IASI Native file not found in {}".format(argv.iasidir))
             else:
