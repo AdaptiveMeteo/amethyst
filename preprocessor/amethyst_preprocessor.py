@@ -288,7 +288,8 @@ def preproccessor_parser():
     # If missing set Cloudmask threshold 
     if argv.cmt == None:
         argv.cmt = amethyst_config.preprocessor_vars['{}_cmt'.format(argv.instrument)]   
-        
+    
+    print(argv.logdir)
     # Create logdir if it doesn't exist    
     if not os.path.isdir(argv.logdir):
         os.system("mkduir -p {}".format(argv.logdir))
