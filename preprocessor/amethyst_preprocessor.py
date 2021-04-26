@@ -189,7 +189,7 @@ def launch_preprocessing(argv):
                                                            "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                            
-                             "python {}/preprocessor/fov_generator/cris/cris2observation.py {} {} {}/fov.nc"
+                             "python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc"
                                                            "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
                                                            "--lonmin {} --lonmax {} --latmin {}  "
                                                            "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
@@ -200,7 +200,7 @@ def launch_preprocessing(argv):
                                                            " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                            
-                             "python {}/preprocessor/apriori_generator/emiss2firstguess/covtable2firstguesscov.py {}/fov.nc"
+                             "python {}/preprocessor/apriori_generator/covtable2firstguesscov.py {}/fov.nc"
                                                            " {}/apriori.nc {} {} {} {} -v info --compression 9".format(AMETHYST_PATH,argv.output,argv.output,
                                                                                                                        argv.lonmin,argv.lonmax,argv.latmin,argv.latmax) 
                              ]
