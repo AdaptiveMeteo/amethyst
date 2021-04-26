@@ -134,8 +134,10 @@ def launch_preprocessing(argv):
     wrf_f_fmt = '%Y-%m-%d_%H:%M:%S'
     wrf_o_fmt = 'wrfout_d01_%Y-%m-%d_%H:%M:%S'
     wrffilename = datetime.strptime(sel_wrf_run_file[11:], wrf_f_fmt).strftime(wrf_o_fmt)
-    wrffile = argv.wrfdir + sel_wrf_run + '/wrf/' + wrffilename
+    wrffile = "/".join([argv.wrfdir,sel_wrf_run,'wrf', wrffilename])
     print( wrffile.replace(os.path.basename(wrffile),'DONE') )
+    
+        
     if not os.path.isfile(   wrffile.replace(os.path.basename(wrffile),'DONE') ):
         prev_wrf_dir = datetime.strptime(sel_wrf_run, wrf_fmt)-timedelta(hours=6)
         sel_wrf_run = prev_wrf_dir.strftime(wrf_fmt)
