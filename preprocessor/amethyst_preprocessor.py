@@ -116,7 +116,7 @@ def launch_preprocessing(argv):
     if any([os.path.isfile(argv.logdir + '/' + f) for f in ret_status]):
        sysexit('Execution of Main stops here as overpass has already been sumbmitted to processing.\nExiting')
     else:
-       open(argv.logdir + '/' + ret_status[0] , 'a').close()
+        open(argv.logdir + '/' + ret_status[0] , 'a').close()
  
     # sat_ov_time = datetime.strptime(sat_pass_date, "%Y%m%d_%H%M%S")
        
@@ -288,7 +288,11 @@ def preproccessor_parser():
     # If missing set Cloudmask threshold 
     if argv.cmt == None:
         argv.cmt = amethyst_config.preprocessor_vars['{}_cmt'.format(argv.instrument)]   
-    
+
+    # Create logdir if it doesn't exist    
+    if not os.path.isdir(argv.logdir):
+        os.system("mkduir -p {}".format(argv.logdir))
+
     return argv
 
 
