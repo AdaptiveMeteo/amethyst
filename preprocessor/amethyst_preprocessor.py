@@ -99,12 +99,12 @@ def launch_preprocessing(argv):
     
     if argv.overpass == None:
         sat_pass_date = sat_ov_times[0]
-        log.info('Last DB dir with L1 files is {}.'.format(sat_pass_date))
+        log.info('Last DB dir with L1 files is {}'.format(sat_pass_date))
     else:
         sat_pass_date = argv.overpass
-        log.info('Selected DB dir with L1 files is {}.'.format(sat_pass_date))    
+        log.info('Selected DB dir with L1 files is {}'.format(sat_pass_date))    
     
-    # Check if all the L1 data have been downloaded or are still downloading
+        # Check if all the L1 data have been downloaded or are still downloading
     ready = "/".join([ argv.l1dir, sat_pass_date,'ready4processing'])
     if not os.path.isfile(ready):
             sysexit('{}{} exists but not all needed data have been downloaded yet!\n'
