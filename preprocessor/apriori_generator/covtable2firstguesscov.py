@@ -29,6 +29,7 @@ is a netcdf file that is suitable to be used with Mirto.
 import logging
 from argparse import ArgumentParser
 from sys import exit as sysexit
+import sys
 from traceback import format_exc
 from os import path
 
@@ -47,6 +48,8 @@ __email__ = "stefano.piani@exact-lab.it"
 
 if __name__ == '__main__':
     LOG = logging.getLogger()
+    AMETHYST_PATH = [ x for x in sys.path if os.path.basename(x) == 'amethyst' ][0]
+
 else:
     LOG = logging.getLogger(__name__)
 
@@ -71,7 +74,7 @@ def main():
     parser.add_argument('output', type=str,
                         help='The first guess NetCDF file that will be '
                              'generated')
-    parser.add_argument('--covtable', '-cov', type=str, help='The covariance table file')
+    parser.add_argument('--covtable', '-cov', type=str, default = AMETHYST_PATH + '/ancillary/atmosphere/hawaii_apriori.nc',help='The covariance table file')
     parser.add_argument('--static_apriori', '-sa', type=str, default=None,
                         help='The static apriori covariance file')
     parser.add_argument('--verbose', '-v', choices=v_levels, default='info',
@@ -246,7 +249,7 @@ def main():
                 LOG.debug('Reading T_q cov')
                 static_sa_dict['T_q'] = sa_file.groups['atmospheric_components'].groups['Covariances'].variables['T_q'][:]
         else:
-            LOG.info('Reading file {}'.format(argv.covtable))
+            LOG.info('Reading file {}'.format(table))
             with Dataset(argv.covtable, 'r') as cov_table:
                 # Generate a list of valid molecules from the cov_table file
                 assoc = cov_table.groups[ASSOCIATIONS]
