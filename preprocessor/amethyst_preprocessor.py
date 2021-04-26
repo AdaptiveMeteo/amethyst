@@ -221,11 +221,16 @@ def launch_preprocessing(argv):
 
                 log.debug(cmd)  # Debug printout
                     
+                log.info(" ")
                 log.info(printout)
-                log.info("______________________________________________")
-
-                subprocess.run(cmd.replace('  ',' ').split())
                 
+                # Run process
+                proc = subprocess.run(cmd.replace('  ',' ').split())
+                
+                # Check if subprocess fails
+                if bool(proc.returncode):
+                    log.info("Preprocessing failed in {}!".format(printout.lower()))
+                    break
         else:
             # Iasi
             sysexit("To be added...")
@@ -289,7 +294,6 @@ def preproccessor_parser():
     if argv.cmt == None:
         argv.cmt = amethyst_config.preprocessor_vars['{}_cmt'.format(argv.instrument)]   
     
-    print(argv.logdir)
     # Create logdir if it doesn't exist    
     if not os.path.isdir(argv.logdir):
         os.system("mkdir -p {}".format(argv.logdir))
