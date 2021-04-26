@@ -187,7 +187,8 @@ def launch_preprocessing(argv):
                              "python preprocessor/fov_generator/cris/cris2observation.py {} {} {}/fov.nc"
                                                            "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
                                                            "--lonmin {} --lonmax {} --latmin {}  "
-                                                           "--latmax {}".format(argv.output,argv.cmt,argv.output,
+                                                           "--latmax {}".format(argv.gcrso,argv.scris,argv.output,
+                                                                                argv.output,argv.cmt,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                                                     
                              "python preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {}"
