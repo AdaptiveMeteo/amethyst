@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# mirto.py
 
 from __future__ import print_function, division
 
@@ -18,7 +17,6 @@ if py_version > 2:
 else:
     from Queue import Empty    # @UnresolvedImport @Reimport
 
-from mirto.ParseConfig import ParseConfig
 
 import traceback
 from ossFM_files.ossFM import ossFM
@@ -34,6 +32,7 @@ from mirto.scriba import scriba_f, ProgressBar
 
 import cProfile, pstats
 
+import amethyst_config
 
 class logger():
     def __init__(self, verbose_level, file_log=sys.stdout):
@@ -213,9 +212,6 @@ def invert_process(proc_num, to_compute, to_write,
 
 if __name__ == '__main__':
 
-    # Read Mirto configuration file
-    xmlconf = ParseConfig('configuration.xml')
-
     start_process = time.time()
 
     parser = argparse.ArgumentParser()
@@ -229,7 +225,7 @@ if __name__ == '__main__':
                         help="Define the number of COMPUTING processes")
     parser.add_argument('-s', '--startobs', type=int, default=0,
                         help="Define the number of the first observation to be computed")
-    parser.add_argument('-o', '--output', default=xmlconf.outfile,
+    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["outfile"]["filename"],
                         help="Define the output filename")
     parser.add_argument('-v', '--verbose', type=int, default=2,
                         help="Define the level of verbosity")
@@ -250,10 +246,10 @@ if __name__ == '__main__':
     #
     L.log('Reading OSS init input... ', 1, end='')
 
-    workingDir  = xmlconf.workingPath
-    co2_std     = xmlconf.constantCO2
-    eigen_land  = xmlconf.eigenforland
-    eigen_sea   = xmlconf.eigenforsea
+    workingDir  = amethyst_config.common_vars['wrkdir']
+    co2_std     = amethyst_config.processor_vars['constant_co2_std']
+    eigen_land  = amethyst_config.processor_vars['eigenforland']
+    eigen_sea   = amethyst_config.processor_vars['eigenforsea']
 
     asolar  = Solar(xmlconf.constantSolarIrradianceFile)
     ahitran = Hitran(xmlconf.instrumentODFile)

@@ -286,7 +286,7 @@ def preproccessor_parser():
     v_levels = ['debug', 'info', 'warning']
     
     parser = ArgumentParser()
-    parser.add_argument('--output','-o',type=str,required=True,
+    parser.add_argument('--output','-o',type=str,default = amethyst_config.common_vars['wrkdir'],
                         help='Output directory containing all NETCDF preprocessed data')
     parser.add_argument('--overpass',default = None,type=str,
                         help='Overpass date and time YYYYMMDD_HHMMSS')
@@ -306,7 +306,7 @@ def preproccessor_parser():
                         help='The level of verbosity of the software')
     parser.add_argument('--levels', '-l', type=int, default=amethyst_config.common_vars['levels'],
                         help='The total number of levels')
-    parser.add_argument('--instrument', type=str, required=True,choices=['cris','iasi'],
+    parser.add_argument('--instrument', type=str, default = amethyst_config.common_vars['instrument'],
                         help='Instrument type')
     parser.add_argument('--latmin', type=str, default = amethyst_config.common_vars['geobox']['latmin'],
                         help='Min Latitude')
