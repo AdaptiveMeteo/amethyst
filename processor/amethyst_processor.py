@@ -209,38 +209,16 @@ def invert_process(proc_num, to_compute, to_write,
 
 
 
+def processor(log_file, numobs, process_number, startobs, verbose,
+              output_file = amethyst_config.processor_vars["outfile"]["filename"]):
 
-if __name__ == '__main__':
-
+ 
     start_process = time.time()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--debug', default='None',
-                        help="Define which debug variables must be saved")
-    parser.add_argument('-l', '--log_file', default='stdout',
-                        help="Define where print the log file")
-    parser.add_argument('-n', '--numobs', type=int, default=-1,
-                        help="Define the max number of observations to be computed")
-    parser.add_argument('-p', '--processes', type=int, default=1,
-                        help="Define the number of COMPUTING processes")
-    parser.add_argument('-s', '--startobs', type=int, default=0,
-                        help="Define the number of the first observation to be computed")
-    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["outfile"]["filename"],
-                        help="Define the output filename")
-    parser.add_argument('-v', '--verbose', type=int, default=2,
-                        help="Define the level of verbosity")
-
-    LOG_FILE         = read_log_file(parser.parse_args().log_file)
-    OUTPUT_FILE      = parser.parse_args().output
-    NUMOBS           = parser.parse_args().numobs
-    PROCESSES_NUMBER = parser.parse_args().processes
-    STARTOBS         = parser.parse_args().startobs
-    VERBOSE          = parser.parse_args().verbose
 
     L = logger(VERBOSE, LOG_FILE)
 
     output_not_a_file = LOG_FILE in [sys.stderr, sys.stdout]
-
+    
     #
     # OSS init input
     #
@@ -251,13 +229,13 @@ if __name__ == '__main__':
     eigen_land  = amethyst_config.processor_vars['eigenforland']
     eigen_sea   = amethyst_config.processor_vars['eigenforsea']
 
-    asolar  = Solar(xmlconf.constantSolarIrradianceFile)
-    ahitran = Hitran(xmlconf.instrumentODFile)
-    #obs_err = create_obs_err(xmlconf.instrumentNoiseFile, obs_err_type='iasi')
-    obs_err = create_obs_err(xmlconf.instrumentNoiseFile)
-    #obs_err_sps = create_obs_err_sps(xmlconf.instrumentNoiseFileSps, obs_err_type='iasi')
-    obs_err_sps = create_obs_err_sps(xmlconf.instrumentNoiseFileSps)
+    asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
+    ahitran = Hitran(amethyst_config.processor_vars["od_file"])
+    obs_err = create_obs_err(amethyst_config.processors_vars["noise_file"])
+    obs_err_sps = create_obs_err_sps(amethyst_config.processors_vars["noise_file_sps"])
+
     oss_time=time.time()
+
     L.log('Done in ' +str(oss_time-start_process)+' seconds', 1)
 
     # This part of code must be repeated for each input profile in data
@@ -270,8 +248,7 @@ if __name__ == '__main__':
     L.log('Done in ' +str(inverter_time-oss_time)+' seconds', 1)
 
     # Check which observations should be computed
-    datapath = 'data'
-    allobs = FOVCount(xmlconf.atmosphereFirstGuessFile)
+    allobs = FOVCount(amethyst_config.processor_vars["fg_file"])
     obsnum = list(range(STARTOBS, allobs))
     if NUMOBS > 0:
         obsnum = list(range(STARTOBS, min(STARTOBS+NUMOBS, allobs)))
@@ -287,7 +264,6 @@ if __name__ == '__main__':
                      args=[to_compute, 
                            obs_err_sps, 
                            obsnum, 
-                           datapath, 
                            L, 
                            eigen_land, 
                            eigen_sea, 
@@ -415,3 +391,38 @@ if __name__ == '__main__':
             print(str(len(err_comp)) + ' observations were NOT executed'
                   ' due to some strange errors', file=sys.stderr)
         sys.exit(1)
+
+    return
+
+
+if __name__ == '__main__':
+
+
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', default='None',
+                        help="Define which debug variables must be saved")
+    parser.add_argument('-l', '--log_file', default='stdout',
+                        help="Define where print the log file")
+    parser.add_argument('-n', '--numobs', type=int, default=-1,
+                        help="Define the max number of observations to be computed")
+    parser.add_argument('-p', '--processes', type=int, default=1,
+                        help="Define the number of COMPUTING processes")
+    parser.add_argument('-s', '--startobs', type=int, default=0,
+                        help="Define the number of the first observation to be computed")
+    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["outfile"]["filename"],
+                        help="Define the output filename")
+    parser.add_argument('-v', '--verbose', type=int, default=2,
+                        help="Define the level of verbosity")
+
+    # INPUT 4 FUNCTION
+    LOG_FILE         = read_log_file(parser.parse_args().log_file)
+    OUTPUT_FILE      = parser.parse_args().output
+    NUMOBS           = parser.parse_args().numobs
+    PROCESSES_NUMBER = parser.parse_args().processes
+    STARTOBS         = parser.parse_args().startobs
+    VERBOSE          = parser.parse_args().verbose
+
+    # Launch processor
+    processor(LOG_FILE, NUMOBS, PROCESSES_NUMBER, STARTOBS, VERBOSE,
+              output_file = OUTPUT_FILE)
