@@ -31,6 +31,11 @@ from main.scriba import scriba_f, ProgressBar
 
 import cProfile, pstats
 import amethyst_config
+if amethyst_config.common_vars["instrument"] in ["cris","iasi_v2"]:
+    from ossfm.v2.ossFM import ossfm
+else:
+    from ossfm.v3.ossFM import ossfm
+
 
 class logger():
     def __init__(self, verbose_level, file_log=sys.stdout):
