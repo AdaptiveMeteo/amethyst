@@ -17,18 +17,17 @@ if py_version > 2:
 else:
     from Queue import Empty    # @UnresolvedImport @Reimport
 
-
 import traceback
-from ossFM_files.ossFM import ossFM
+from ossfm.ossFM import ossFM
 from dobjects.Solar import Solar
 from dobjects.Hitran import Hitran
 from dobjects.SounderFOV import FOVCount
 from dobjects.ObservationError import create_obs_err
 from dobjects.ObservationError import create_obs_err_sps
-from mirto.ForwardModel import NotConvergentIteration
-from mirto.mirto_code_main import mirto
-from mirto.reader import reader_f
-from mirto.scriba import scriba_f, ProgressBar
+from amethyst.ForwardModel import NotConvergentIteration
+from main.amethyst_code_main import core
+from main.reader import reader_f
+from main.scriba import scriba_f, ProgressBar
 
 import cProfile, pstats
 
@@ -216,8 +215,6 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     start_process = time.time()
 
     L = logger(VERBOSE, LOG_FILE)
-
-    output_not_a_file = LOG_FILE in [sys.stderr, sys.stdout]
     
     #
     # OSS init input
@@ -243,10 +240,10 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     # also can be preloaded.
     L.log('Creating an inverter... ', 1, end='')
     oss = ossFM(asolar, ahitran)
-    inverter = mirto(xmlconf, oss, obs_err)
+    inverter = core( oss, obs_err )
     inverter_time=time.time()
     L.log('Done in ' +str(inverter_time-oss_time)+' seconds', 1)
-
+    # <-----
     # Check which observations should be computed
     allobs = FOVCount(amethyst_config.processor_vars["fg_file"])
     obsnum = list(range(STARTOBS, allobs))
@@ -396,7 +393,6 @@ def processor(log_file, numobs, process_number, startobs, verbose,
 
 
 if __name__ == '__main__':
-
 
     # Parse arguments
     parser = argparse.ArgumentParser()

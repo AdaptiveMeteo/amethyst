@@ -48,6 +48,7 @@ preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cr
 
 processor_vars = {
                 # Instrument
+                "instrument"      : common_vars["instrument"],
                 "noise_file"      : "./data/obserr_res_0_7.nc",
                 "noise_file_sps"  : "./data/obserr_res_0_7_sps.nc",
                 "instr_chan_list" : "./data/cris_chList.dat",
