@@ -1,0 +1,22 @@
+#########################
+	OSSFM.py
+#########################
+
+1. Compile od2cmpr 
+
+	cd OSSDIR/od2cmpr
+	make
+
+2. Create netcdf with iasi coefficients 
+
+	./od2cmpr metop_iasi-B1B2B3-loc-clear-23V-M12.4-v1.2
+	ln -s OSSDIR/od2cmpr/metop_iasi-B1B2B3-loc-clear-23V-M12.4-v1.2.train.nc OSSDIR/data/iasi_coefficients.nc
+
+3. Create ossir library with pyfort
+
+	cd OSSDIR
+	make
+
+4. Test with python
+
+	python ossFM.py
