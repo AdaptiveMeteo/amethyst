@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 
 import argparse
-from os import path
+from os import path, listdir
 import sys
 import time
 
@@ -32,8 +32,10 @@ from main.scriba import scriba_f, ProgressBar
 import cProfile, pstats
 import amethyst_config
 if amethyst_config.common_vars["instrument"] in ["cris","iasi_v2"]:
+    OSS_PATH = "ossfm/v2/"
     from ossfm.v2.ossFM import ossfm
 else:
+    OSS_PATH = "ossfm/v3/"
     from ossfm.v3.ossFM import ossfm
 
 
@@ -414,7 +416,11 @@ if __name__ == '__main__':
                         help="Define the output filename")
     parser.add_argument('-v', '--verbose', type=int, default=2,
                         help="Define the level of verbosity")
-
+    
+    # Check wether FM is compiled
+    if len([ x for x in listdir(OSS_PATH) if 'cpython' in x])==0:
+        sys.exit("Compile forward model in {}".format(OSS_PATH))
+        
     # INPUT 4 FUNCTION
     LOG_FILE         = read_log_file(parser.parse_args().log_file)
     OUTPUT_FILE      = parser.parse_args().output
