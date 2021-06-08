@@ -30,7 +30,6 @@ from main.reader import reader_f
 from main.scriba import scriba_f, ProgressBar
 
 import cProfile, pstats
-
 import amethyst_config
 
 class logger():
