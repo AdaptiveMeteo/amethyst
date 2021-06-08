@@ -18,7 +18,6 @@ else:
     from Queue import Empty    # @UnresolvedImport @Reimport
 
 import traceback
-from ossfm.ossFM import ossFM
 from dobjects.Solar import Solar
 from dobjects.Hitran import Hitran
 from dobjects.SounderFOV import FOVCount
@@ -33,10 +32,10 @@ import cProfile, pstats
 import amethyst_config
 if amethyst_config.common_vars["instrument"] in ["cris","iasi_v2"]:
     OSS_PATH = "ossfm/v2/"
-    from ossfm.v2.ossFM import ossfm
+    from ossfm.v2.ossFM import ossFM
 else:
     OSS_PATH = "ossfm/v3/"
-    from ossfm.v3.ossFM import ossfm
+    from ossfm.v3.ossFM import ossFM
 
 
 class logger():
