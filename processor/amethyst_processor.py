@@ -64,9 +64,9 @@ def read_log_file(arg_passed):
         except:
             raise ValueError('Invalid file name')
 
-def invert_process(proc_num, to_compute, to_write,
+def invert_process(inverter, nlev, proc_num, to_compute, to_write,
                    reader_is_alive, L, transformer,
-                   output_vars, log_data):
+                   output_vars, log_data, start_process ):
 
     proc_str = '{0:03d}'.format(proc_num+1)
     obs_computed_by_me = list()
@@ -102,15 +102,15 @@ def invert_process(proc_num, to_compute, to_write,
                 L.log('Elapsed Time in the inverter for OBS '+str(obs)+' : '+
                       repr(time.time()-time_invert)+' s', 3, print_now=False)
                 time_output=time.time()
-                if 'pressure' in output_vars:
+                if output_vars["pressure"]:
                     output['pressure'] = inverter.cx.pressure_grid
-                if 'temperature' in output_vars:
+                if output_vars["temperature"]:
                     output['temperature'] = solution.xhat[0:nlev]
-                if 'water_vapor' in output_vars:
+                if output_vars["water_vapor"]:
                     output['water_vapor'] = solution.xhat[nlev:2*nlev]
-                if 'ozone' in output_vars:
+                if output_vars["ozone"]:
                     output['ozone'] = solution.xhat[2*nlev:3*nlev]
-                if 'surface_temperature' in output_vars:
+                if output_vars["surface_temperature"]:
                     output['surface_temperature'] = solution.xhat[3*nlev]
                 if 'surface_emissivity_coefficients' in output_vars:
                     output['surface_emissivity_coefficients'] = solution.xhat[3*nlev+1:]
@@ -265,7 +265,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
                            eigen_land, 
                            eigen_sea, 
                            co2_std, 
-                           xmlconf,
+                           amethyst_config.processor_vars,
                            inverter.cx.variable_selection]
                      )
     reader.start()
@@ -300,7 +300,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     scriba = Process(target = scriba_f,
                      args=[to_write, stop_scriba, outfile, obsnum, nlev,
                            eigen_max, nselstate + eigen_max, selchannels,
-                           STARTOBS, xmlconf.output_vars, progress_bar_queue])
+                           STARTOBS, amethyst_config.processor_vars["output"], progress_bar_queue])
     scriba.start()
     L.log('Done!', 1)
 
@@ -310,9 +310,9 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     L.log('Starting computation... ',1, end='')
     for i in range(min(PROCESSES_NUMBER,len(obsnum))):
         p = Process(target=invert_process,
-                    args=[i, to_compute, to_write, reader_is_alive,
+                    args=[inverter,nlev, i, to_compute, to_write, reader_is_alive,
                           logger(VERBOSE, LOG_FILE), transformer,
-                          xmlconf.output_vars, log_data])
+                          amethyst_config.processor_vars["output"] , log_data, start_process])
         process_list.append((i, p))
         p.start()
     L.log('Running!',1)

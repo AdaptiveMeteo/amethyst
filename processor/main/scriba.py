@@ -73,42 +73,42 @@ def scriba_f(to_write, stop_now, root_file, obsnum, nlev, nem, nselstate,
         dims = ('obsnum','levels')
         f_v = 1.0E20
         nco  =  rootgrp.createVariable('obs', 'i4', dims[0], -1)
-        if 'pressure' in output_vars:
+        if output_vars['pressure']:
             ncp  =  rootgrp.createVariable('p',   v_tp, dims,    f_v)
         if 'temperature' in output_vars:
             nct  =  rootgrp.createVariable('t',   v_tp2, dims,    f_v)
-        if 'water_vapor' in output_vars:
+        if output_vars['water_vapor']:
             ncq  =  rootgrp.createVariable('q',   v_tp2, dims,    f_v)
-        if 'ozone' in output_vars:
+        if output_vars["ozone"]:
             nco3  = rootgrp.createVariable('o3',  v_tp, dims,    f_v)
-        if 'surface_temperature' in output_vars:
+        if output_vars['surface_temperature']:
             ncskt = rootgrp.createVariable('skt', v_tp, dims[0], f_v)
-        if 'd2' in output_vars:
+        if output_vars['d2']:
             ncd2  = rootgrp.createVariable('d2',  v_tp, dims[0], f_v)
-        if 'surface_emissivity_coefficients' in output_vars:
+        if output_vars['surface_emissivity_coefficients']:
             ncems = rootgrp.createVariable('ems_coeff', v_tp,
                                            ('obsnum','coefficients'), f_v)
-        if 'jacobian' in output_vars:
+        if output_vars['jacobian']:
             jacobian = rootgrp.createVariable('jacobian', v_tp,
                             ('obsnum', 'selchannels', 'numselstatevar'), f_v)
-        if 'residuals' in output_vars:
+        if output_vars['residuals']:
             residuals = rootgrp.createVariable('residuals', v_tp, 
                                                ('obsnum', 'selchannels'), f_v)
         #PaoloA 12112018
-        if 'fgresiduals' in output_vars:
+        if output_vars['fg_residuals']:
             fgresiduals = rootgrp.createVariable('fgresiduals', v_tp, 
                                                ('obsnum', 'selchannels'), f_v)
-        if 'da_r' in output_vars:
+        if output_vars['da_r']:
             DA_R  = rootgrp.createVariable('DA_R', 'i2', dims[0], 0)
-        if 'transformed_retrievals' in output_vars:
+        if output_vars['transformed_retrievals']:
             DA_Yret=rootgrp.createVariable('DA_Yret', v_tp2, ('obsnum', 'mnel'), f_v)
-        if 'assimilation_operator' in output_vars:
+        if output_vars['assimilation_operator']:
             DA_Hret=rootgrp.createVariable('DA_Hret', v_tp2, 
                                            ('obsnum', 'mnel', 'twice_levels'), f_v)
         #PaoloA
-        if 'sn_eigenvalues' in output_vars:
+        if output_vars['sn_eigenvalues']:
             DA_Lambda  = rootgrp.createVariable('DA_Lambda', v_tp2, ('obsnum', 'mnel'), f_v)
-        if 'Sa' in output_vars:
+        if output_vars['Sa']:
             Sa_ret = rootgrp.createVariable('Sa_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), f_v)
             SaInv_ret = rootgrp.createVariable('SaInv_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), f_v)
 
@@ -133,40 +133,40 @@ def scriba_f(to_write, stop_now, root_file, obsnum, nlev, nem, nselstate,
                     if sol is None:
                         continue
                     try:
-                        if 'pressure' in output_vars:
+                        if output_vars['pressure']:
                             ncp[obs-STARTOBS, :] = sol['pressure']
-                        if 'temperature' in output_vars:
+                        if output_vars['temperature']:
                             nct[obs-STARTOBS, :] = sol['temperature']
-                        if 'water_vapor' in output_vars:
+                        if output_vars['water_vapor']:
                             ncq[obs-STARTOBS, :] = exp(sol['water_vapor'])*1e3
-                        if 'ozone' in output_vars:
+                        if output_vars['ozone']:
                             nco3[obs-STARTOBS, :] = exp(sol['ozone'])*1e3
-                        if 'surface_temperature' in output_vars:
+                        if output_vars['surface_temperature']:
                             ncskt[obs-STARTOBS] = sol['surface_temperature']
-                        if 'surface_emissivity_coefficients' in output_vars:
+                        if output_vars['surface_emissivity_coefficients']:
                             len_sc = sol['surface_emissivity_coefficients'].size
                             ncems[obs-STARTOBS, :len_sc] = sol['surface_emissivity_coefficients']
-                        if 'd2' in output_vars:
+                        if output_vars['d2']:
                             ncd2[obs-STARTOBS] = sol['d2']
-                        if 'da_r' in output_vars:
+                        if output_vars['da_r']:
                             DA_R[obs-STARTOBS] = sol['da_r']
-                        if 'transformed_retrievals' in output_vars:
+                        if output_vars['transformed_retrievals']:
                             DA_Yret[obs-STARTOBS, :] = sol['transformed_retrievals']
                         #PaoloA
-                        if 'sn_eigenvalues' in output_vars:
+                        if output_vars['sn_eigenvalues']:
                             DA_Lambda[obs-STARTOBS, :] = sol['sn_eigenvalues']
-                        if 'assimilation_operator' in output_vars:
+                        if output_vars['assimilation_operator']:
                             DA_Hret[obs-STARTOBS, :, :] = sol['assimilation_operator']
-                        if 'jacobian' in output_vars:
+                        if output_vars['jacobian']:
                             #PaoloA 14112018
                             #print(" shape {}".format(jacobian[obs-STARTOBS, :, :].shape))
                             jacobian[obs-STARTOBS, :, :] = sol['jacobian']
-                        if 'residuals' in output_vars:
+                        if output_vars['residuals']:
                             residuals[obs-STARTOBS, :] = sol['residuals']
                         #PaoloA 12112018
-                        if 'fgresiduals' in output_vars:
+                        if output_vars['f_gresiduals']:
                             fgresiduals[obs-STARTOBS, :] = sol['fgresiduals']
-                        if 'Sa' in output_vars:
+                        if output_vars['Sa']:
                             Sa_ret[obs-STARTOBS, :, :] = sol['Sa_ret']
                             SaInv_ret[obs-STARTOBS, :, :] = sol['SaInv_ret']
                     except:

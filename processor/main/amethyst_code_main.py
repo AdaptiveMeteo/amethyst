@@ -45,7 +45,7 @@ class amethyst_core_config(object):
         self.observationAltitude_km = amethyst_config.processor_vars["observation_altitude"]["value"]
         self.observationPressure_mb = amethyst_config.processor_vars["observation_pressure"]["value"]
         self.EstimateK = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=int)
-        self.Jvar = np.array(xmlconf.retrievalSelectedStateVectorVariables)
+        self.Jvar = np.array(amethyst_config.processor_vars["selected_state_vector_variables"])
         
         SKTflag = np.size(np.where(self.Jvar == -1)) > 0
         Tflag = np.size(np.where(self.Jvar == 0)) > 0
@@ -56,11 +56,11 @@ class amethyst_core_config(object):
         self.variable_selection = [ SKTflag, Tflag, WVflag, CO2flag, O3flag ]
 
         self.Iteration_limit = sum(self.EstimateK)
-        self.retrievalMLGamma = xmlconf.retrievalMLGamma
-        self.retrievalFixGammaZero = xmlconf.retrievalFixGammaZero
-        self.MFRC = xmlconf.retrievalMinimumFractionRateChange
-        self.MLGIF = xmlconf.retrievalMLGammaIncreaseFactor
-        self.MLGDF = xmlconf.retrievalMLGammaDecreaseFactor
+        self.retrievalMLGamma      = amethyst_config.processor_vars["ml_gamma"]
+        self.retrievalFixGammaZero = amethyst_config.processor_vars["fix_gamma_zero"]
+        self.MFRC                  = amethyst_config.processor_vars["minimum_fraction_rate_change"]
+        self.MLGIF                 = amethyst_config.processor_vars["ml_gamma_increase_factor"]
+        self.MLGDF                 = amethyst_config.processor_vars["ml_gamma_decrease_factor"]
         self.xdim = None
         self.indx = None
         self.state_var_indx = None
@@ -79,7 +79,7 @@ class amethyst_core_config(object):
         self.emrf = None
 
 
-class amethsyst_apriori(object):
+class amethyst_apriori(object):
     """ Utility class to keep apriori estimate and model error """
     def __init__(self):
         """ Initialize all class attributes """
@@ -99,7 +99,7 @@ class core(object):
         self.dot_inv_obs_err = obserr.dot_inv_obs_err
         self.inv_obs_err_dot = obserr.inv_obs_err_dot
         self.apriori = amethyst_apriori()
-        self.state = mirto_state()
+        self.state = amethyst_state()
         self.yobs_minus_yhat = None
         self.mspo = np.NAN
         self.fm = None

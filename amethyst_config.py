@@ -89,23 +89,24 @@ processor_vars = {
                 "tr_chan_list"   : "./data/tr_chList.dat",
 
                 # Amethyst Output
-                "output"  : {"filename"  : "amethyst_output.nc",
-                             "pressure"                    : True,
-                             "tempertaure"                 : True,
-                             "water_vapor"                 : True,
-                             "ozone"                       : True,
-                             "surface_temperature"         : True,
-                             "surface_emiss_coefficients"  : True,                             
-                             "d2"                          : True,
-                             "da_r"                        : True,
-                             "transformed_retrievals"      : True,
-                             "sn_eigenvalues"              : True,
-                             "assimilation_operator"       : True,
-                             "residuals"                   : False,
-                             "fg_residuals"                : False,
-                             "jacobian"                    : False,
-                             "sa"                          : False,
-                             "indices"                     : False}
+                "output_file"  : "amethyst_output.nc",
+                "output_vars"  : {   
+                                     "pressure"                    : True,
+                                     "tempertaure"                 : True,
+                                     "water_vapor"                 : True,
+                                     "ozone"                       : True,
+                                     "surface_temperature"         : True,
+                                     "surface_emiss_coefficients"  : True,                             
+                                     "d2"                          : True,
+                                     "da_r"                        : True,
+                                     "transformed_retrievals"      : True,
+                                     "sn_eigenvalues"              : True,
+                                     "assimilation_operator"       : True,
+                                     "residuals"                   : False,
+                                     "fg_residuals"                : False,
+                                     "jacobian"                    : False,
+                                     "sa"                          : False,
+                                     "indices"                     : False}
                 }
 
 postprocessor_vars = {
