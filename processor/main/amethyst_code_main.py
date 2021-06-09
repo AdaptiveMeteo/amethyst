@@ -9,8 +9,8 @@ from __future__ import print_function
 import numpy as np
 from scipy.linalg import lu, solve
 
-from amethyst.ForwardModel import ForwardModel
-from amethyst.ForwardModel import NotConvergentIteration
+from main.ForwardModel import ForwardModel
+from main.ForwardModel import NotConvergentIteration
 import sys
 if "amethyst_config" not in sys.modules:
     import amethyst_config
