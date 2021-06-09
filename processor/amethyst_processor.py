@@ -23,7 +23,7 @@ from dobjects.Hitran           import Hitran
 from dobjects.SounderFOV       import FOVCount
 from dobjects.ObservationError import create_obs_err
 from dobjects.ObservationError import create_obs_err_sps
-from amethyst.ForwardModel     import NotConvergentIteration
+from main.ForwardModel         import NotConvergentIteration
 from main.amethyst_code_main   import core
 from main.reader               import reader_f
 from main.scriba               import scriba_f, ProgressBar
