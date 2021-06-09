@@ -10,7 +10,7 @@ Wrapper for calling the oss_ir_r4 Fortran90 module.
 
 from numpy import array, transpose, zeros, int32, float32
 import sys
-from ossFM_files.ossir import oss_ir
+from ossfm.v3.ossir import oss_ir
 
 
 if  __name__ == '__main__':

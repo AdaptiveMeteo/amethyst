@@ -18,7 +18,7 @@ if  __name__ == '__main__':
                           '"python -m ossFM_files.ossFM" from the main'
                           ' directory of this project.')
 
-from ossFM_files.ossir import oss_ir
+from ossfm.v2.ossir import oss_ir
 
 class ossFM(object):
     """Use HITRAN precomputed tables to compute oss forward model (ir)"""
