@@ -214,7 +214,7 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
 
 
 def processor(log_file, numobs, process_number, startobs, verbose,
-              output_file = amethyst_config.processor_vars["outfile"]["filename"]):
+              output_file = amethyst_config.processor_vars["output_file"]):
  
     start_process = time.time()
 
