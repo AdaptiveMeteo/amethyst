@@ -1,11 +1,11 @@
 import time
 from os.path import join
 
-from dobjects.SounderFOV        import SounderFOV, sounderfov
-from dobjects.FirstGuess        import FirstGuess, firstguess
-from dobjects.AprioriCovariance import AprioriCovariance , covariance_matrix
-from dobjects.Emissivity        import Emissivity, emissivity_model
-from mirto.mirto_code_transform import transform
+from dobjects.SounderFOV          import SounderFOV, sounderfov
+from dobjects.FirstGuess          import FirstGuess, firstguess
+from dobjects.AprioriCovariance   import AprioriCovariance , covariance_matrix
+from dobjects.Emissivity          import Emissivity, emissivity_model
+from main.amethyst_code_transform import transform
 
 
 def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2std, config_vars, var_selection_flags):
