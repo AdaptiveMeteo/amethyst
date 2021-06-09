@@ -35,7 +35,7 @@ from netCDF4 import Dataset
 
 from sources.local_file import LocalFile
 
-__author__ = 'Stefano Piani '
+__author__ = 'Stefano Piani'
 __copyright__ = "Copyright 2016, Paolo Antonelli"
 __credits__ = ["Stefano Piani", "Paolo Antonelli"]
 __license__ = "GPL"

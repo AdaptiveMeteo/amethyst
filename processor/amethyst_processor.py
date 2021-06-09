@@ -18,15 +18,15 @@ else:
     from Queue import Empty    # @UnresolvedImport @Reimport
 
 import traceback
-from dobjects.Solar import Solar
-from dobjects.Hitran import Hitran
-from dobjects.SounderFOV import FOVCount
+from dobjects.Solar            import Solar
+from dobjects.Hitran           import Hitran
+from dobjects.SounderFOV       import FOVCount
 from dobjects.ObservationError import create_obs_err
 from dobjects.ObservationError import create_obs_err_sps
-from amethyst.ForwardModel import NotConvergentIteration
-from main.amethyst_code_main import core
-from main.reader import reader_f
-from main.scriba import scriba_f, ProgressBar
+from amethyst.ForwardModel     import NotConvergentIteration
+from main.amethyst_code_main   import core
+from main.reader               import reader_f
+from main.scriba               import scriba_f, ProgressBar
 
 import cProfile, pstats
 import amethyst_config
@@ -123,7 +123,7 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
                     output['d2'] = solution.d2
                 if 'jacobian' in output_vars:
                     output['jacobian'] = solution.jacobian
-                if 'residuals' in output_vars:                   
+                if 'residuals' in output_vars:
                     output['residuals'] = solution.residuals
                 #PaoloA 12112018
                 if 'fgresiduals' in output_vars:                   
@@ -215,7 +215,6 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
 
 def processor(log_file, numobs, process_number, startobs, verbose,
               output_file = amethyst_config.processor_vars["outfile"]["filename"]):
-
  
     start_process = time.time()
 
@@ -233,8 +232,8 @@ def processor(log_file, numobs, process_number, startobs, verbose,
 
     asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
     ahitran = Hitran(amethyst_config.processor_vars["od_file"])
-    obs_err = create_obs_err(amethyst_config.processors_vars["noise_file"])
-    obs_err_sps = create_obs_err_sps(amethyst_config.processors_vars["noise_file_sps"])
+    obs_err = create_obs_err(amethyst_config.processors_vars["noise_file"],  obs_err_type = amethyst_config.common_vars["instrument"])
+    obs_err_sps = create_obs_err_sps(amethyst_config.processors_vars["noise_file_sps"], obs_err_type = amethyst_config.common_vars["instrument"])
 
     oss_time=time.time()
 
