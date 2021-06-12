@@ -199,7 +199,7 @@ if __name__ == '__main__':
                           'from the main directory of this project.')
 
     from os import path
-    from mirto.ParseConfig import ParseConfig
+    from amethyst.ParseConfig import ParseConfig
     from dobjects.FirstGuess import FirstGuess
     from dobjects.SounderFOV import SounderFOV
     from dobjects.Solar import Solar

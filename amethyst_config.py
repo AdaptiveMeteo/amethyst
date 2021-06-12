@@ -22,6 +22,7 @@ __email__      = "paolo.scaccia@adaptivemeteo.com"
 
 common_vars = {
                   "instrument" : "cris",
+                  "fm_version" : 2,
                   "levels"     : 81,
                   "wrfdir"     : "/mnt/satellite/amethyst_test_data/wrf",
                   "wrkdir"     : "/home/mirto/wrkdir/",

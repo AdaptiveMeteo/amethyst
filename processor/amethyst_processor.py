@@ -30,7 +30,7 @@ from main.scriba               import scriba_f, ProgressBar
 
 import cProfile, pstats
 import amethyst_config
-if amethyst_config.common_vars["instrument"] in ["cris","iasi_v2"]:
+if amethyst_config.common_vars["fm_version"] == 2:
     OSS_PATH = "ossfm/v2/"
     from ossfm.v2.ossFM import ossFM
 else:
@@ -210,7 +210,6 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
                str(len(obs_computed_by_me)) +
                ' observations', 3, print_now = False)
     log_data.put(L.output_str) 
-
 
 
 def processor(log_file, numobs, process_number, startobs, verbose,
