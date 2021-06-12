@@ -1,0 +1,129 @@
+from numpy import diag, identity, array, allclose, dot
+
+from netCDF4 import Dataset
+
+
+class CrisSVD:
+    def __init__(self, D):
+        self.D = D
+    
+    def U_dot(self, M):
+        return M
+    
+    def dot_U(self, M):
+        return M
+    
+    def V_dot(self, M):
+        return M
+    
+    def dot_V(self, M):
+        return M
+
+    def D_dot(self, M):
+        return self.D.reshape((self.D.shape[0],1)) * M
+
+    def dot_D(self, M):
+        return self.D_dot(M.T).T
+
+
+class CrisObservationError(object):
+    def __init__(self, data_filename):
+        """
+        Initialize the ObservationError object
+        """
+        with Dataset(data_filename, mode='r') as df:
+            obs_err = array(df.variables['obserrselchannels'][:])
+
+        self.__obs_err_diag = diag(obs_err)
+
+        self.__inv_obs_err_diag = 1/self.__obs_err_diag
+
+        D = self.__obs_err_diag
+        self.__svd = CrisSVD(D)
+
+    @ property
+    def obs_err(self):
+        """
+        Get one of the observation error matrix
+        """
+        return diag(self.__obs_err_diag)
+
+    @property
+    def inv_obs_err(self):
+        return diag(self.__inv_obs_err_diag)
+    
+    def inv_obs_err_dot(self, M):
+        if len(M.shape) == 1:
+            return self.__inv_obs_err_diag * M
+        elif len(M.shape) == 2:
+            inv_obs_err_size = self.__inv_obs_err_diag.shape[0]
+            inv_obs_err = self.__inv_obs_err_diag.reshape((inv_obs_err_size,1))
+            return inv_obs_err * M
+        else:
+            return dot(self.inv_obs_err, M)
+    
+    def dot_inv_obs_err(self, M):
+        return self.inv_obs_err_dot(M.T).T
+
+    @property
+    def svd(self):
+        return self.__svd
+    
+    def get_svd(self):
+        temp = identity(self.__obs_err_diag.shape[0])
+        return (temp, self.__svd.D, temp)
+
+class CrisObservationErrorSps(object):
+    def __init__(self, data_filename):
+        """
+        Initialize the ObservationError object
+        """
+        with Dataset(data_filename, mode='r') as df:
+            obs_err = array(df.variables['obserrselchannels'][:])
+            oe_sub_indices = array(df.variables['oe_sub_indices'][:])
+
+        self.__obs_err_diag = diag(obs_err)
+
+        self.__inv_obs_err_diag = 1/self.__obs_err_diag
+
+        self.__oe_sub_indices = oe_sub_indices
+
+        D = self.__obs_err_diag
+        self.__svd = CrisSVD(D)
+
+    @ property
+    def obs_err(self):
+        """
+        Get one of the observation error matrix
+        """
+        return diag(self.__obs_err_diag)
+
+    @property
+    def inv_obs_err(self):
+        return diag(self.__inv_obs_err_diag)
+
+    @property
+    def oe_sub_indices(self):
+        return self.__oe_sub_indices-1
+
+    def inv_obs_err_dot(self, M):
+        if len(M.shape) == 1:
+            return self.__inv_obs_err_diag * M
+        elif len(M.shape) == 2:
+            inv_obs_err_size = self.__inv_obs_err_diag.shape[0]
+            inv_obs_err = self.__inv_obs_err_diag.reshape((inv_obs_err_size,1))
+            return inv_obs_err * M
+        else:
+            return dot(self.inv_obs_err, M)
+
+    def dot_inv_obs_err(self, M):
+        return self.inv_obs_err_dot(M.T).T
+
+    @property
+    def svd(self):
+        return self.__svd
+
+    def get_svd(self):
+        temp = identity(self.__obs_err_diag.shape[0])
+        return (temp, self.__svd.D, temp)
+
