@@ -20,6 +20,10 @@ __version__ = "1.0"
 __maintainer__ = "Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>"
 __email__      = "paolo.scaccia@adaptivemeteo.com"
 
+import os
+
+AMETHYST_PATH = os.path.dirname(__file__)
+
 common_vars = {
                   "instrument" : "cris",
                   "fm_version" : 2,
@@ -47,13 +51,14 @@ preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cr
                                 "iasi" : preprocessor_vars["basedir"] + "/run_iasi"
                                }
 
+
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
-                "noise_file"      : "./data/obserr_res_0_7.nc",
-                "noise_file_sps"  : "./data/obserr_res_0_7_sps.nc",
-                "instr_chan_list" : "./data/cris_chList.dat",
-                "od_file"         : "./data/leo.cris.0.05.nc",
+                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/obserr_res_0_7.nc",
+                "noise_file_sps"  : AMETHYST_PATH + "/ancillary/instrument/obserr_res_0_7_sps.nc",
+                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_chList.dat",
+                "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/leo.cris.0.05.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",
                 "fg_file"         : common_vars['wrkdir'] + "/fg.nc",
                 "apriori_file"    : common_vars['wrkdir'] + "/apriori.nc",
@@ -68,7 +73,7 @@ processor_vars = {
                 "constant_co2_std"                     : {"units":"ppmv", "value":5.0},
                 "constant_skt_std"                     : {"units":"K",    "value":3.0},
                 "constant_inflation_surface_emiss_cov" : {"units":1,"value":1},
-                "constant_solar_irradiance_file"       : "./data/solar_irradiances.nc",
+                "constant_solar_irradiance_file"       : AMETHYST_PATH + "ancillary/atmosphere/solar_irradiances.nc",
                 "eigenforland"         : 4,
                 "eigenforsea"          : 3,
 
@@ -87,7 +92,7 @@ processor_vars = {
                 "minimum_fraction_rate_change"    : 0.03,
                 
                 # Transformed Retrieval
-                "tr_chan_list"   : "./data/tr_chList.dat",
+                "tr_chan_list"   : AMETHYST_PATH + "ancillary/instrument/tr_chList.dat",
 
                 # Amethyst Output
                 "output_file"  : "amethyst_output.nc",
