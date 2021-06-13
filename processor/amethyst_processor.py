@@ -409,7 +409,7 @@ if __name__ == '__main__':
                         help="Define the number of COMPUTING processes")
     parser.add_argument('-s', '--startobs', type=int, default=0,
                         help="Define the number of the first observation to be computed")
-    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["outfile"]["filename"],
+    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["output_file"],
                         help="Define the output filename")
     parser.add_argument('-v', '--verbose', type=int, default=2,
                         help="Define the level of verbosity")
