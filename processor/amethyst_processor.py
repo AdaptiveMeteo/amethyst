@@ -258,7 +258,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     L.log('Creating a data reader... ', 1, end='')
 
     to_compute = Queue(20)
-    reader_is_alive = Queue()
+    reader_is_alive = Queue()   
     
     reader = Process(target=reader_f,
                      args=[to_compute, 
@@ -303,7 +303,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     scriba = Process(target = scriba_f,
                      args=[to_write, stop_scriba, outfile, obsnum, nlev,
                            eigen_max, nselstate + eigen_max, selchannels,
-                           STARTOBS, amethyst_config.processor_vars["output"], progress_bar_queue])
+                           STARTOBS, amethyst_config.processor_vars["output_file"], progress_bar_queue])
     scriba.start()
     L.log('Done!', 1)
 
