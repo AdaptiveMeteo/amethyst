@@ -73,7 +73,7 @@ processor_vars = {
                 "constant_co2_std"                     : {"units":"ppmv", "value":5.0},
                 "constant_skt_std"                     : {"units":"K",    "value":3.0},
                 "constant_inflation_surface_emiss_cov" : {"units":1,"value":1},
-                "constant_solar_irradiance_file"       : AMETHYST_PATH + "ancillary/atmosphere/solar_irradiances.nc",
+                "constant_solar_irradiance_file"       : AMETHYST_PATH + "/ancillary/atmosphere/solar_irradiances.nc",
                 "eigenforland"         : 4,
                 "eigenforsea"          : 3,
 
@@ -92,7 +92,7 @@ processor_vars = {
                 "minimum_fraction_rate_change"    : 0.03,
                 
                 # Transformed Retrieval
-                "tr_chan_list"   : AMETHYST_PATH + "ancillary/instrument/tr_chList.dat",
+                "tr_chan_list"   : AMETHYST_PATH + "/ancillary/instrument/tr_chList.dat",
 
                 # Amethyst Output
                 "output_file"  : "amethyst_output.nc",
