@@ -92,7 +92,7 @@ class core(object):
     """
     This class is the core of the inversion system
     """
-    def __init__(self, xmlconf, forward_model, obserr):
+    def __init__(self, forward_model, obserr):
         """ Load configuration parameters and Input data for retrieval """
         self.cx = amethyst_core_config(forward_model)
         self.obs_err = obserr.obs_err
