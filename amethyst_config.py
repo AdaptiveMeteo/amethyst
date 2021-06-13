@@ -29,7 +29,7 @@ common_vars = {
                   "fm_version" : 2,
                   "levels"     : 81,
                   "wrfdir"     : "/mnt/satellite/amethyst_test_data/wrf",
-                  "wrkdir"     : "/home/mirto/wrkdir/",
+                  "wrkdir"     : "/home/mirto/wrkdir/cris",
                   "geobox"     : { "lonmin" : -166.0,
                                    "lonmax" : -148.0,
                                    "latmin" :  11.0,
@@ -55,7 +55,7 @@ preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cr
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
-                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/obserr_res_0_7.nc",
+                "noise_file"      : AMETHYST_PATH + "/processor/ancillary/instrument/obserr_res_0_7.nc",
                 "noise_file_sps"  : AMETHYST_PATH + "/ancillary/instrument/obserr_res_0_7_sps.nc",
                 "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_chList.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/leo.cris.0.05.nc",
@@ -97,22 +97,22 @@ processor_vars = {
                 # Amethyst Output
                 "output_file"  : "amethyst_output.nc",
                 "output_vars"  : {   
-                                     "pressure"                    : True,
-                                     "tempertaure"                 : True,
-                                     "water_vapor"                 : True,
-                                     "ozone"                       : True,
-                                     "surface_temperature"         : True,
-                                     "surface_emiss_coefficients"  : True,                             
-                                     "d2"                          : True,
-                                     "da_r"                        : True,
-                                     "transformed_retrievals"      : True,
-                                     "sn_eigenvalues"              : True,
-                                     "assimilation_operator"       : True,
-                                     "residuals"                   : False,
-                                     "fg_residuals"                : False,
-                                     "jacobian"                    : False,
-                                     "sa"                          : False,
-                                     "indices"                     : False}
+                                     "pressure"                         : True,
+                                     "tempertaure"                      : True,
+                                     "water_vapor"                      : True,
+                                     "ozone"                            : True,
+                                     "surface_temperature"              : True,
+                                     "surface_emissivity_coefficients"  : True,                             
+                                     "d2"                               : True,
+                                     "da_r"                             : True,
+                                     "transformed_retrievals"           : True,
+                                     "sn_eigenvalues"                   : True,
+                                     "assimilation_operator"            : True,
+                                     "residuals"                        : False,
+                                     "fg_residuals"                     : False,
+                                     "jacobian"                         : False,
+                                     "sa"                               : False,
+                                     "indices"                          : False}
                 }
 
 postprocessor_vars = {
