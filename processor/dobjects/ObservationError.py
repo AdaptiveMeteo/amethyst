@@ -8,17 +8,21 @@ class UnknownObservationType(Exception):
 
 
 def create_obs_err(data_filename, obs_err_type='cris'):
-    if 'cris' in obs_err_type:
+    if obs_err_type == 'cris':
         return CrisObservationError(data_filename)
-    elif 'iasi' in obs_err_type:
+    elif obs_err_type == 'iasi':
         return IasiObservationError(data_filename)
+    elif obs_err_type == 'iasi_sps':
+        return IasiObservationErrorSps(data_filename)
+    elif obs_err_type == 'cris_sps':
+        return CrisObservationErrorSps(data_filename)
     else:
         raise UnknownObservationType
 
 def create_obs_err_sps(data_filename, obs_err_type='cris'):
-    if 'cris' in obs_err_type:
+    if obs_err_type == 'cris':
         return CrisObservationErrorSps(data_filename)
-    elif 'iasi' in obs_err_type:
+    elif obs_err_type == 'iasi':
         return IasiObservationErrorSps(data_filename)
     else:
         raise UnknownObservationType
