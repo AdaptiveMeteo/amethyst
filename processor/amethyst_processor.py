@@ -315,7 +315,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
         p = Process(target=invert_process,
                     args=[inverter,nlev, i, to_compute, to_write, reader_is_alive,
                           logger(VERBOSE, LOG_FILE), transformer,
-                          amethyst_config.processor_vars["output"] , log_data, start_process])
+                          amethyst_config.processor_vars["output_vars"] , log_data, start_process])
         process_list.append((i, p))
         p.start()
     L.log('Running!',1)
