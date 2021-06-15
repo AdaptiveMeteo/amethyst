@@ -22,7 +22,7 @@ from dobjects.Solar            import Solar
 from dobjects.Hitran           import Hitran
 from dobjects.SounderFOV       import FOVCount
 from dobjects.ObservationError import create_obs_err
-from dobjects.ObservationError import create_obs_err_sps
+from dobjects.ObservationError import create_obs_err_tr
 from main.ForwardModel         import NotConvergentIteration
 from main.amethyst_code_main   import core
 from main.reader               import reader_f
@@ -232,7 +232,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
     ahitran = Hitran(amethyst_config.processor_vars["od_file"])
     obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"],  obs_err_type = amethyst_config.common_vars["instrument"])
-    obs_err_sps = create_obs_err_sps(amethyst_config.processor_vars["noise_file_sps"], obs_err_type = amethyst_config.common_vars["instrument"])
+    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file_sps"], obs_err_type = amethyst_config.common_vars["instrument"])
 
     oss_time=time.time()
 
@@ -262,7 +262,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     
     reader = Process(target=reader_f,
                      args=[to_compute, 
-                           obs_err_sps, 
+                           obs_err_tr, 
                            obsnum, 
                            L, 
                            eigen_land, 

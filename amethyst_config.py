@@ -55,8 +55,8 @@ preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cr
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
-                "noise_file"      : AMETHYST_PATH + "/processor/ancillary/instrument/obserr_res_0_7.nc",
-                "noise_file_sps"  : AMETHYST_PATH + "/ancillary/instrument/obserr_res_0_7_sps.nc",
+                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/obserr.nc",
+                "noise_file_sps"  : AMETHYST_PATH + "/ancillary/instrument/obserr_sps.nc",
                 "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_chList.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",

@@ -1,16 +1,12 @@
-from numpy import diag, identity, array, allclose, dot,abs,sum
+from numpy import diag, identity, array, allclose, dot, abs,sum
 from netCDF4 import Dataset
 from numpy.linalg import cholesky, LinAlgError
-
-class UnknownObservationType(Exception):
-    pass
 
 def create_obs_err(data_filename):
     return ObservationError(data_filename)
 
 def create_obs_err_tr(data_filename, obs_err_type='cris'):
         return ObservationErrorTR(data_filename)
-
 
 class SVD:
     def __init__(self, U, D, V):
