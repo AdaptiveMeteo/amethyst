@@ -225,7 +225,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     L.log('Reading OSS init input... ', 1, end='')
 
     workingDir  = amethyst_config.common_vars['wrkdir']
-    co2_std     = amethyst_config.processor_vars['constant_co2_std']
+    co2_std     = amethyst_config.processor_vars['constant_co2_std']["value"]
     eigen_land  = amethyst_config.processor_vars['eigenforland']
     eigen_sea   = amethyst_config.processor_vars['eigenforsea']
 
