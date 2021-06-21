@@ -15,9 +15,12 @@ Generate the TR Obesrvation Error for non diagonal matrix.
 '''
 
 def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
-        
-    nc_attrs, nc_dims, nc_vars         = read_nc(nc_fid)
-    nc_tr_attr, nc_tr_dims, nc_tr_vars = read_nc(nc_fid_tr)
+    
+    # Ncdump     
+    #nc_attrs, nc_dims, nc_vars         = read_nc(nc_fid)
+    #nc_tr_attr, nc_tr_dims, nc_tr_vars = read_nc(nc_fid_tr)
+    
+    
     oe_sub_indices = np.loadtxt(amethyst_config.processor_vars["tr_chan_list"])
     
     #Read Observation Error matrix used in the inversion
