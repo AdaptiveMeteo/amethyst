@@ -24,7 +24,11 @@ def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
     oe_sub_indices = np.loadtxt(amethyst_config.processor_vars["tr_chan_list"])
     
     #Read Observation Error matrix used in the inversion
-    in_obs_err =  nc_fid.variables['obs_err'][:]
+    try:
+        in_obs_err =  nc_fid.variables['obs_err'][:]
+    except:
+        in_obs_err =  nc_fid.variables['obserr'][:]
+        
     
     #Remove channels which are picking high in the atmosphere
     in_oe_sub_indices = nc_fid_tr.variables['oe_sub_indices'][:]
