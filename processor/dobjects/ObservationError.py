@@ -70,7 +70,6 @@ class ObservationError(object):
         #     self.__sparse_cholesky = sparse_cholesky(csc_matrix(self.__obs_err))
         
 
-
     @ property
     def obs_err(self):
         """
