@@ -16,8 +16,8 @@ if py_version > 2:
     from queue import Empty    # @UnresolvedImport @UnusedImport
 else:
     from Queue import Empty    # @UnresolvedImport @Reimport
-
 import traceback
+
 from dobjects.Solar            import Solar
 from dobjects.Hitran           import Hitran
 from dobjects.SounderFOV       import FOVCount
