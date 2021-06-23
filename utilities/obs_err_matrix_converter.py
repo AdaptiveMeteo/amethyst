@@ -35,7 +35,6 @@ def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
     #Remove channels which are picking high in the atmosphere
     in_oe_sub_indices = nc_fid_tr.variables['oe_sub_indices'][:]
     sub_obs_err    = in_obs_err[np.ix_(oe_sub_indices.astype(int)-1,oe_sub_indices.astype(int)-1)]
-    sub_obs_err_tr = in_obs_err_tr[np.ix_(oe_sub_indices_tr.astype(int)-1,oe_sub_indices_tr.astype(int)-1)]
     
     #Calculate Inverse
     inv_obs_err_tr = np.linalg.inv(sub_obs_err)
