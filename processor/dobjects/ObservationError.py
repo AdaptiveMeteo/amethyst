@@ -1,6 +1,8 @@
-from numpy import diag, identity, array, allclose, dot, abs,sum
-from netCDF4 import Dataset
-from numpy.linalg import cholesky, LinAlgError
+from numpy           import diag, identity, array, allclose, dot, abs,sum
+from netCDF4         import Dataset
+from numpy.linalg    import cholesky, LinAlgError
+from amethyst_config import processor_vars
+
 
 def create_obs_err(data_filename):
     return ObservationError(data_filename)

@@ -27,7 +27,6 @@ from main.ForwardModel         import NotConvergentIteration
 from main.amethyst_code_main   import core
 from main.reader               import reader_f
 from main.scriba               import scriba_f, ProgressBar
-
 import cProfile, pstats
 import amethyst_config
 if amethyst_config.common_vars["fm_version"] == 2:

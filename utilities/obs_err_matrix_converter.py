@@ -1,7 +1,7 @@
 import numpy as np
 from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/
 import argparse
-import amethyst_config
+from amethyst_config import processor_vars
 
 '''
 Generate the TR Obesrvation Error for non diagonal matrix.
@@ -19,20 +19,23 @@ def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
     # Ncdump     
     #nc_attrs, nc_dims, nc_vars         = read_nc(nc_fid)
     #nc_tr_attr, nc_tr_dims, nc_tr_vars = read_nc(nc_fid_tr)
-    
-    
-    oe_sub_indices = np.loadtxt(amethyst_config.processor_vars["tr_chan_list"])
+       
+    oe_sub_indices    = np.loadtxt(processor_vars["instr_chan_list"])
+    oe_sub_indices_tr = np.loadtxt(processor_vars["tr_chan_list"])
     
     #Read Observation Error matrix used in the inversion
     try:
         in_obs_err =  nc_fid.variables['obs_err'][:]
+        in_obs_err_tr =  nc_fid.variables['obs_err'][:]
     except:
         in_obs_err =  nc_fid.variables['obserr'][:]
+        in_obs_err_tr =  nc_fid.variables['obserr'][:]
         
     
     #Remove channels which are picking high in the atmosphere
     in_oe_sub_indices = nc_fid_tr.variables['oe_sub_indices'][:]
-    sub_obs_err = in_obs_err[np.ix_(oe_sub_indices.astype(int)-1,oe_sub_indices.astype(int)-1)]
+    sub_obs_err    = in_obs_err[np.ix_(oe_sub_indices.astype(int)-1,oe_sub_indices.astype(int)-1)]
+    sub_obs_err_tr = in_obs_err_tr[np.ix_(oe_sub_indices_tr.astype(int)-1,oe_sub_indices_tr.astype(int)-1)]
     
     #Calculate Inverse
     inv_obs_err_tr = np.linalg.inv(sub_obs_err)
@@ -48,19 +51,19 @@ def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
     w_nc_fid = Dataset(outfile, 'w', format='NETCDF4')
     w_nc_fid.description = "The TR subselection of the Inversion Observation Error Covariance "
     
-    selchannels = w_nc_fid.createDimension('selchannels',len(in_oe_sub_indices))
+    selchannels = w_nc_fid.createDimension('selchannels',len(oe_sub_indices))
     
     obs_err        = w_nc_fid.createVariable('obs_err','f4',('selchannels','selchannels'))
     inv_obs_err    = w_nc_fid.createVariable('inv_obs_err','f4',('selchannels','selchannels'))
     obs_err_U      = w_nc_fid.createVariable('obs_err_U','f4',('selchannels','selchannels'))
     obs_err_D      = w_nc_fid.createVariable('obs_err_D','f4',('selchannels'))
-    oe_sub_indices = w_nc_fid.createVariable('oe_sub_indices','f4',('selchannels'))
+    out_oe_sub_indices = w_nc_fid.createVariable('oe_sub_indices','f4',('selchannels'))
 
-    obs_err[:,:] = sub_obs_err
-    inv_obs_err[:,:] = inv_obs_err_tr
-    obs_err_U[:,:] = sub_obs_err_U
-    obs_err_D[:] = sub_obs_err_D
-    oe_sub_indices[:] = in_oe_sub_indices
+    obs_err[:,:]      = sub_obs_err
+    inv_obs_err[:,:]  = inv_obs_err_tr
+    obs_err_U[:,:]    = sub_obs_err_U
+    obs_err_D[:]      = sub_obs_err_D
+    out_oe_sub_indices[:] = oe_sub_indices
     
     w_nc_fid.close()
 
