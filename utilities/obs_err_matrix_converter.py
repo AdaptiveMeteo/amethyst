@@ -64,9 +64,11 @@ def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
     obs_err_U[:,:]    = sub_obs_err_U
     obs_err_D[:]      = sub_obs_err_D
     out_oe_sub_indices[:] = oe_sub_indices
-    
-    w_nc_fid.close()
-
+    try:
+        w_nc_fid.close()
+        print("New obs err file saved in {}".format(outfile))
+    except:
+        print("Error!")
 
 def read_nc(ncfid):
     # NetCDF global attributes

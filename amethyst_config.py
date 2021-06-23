@@ -56,7 +56,7 @@ processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
                 "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/obserr.nc",
-                "noise_file_sps"  : AMETHYST_PATH + "/ancillary/instrument/obserr_tr.nc",
+                "noise_file_tr"   : AMETHYST_PATH + "/ancillary/instrument/obserr_tr.nc",
                 "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_chList.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",

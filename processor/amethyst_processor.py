@@ -230,8 +230,8 @@ def processor(log_file, numobs, process_number, startobs, verbose,
 
     asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
     ahitran = Hitran(amethyst_config.processor_vars["od_file"])
-    obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"],  obs_err_type = amethyst_config.common_vars["instrument"])
-    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file_sps"], obs_err_type = amethyst_config.common_vars["instrument"])
+    obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"])
+    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file_tr"])
 
     oss_time=time.time()
 
