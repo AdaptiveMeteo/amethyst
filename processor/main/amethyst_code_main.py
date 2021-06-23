@@ -12,9 +12,7 @@ from scipy.linalg import lu, solve
 from main.ForwardModel import ForwardModel
 from main.ForwardModel import NotConvergentIteration
 import sys
-if "amethyst_config" not in sys.modules:
-    import amethyst_config
-
+import amethyst_config
 
 class amethyst_state(object):
     """
