@@ -108,7 +108,7 @@ def scriba_f(to_write, stop_now, root_file, obsnum, nlev, nem, nselstate,
         #PaoloA
         if output_vars['sn_eigenvalues']:
             DA_Lambda  = rootgrp.createVariable('DA_Lambda', v_tp2, ('obsnum', 'mnel'), f_v)
-        if output_vars['Sa']:
+        if output_vars['sa']:
             Sa_ret = rootgrp.createVariable('Sa_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), f_v)
             SaInv_ret = rootgrp.createVariable('SaInv_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), f_v)
 
