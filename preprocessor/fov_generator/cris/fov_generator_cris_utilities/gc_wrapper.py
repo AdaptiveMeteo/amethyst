@@ -53,7 +53,12 @@ class GCWrapper(object):
     def __init__(self, gcrso_path):
         self.path = gcrso_path
         with h5py.File(self.path, 'r') as gc_file:
-            geo_all = gc_file['All_Data/CrIS-SDR-GEO_All']
+            try:
+                LOGGER.info('Reading CRIS normal spectral resolution')
+                geo_all = gc_file['All_Data/CrIS-SDR-GEO_All']
+            except:
+                LOGGER.info('Reading CRIS full spectral resolution')
+                geo_all = gc_file['All_Data/CrIS-FS-SDR-GEO_All']
 
             LOGGER.debug('Reading longitudes')
             self.longs = np.array(geo_all['Longitude'][:], dtype=np.float32)

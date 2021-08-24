@@ -50,7 +50,10 @@ class SCrISWrapper(object):
     def __init__(self, scris_path):
         self.path = scris_path
         with h5py.File(self.path, 'r') as scris_file:
-            geo_all = scris_file['All_Data/CrIS-SDR_All']
+            try:
+                geo_all = scris_file['All_Data/CrIS-SDR_All']
+            except:
+                geo_all = scris_file['All_Data/CrIS-FS-SDR_All']
 
             LOGGER.debug('Reading ES_RealLW')
             reallw = np.array(geo_all['ES_RealLW'][:], dtype=np.float32)
