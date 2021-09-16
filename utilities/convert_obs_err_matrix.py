@@ -14,16 +14,12 @@ Generate the TR Obesrvation Error for non diagonal matrix.
 
 '''
 
-def convert_obs_err_matrix(nc_fid,nc_fid_tr,outfile):
+def convert_obs_err_matrix_with_svd(nc_fid,nc_fid_tr,outfile):
     
-    # Ncdump     
-    #nc_attrs, nc_dims, nc_vars         = read_nc(nc_fid)
-    #nc_tr_attr, nc_tr_dims, nc_tr_vars = read_nc(nc_fid_tr)
-       
     oe_sub_indices    = np.loadtxt(processor_vars["instr_chan_list"])
     oe_sub_indices_tr = np.loadtxt(processor_vars["tr_chan_list"])
     
-    #Read Observation Error matrix used in the inversion
+    # Read Observation Error matrix used in the inversion
     try:
         in_obs_err =  nc_fid.variables['obs_err'][:]
         in_obs_err_tr =  nc_fid.variables['obs_err'][:]
@@ -106,6 +102,6 @@ if __name__ == '__main__':
     nc_fid_tr = Dataset(argv.input_tr, 'r')  # Dataset is the class behavior to open the file
                                  # and create an instance of the ncCDF4 class
     
-    convert_obs_err_matrix(nc_fid,nc_fid_tr,argv.output)
+    convert_obs_err_matrix_with_svd(nc_fid,nc_fid_tr,argv.output)
     
     
