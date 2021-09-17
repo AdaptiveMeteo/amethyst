@@ -4,17 +4,32 @@ import numpy as np
 from netCDF4 import Dataset
 import sys
 
-def read_cris_iasi_channels( iasi_file, cris_file , iasi_tr_chanList = None):
+def read_cris_iasi_channels( iasi_file, cris_file , iasi_tr_chanList = None,iasi_ch_list=None):
     with Dataset(iasi_file,'r') as infile:
         iasi_wn = infile["Wavenumbers"][:]
     with Dataset(cris_file,'r') as infile:
         cris_wn = infile["Wavenumbers"][:]
     
-    if iasi_tr_chanList != None:
-        iasi_tr_wn = iasi_wn[ np.loadtxt( iasi_tr_chanList , dtype=int)  ]
-        return iasi_wn, cris_wn, iasi_tr_wn
+    if iasi_ch_list != None:
+        iasi_selchannels = np.loadtxt(iasi_ch_list,dtype=int)
+        sel_iasi_wn = iasi_wn[iasi_selchannels]
     else:
-        return iasi_wn,cris_wn
+        sel_iasi_wn = iasi_wn
+        
+    if iasi_tr_chanList != None:
+        print("Returned:\n"
+              "     - selected Iasi channels\n"
+              "     - selected CrIS channels\n"
+              "     - selected IASI channels for TR")
+
+        iasi_tr_wn = iasi_wn[ np.loadtxt( iasi_tr_chanList , dtype=int) ]
+        return sel_iasi_wn, cris_wn, iasi_tr_wn
+    else:
+        print("Returned:\n"
+              "     - selected Iasi channels\n"
+              "     - selected CrIS channels")
+
+        return sel_iasi_wn, cris_wn
     
 
 def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=None):
@@ -52,12 +67,11 @@ def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=No
     if iasi_tr_chan is not None:
         out_tr_chan = []
         for ichan in iasi_tr_chan:
-            dif = np.abs( out_chan - ichan  )
+            dif = np.abs( cris_chan[out_chan] - ichan  )
             min_dif = dif.min()
             if min_dif < CHAN_THRESHOLD:
                 out_tr_chan.append(np.argmin(dif))
         out_tr_chan = np.unique(out_tr_chan)
-        #internal_indices = np.array([ np.where(out_chan==x)[0][0] for x in out_tr_chan  ])
     
     if outdir != None:
         with open(outdir+'/cris_chList.dat', "w") as ofile:
