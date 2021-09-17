@@ -57,7 +57,7 @@ def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=No
             if min_dif < CHAN_THRESHOLD:
                 out_tr_chan.append(np.argmin(dif))
         out_tr_chan = np.unique(out_tr_chan)
-        # internal_indices = np.array([ np.where(out_chan==x)[0][0] for x in out_tr_chan  ])
+        #internal_indices = np.array([ np.where(out_chan==x)[0][0] for x in out_tr_chan  ])
     
     if outdir != None:
         with open(outdir+'/cris_chList.dat', "w") as ofile:
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     
     full_err = np.concatenate((err_lw, err_mw,err_sw))
     obserr = np.diag( full_err[sel_channel] )
-        
+    
     # Write outnetcdf
     
     nc_fid = Dataset(argv.outfile, 'w', format='NETCDF4')
@@ -192,8 +192,8 @@ if __name__ == "__main__":
         
         if argv.tr_chan_file is None:
             sys.exit("I need a TR channel list file!")
-        tr_selchannels = np.loadtxt(argv.tr_chan_file,dtype=int)   
-        tr_obserr = obserr[tr_selchannels][tr_selchannels]
+        tr_selchannels = np.loadtxt(argv.tr_chan_file,dtype=int)
+        tr_obserr = np.diag( full_err[tr_selchannels] )
         
         nc_fid = Dataset(argv.out_trfile, 'w', format='NETCDF4')
         nc_fid.description = "CrIS TR Observation Error Covariance "
