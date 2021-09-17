@@ -4,8 +4,41 @@ import numpy as np
 from netCDF4 import Dataset
 import sys
 
-def get_cris_chan_from_iasi(cris_chan, iasi_chan, output_file = None, iasi_sps_chan=None):
+def read_cris_iasi_channels( iasi_file, cris_file , iasi_tr_chanList = None):
+    with Dataset(iasi_file,'r') as infile:
+        iasi_wn = infile["Wavenumbers"][:]
+    with Dataset(cris_file,'r') as infile:
+        cris_wn = infile["Wavenumbers"][:]
     
+    if iasi_tr_chanList != None:
+        iasi_tr_wn = iasi_wn[ np.loadtxt( iasi_tr_chanList , dtype=int)  ]
+        return iasi_wn, cris_wn, iasi_tr_wn
+    else:
+        return iasi_wn,cris_wn
+    
+
+def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=None):
+    """
+    
+    Parameters
+    ----------
+    cris_chan : str
+        DAT File with the entire CrIS Channel list
+    iasi_chan : str
+        DAT File with the selected IASI Channel list
+    output_file : str, (optional)
+        Output DAT File with the selected CrIS Channel List. The default is None.
+    iasi_sps_chan : str, (optional)
+        DAT File with the selected IASI Channel list for TR (sps). The default is None.
+
+    Returns
+    -------
+    out_chan : str, (optional)
+        If output_file not in the input the channel selection is returned as a numpy array
+    out_sps_chan : str, (optional)
+        If output_file not in the input the channel selection for TR (sps) is returned as a numpy array
+        
+    """
     CHAN_THRESHOLD = 0.2
     
     out_chan = []
@@ -16,19 +49,39 @@ def get_cris_chan_from_iasi(cris_chan, iasi_chan, output_file = None, iasi_sps_c
             out_chan.append(np.argmin(dif))
     out_chan = np.unique(out_chan)
     
+    if iasi_tr_chan is not None:
+        out_tr_chan = []
+        for ichan in iasi_tr_chan:
+            dif = np.abs( out_chan - ichan  )
+            min_dif = dif.min()
+            if min_dif < CHAN_THRESHOLD:
+                out_tr_chan.append(np.argmin(dif))
+        out_tr_chan = np.unique(out_tr_chan)
+        # internal_indices = np.array([ np.where(out_chan==x)[0][0] for x in out_tr_chan  ])
     
-    if output_file != None:
-        with open(output_file, "w") as ofile:
+    if outdir != None:
+        with open(outdir+'/cris_chList.dat', "w") as ofile:
             try:
                 np.savetxt(ofile, out_chan, fmt = "%d")
-                print("Saved chan list in {}".format(output_file))
-            except:
-                print("Error!")
+                print("Saved chan list in {}/cris_chList.dat".format(outdir))
+            except Exception as error:
+                print("Error: {}".format(error))
+                
+        if iasi_tr_chan is not None:
+            with open(outdir + "/cris_tr_chList.dat", "w") as ofile:
+                try:
+                    np.savetxt(ofile, out_tr_chan, fmt = "%d")
+                    print("Saved TR chan list in {}/cris_tr_chList.dat".format(outdir))
+                except Exception as error:
+                    print("Error: {}".format(error))
                 
         
         return
     else:
-        return out_chan if iasi_sps is None else out_chan, out_sps_chan
+        if iasi_tr_chan is None:
+            return out_chan 
+        else:
+            return out_chan, out_tr_chan
 
 
 
@@ -67,114 +120,114 @@ def array_twist(vect):
 
 
 
-
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--input', required=True,
-                    help="CrIS input file")
-parser.add_argument('-c', '--chan_file', required=True,
-                    help="CrIS channel list")
-parser.add_argument('-o', '--outfile', required=True,
-                    help="ObsErr Output File")
-parser.add_argument('-tr', '--out_trfile', required=False,
-                    default = None,
-                    help="TR ObsErr Output File")
-parser.add_argument('-trc', '--tr_chan_file', required=False,
-                    default = None,
-                    help="TR Channel List")
-
-
-argv = parser.parse_args()
-sel_channel = np.loadtxt(argv.chan_file,dtype=int)
-
-print("Computing Observation Error...")
-with h5py.File(argv.input, 'r') as scris_file:
-    try:
-        geo_all = scris_file['All_Data/CrIS-SDR_All']
-    except:
-        geo_all = scris_file['All_Data/CrIS-FS-SDR_All']
-
-    err_lw = np.array(geo_all["ES_NEdNLW"][:])
-    err_lw = array_twist(err_lw)
-    err_lw = err_lw.reshape((err_lw.shape[0]*err_lw.shape[1],err_lw.shape[2]),).mean(axis=0)
-
-    err_mw = np.array(geo_all["ES_NEdNMW"][:])
-    err_mw = array_twist(err_mw)
-    err_mw = err_mw.reshape((err_mw.shape[0]*err_mw.shape[1],err_mw.shape[2]),).mean(axis=0)
-
-    err_sw = np.array(geo_all["ES_NEdNSW"][:])
-    err_sw = array_twist(err_sw)
-    err_sw = err_sw.reshape((err_sw.shape[0]*err_sw.shape[1],err_sw.shape[2]),).mean(axis=0)
-
-full_err = np.concatenate((err_lw, err_mw,err_sw))
-obserr = np.diag( full_err[sel_channel] )
+if __name__ == "__main__":
     
-# Write outnetcdf
-
-nc_fid = Dataset(argv.outfile, 'w', format='NETCDF4')
-nc_fid.description = "CrIS Observation Error Covariance "
-selchannels = nc_fid.createDimension('selchannels',len(sel_channel))
-
-out_obs_err        = nc_fid.createVariable('obs_err','f4',('selchannels','selchannels'))
-inv_obs_err    = nc_fid.createVariable('inv_obs_err','f4',('selchannels','selchannels'))
-obs_err_U      = nc_fid.createVariable('obs_err_U','f4',('selchannels','selchannels'))
-obs_err_D      = nc_fid.createVariable('obs_err_D','f4',('selchannels'))
-#out_oe_sub_indices = w_nc_fid.createVariable('oe_sub_indices','f4',('selchannels'))
-
-out_obs_err[:,:] = obserr
-inv_obs_err[:,:] = np.linalg.inv(obserr)
-
-#Get Observation Error SVD
-sub_obs_err_U, sub_obs_err_D, sub_obs_err_V = np.linalg.svd(obserr, full_matrices=True)
-
-obs_err_U[:,:]    = sub_obs_err_U
-obs_err_D[:]      = sub_obs_err_D
-
-nc_fid.close()
-print("NETCDF File saved in {}".format(argv.outfile))
-#ut_oe_sub_indices[:] = sel_channel
-
-if argv.out_trfile != None:
-    print("Preparing TR Observation Error...")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', required=True,
+                        help="CrIS input file")
+    parser.add_argument('-c', '--chan_file', required=True,
+                        help="CrIS channel list")
+    parser.add_argument('-o', '--outfile', required=True,
+                        help="ObsErr Output File")
+    parser.add_argument('-tr', '--out_trfile', required=False,
+                        default = None,
+                        help="CrIS TR ObsErr Output File")
+    parser.add_argument('-trc', '--tr_chan_file', required=False,
+                        default = None,
+                        help="TR Channel List")
     
-    if argv.tr_chan_file is None:
-        sys.exit("I need a TR channel list file!")
-    tr_selchannels = np.loadtxt(argv.tr_chan_file,dtype=int)   
-    tr_obserr = obserr[tr_selchannels][tr_selchannels]
     
-    nc_fid = Dataset(argv.out_trfile, 'w', format='NETCDF4')
-    nc_fid.description = "CrIS TR Observation Error Covariance "
-    selchannels = nc_fid.createDimension('selchannels',len(tr_selchannels))
-    nc_fid.description = "The TR subselection of the Inversion Observation Error Covariance"
+    argv = parser.parse_args()
+    sel_channel = np.loadtxt(argv.chan_file,dtype=int)
     
-    out_obs_err        = nc_fid.createVariable('obs_err','f4',('selchannels','selchannels'))
+    print("Computing Observation Error...")
+    with h5py.File(argv.input, 'r') as scris_file:
+        try:
+            geo_all = scris_file['All_Data/CrIS-SDR_All']
+        except:
+            geo_all = scris_file['All_Data/CrIS-FS-SDR_All']
+    
+        err_lw = np.array(geo_all["ES_NEdNLW"][:])
+        err_lw = array_twist(err_lw)
+        err_lw = err_lw.reshape((err_lw.shape[0]*err_lw.shape[1],err_lw.shape[2]),).mean(axis=0)
+    
+        err_mw = np.array(geo_all["ES_NEdNMW"][:])
+        err_mw = array_twist(err_mw)
+        err_mw = err_mw.reshape((err_mw.shape[0]*err_mw.shape[1],err_mw.shape[2]),).mean(axis=0)
+    
+        err_sw = np.array(geo_all["ES_NEdNSW"][:])
+        err_sw = array_twist(err_sw)
+        err_sw = err_sw.reshape((err_sw.shape[0]*err_sw.shape[1],err_sw.shape[2]),).mean(axis=0)
+    
+    full_err = np.concatenate((err_lw, err_mw,err_sw))
+    obserr = np.diag( full_err[sel_channel] )
+        
+    # Write outnetcdf
+    
+    nc_fid = Dataset(argv.outfile, 'w', format='NETCDF4')
+    nc_fid.description = "CrIS Observation Error Covariance "
+    selchannels = nc_fid.createDimension('selchannels',len(sel_channel))
+    
+    out_obs_err    = nc_fid.createVariable('obs_err','f4',('selchannels','selchannels'))
     inv_obs_err    = nc_fid.createVariable('inv_obs_err','f4',('selchannels','selchannels'))
     obs_err_U      = nc_fid.createVariable('obs_err_U','f4',('selchannels','selchannels'))
     obs_err_D      = nc_fid.createVariable('obs_err_D','f4',('selchannels'))
-    oe_sub_indices = nc_fid.createVariable('oe_sub_indices','f4',('selchannels'))
+    #out_oe_sub_indices = w_nc_fid.createVariable('oe_sub_indices','f4',('selchannels'))
     
-    out_obs_err[:,:] = tr_obserr
-    inv_obs_err[:,:] = np.linalg.inv(tr_obserr)
+    out_obs_err[:,:] = obserr
+    inv_obs_err[:,:] = np.linalg.inv(obserr)
     
     #Get Observation Error SVD
-    sub_obs_err_U, sub_obs_err_D, sub_obs_err_V = np.linalg.svd(tr_obserr, full_matrices=True)
+    sub_obs_err_U, sub_obs_err_D, sub_obs_err_V = np.linalg.svd(obserr, full_matrices=True)
     
     obs_err_U[:,:]    = sub_obs_err_U
     obs_err_D[:]      = sub_obs_err_D
-    oe_sub_indices[:] = tr_selchannels
-
+    
     nc_fid.close()
-    print("NETCDF File saved in {}".format(argv.out_trfile))
+    print("NETCDF File saved in {}".format(argv.outfile))
+    #ut_oe_sub_indices[:] = sel_channel
+    
+    if argv.out_trfile != None:
+        print("Preparing TR Observation Error...")
+        
+        if argv.tr_chan_file is None:
+            sys.exit("I need a TR channel list file!")
+        tr_selchannels = np.loadtxt(argv.tr_chan_file,dtype=int)   
+        tr_obserr = obserr[tr_selchannels][tr_selchannels]
+        
+        nc_fid = Dataset(argv.out_trfile, 'w', format='NETCDF4')
+        nc_fid.description = "CrIS TR Observation Error Covariance "
+        selchannels = nc_fid.createDimension('selchannels',len(tr_selchannels))
+        nc_fid.description = "The TR subselection of the Inversion Observation Error Covariance"
+        
+        out_obs_err    = nc_fid.createVariable('obs_err','f4',('selchannels','selchannels'))
+        inv_obs_err    = nc_fid.createVariable('inv_obs_err','f4',('selchannels','selchannels'))
+        obs_err_U      = nc_fid.createVariable('obs_err_U','f4',('selchannels','selchannels'))
+        obs_err_D      = nc_fid.createVariable('obs_err_D','f4',('selchannels'))
+        oe_sub_indices = nc_fid.createVariable('oe_sub_indices','f4',('selchannels'))
+        
+        out_obs_err[:,:] = tr_obserr
+        inv_obs_err[:,:] = np.linalg.inv(tr_obserr)
+        
+        #Get Observation Error SVD
+        sub_obs_err_U, sub_obs_err_D, sub_obs_err_V = np.linalg.svd(tr_obserr, full_matrices=True)
+        
+        obs_err_U[:,:]    = sub_obs_err_U
+        obs_err_D[:]      = sub_obs_err_D
+        oe_sub_indices[:] = np.array([ np.where(sel_channel==x)[0][0] for x in tr_selchannels  ])
+    
+        nc_fid.close()
+        print("NETCDF File saved in {}".format(argv.out_trfile))
+        
+        
+    
+        
+    
+        
     
     
-
     
-
     
-
-
-
-
-
-
     
+    
+        
