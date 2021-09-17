@@ -88,8 +88,6 @@ def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=No
                     print("Saved TR chan list in {}/cris_tr_chList.dat".format(outdir))
                 except Exception as error:
                     print("Error: {}".format(error))
-                
-        
         return
     else:
         if iasi_tr_chan is None:
@@ -207,7 +205,7 @@ if __name__ == "__main__":
         if argv.tr_chan_file is None:
             sys.exit("I need a TR channel list file!")
         tr_selchannels = np.loadtxt(argv.tr_chan_file,dtype=int)
-        tr_obserr = np.diag( full_err[tr_selchannels] )
+        tr_obserr = np.diag( full_err[sel_channel][tr_selchannels] )
         
         nc_fid = Dataset(argv.out_trfile, 'w', format='NETCDF4')
         nc_fid.description = "CrIS TR Observation Error Covariance "
@@ -228,7 +226,8 @@ if __name__ == "__main__":
         
         obs_err_U[:,:]    = sub_obs_err_U
         obs_err_D[:]      = sub_obs_err_D
-        oe_sub_indices[:] = np.array([ np.where(sel_channel==x)[0][0] for x in tr_selchannels  ])
+        oe_sub_indices[:] = tr_selchannels
+        #np.array([ np.where(sel_channel==x)[0][0] for x in tr_selchannels  ])
     
         nc_fid.close()
         print("NETCDF File saved in {}".format(argv.out_trfile))
