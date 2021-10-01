@@ -4,6 +4,16 @@ import numpy as np
 from netCDF4 import Dataset
 import sys
 
+"""
+Paolo S - 17/9/2021
+
+NOTE: The array for Iasi TR selected channels contains indices for the full spectrum, while
+      for CRIS TR selected channels indices refer to the array with Cris selected channels!
+
+"""
+
+
+
 def read_cris_iasi_channels( iasi_file, cris_file , iasi_tr_chanList = None,iasi_ch_list=None):
     with Dataset(iasi_file,'r') as infile:
         iasi_wn = infile["Wavenumbers"][:]
@@ -22,7 +32,7 @@ def read_cris_iasi_channels( iasi_file, cris_file , iasi_tr_chanList = None,iasi
               "     - selected CrIS channels\n"
               "     - selected IASI channels for TR")
 
-        iasi_tr_wn = iasi_wn[ np.loadtxt( iasi_tr_chanList , dtype=int) ]
+        iasi_tr_wn = iasi_wn[ np.loadtxt( iasi_tr_chanList , dtype=int) - 1]
         return sel_iasi_wn, cris_wn, iasi_tr_wn
     else:
         print("Returned:\n"
@@ -33,33 +43,13 @@ def read_cris_iasi_channels( iasi_file, cris_file , iasi_tr_chanList = None,iasi
     
 
 def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=None):
-    """
-    
-    Parameters
-    ----------
-    cris_chan : str
-        DAT File with the entire CrIS Channel list
-    iasi_chan : str
-        DAT File with the selected IASI Channel list
-    output_file : str, (optional)
-        Output DAT File with the selected CrIS Channel List. The default is None.
-    iasi_sps_chan : str, (optional)
-        DAT File with the selected IASI Channel list for TR (sps). The default is None.
 
-    Returns
-    -------
-    out_chan : str, (optional)
-        If output_file not in the input the channel selection is returned as a numpy array
-    out_sps_chan : str, (optional)
-        If output_file not in the input the channel selection for TR (sps) is returned as a numpy array
-        
-    """
     CHAN_THRESHOLD = 0.2
     
     out_chan = []
     for ichan in iasi_chan:
         dif = np.abs( cris_chan - ichan  )
-        min_dif = dif.min()
+a        min_dif = dif.min()
         if min_dif < CHAN_THRESHOLD:
             out_chan.append(np.argmin(dif))
     out_chan = np.unique(out_chan)
