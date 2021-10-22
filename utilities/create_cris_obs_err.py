@@ -152,15 +152,18 @@ if __name__ == "__main__":
         err_lw = np.array(geo_all["ES_NEdNLW"][:])
         err_lw = array_twist(err_lw)
         err_lw = err_lw.reshape((err_lw.shape[0]*err_lw.shape[1],err_lw.shape[2]),).mean(axis=0)
-    
+        err_lw = err_lw[2:-2]
+
         err_mw = np.array(geo_all["ES_NEdNMW"][:])
         err_mw = array_twist(err_mw)
         err_mw = err_mw.reshape((err_mw.shape[0]*err_mw.shape[1],err_mw.shape[2]),).mean(axis=0)
+        err_mw = err_mw[2:-2]
     
         err_sw = np.array(geo_all["ES_NEdNSW"][:])
         err_sw = array_twist(err_sw)
         err_sw = err_sw.reshape((err_sw.shape[0]*err_sw.shape[1],err_sw.shape[2]),).mean(axis=0)
-    
+        err_sw = err_sw[2:-2]
+
     full_err = np.concatenate((err_lw, err_mw,err_sw))
     obserr = np.diag( full_err[sel_channel] )
     
