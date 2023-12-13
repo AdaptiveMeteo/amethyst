@@ -21,7 +21,6 @@ sounder
 
 import h5py
 import logging
-
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
@@ -52,12 +51,14 @@ class SCrISWrapper(object):
         with h5py.File(self.path, 'r') as scris_file:
             try:
                 geo_all = scris_file['All_Data/CrIS-SDR_All']
+                mode = 'NSR'
             except:
                 geo_all = scris_file['All_Data/CrIS-FS-SDR_All']
+                mode = 'FSR'
 
             LOGGER.debug('Reading ES_RealLW')
             reallw = np.array(geo_all['ES_RealLW'][:], dtype=np.float32)
-            reallw_dim = reallw.size
+            reallw_dim = reallw.shape[-1]
 
             LOGGER.debug('Its shape is {}'.format(reallw.shape))
             LOGGER.debug('Twisting ES_RealLW')
@@ -68,7 +69,7 @@ class SCrISWrapper(object):
 
             LOGGER.debug('Reading ES_RealMW')
             realmw = np.array(geo_all['ES_RealMW'][:], dtype=np.float32)
-            realmw_dim = realmw.size
+            realmw_dim = realmw.shape[-1]
             LOGGER.debug('Its shape is {}'.format(realmw.shape))
             LOGGER.debug('Twisting ES_RealMW')
             realmw = array_twist(realmw)
@@ -78,7 +79,7 @@ class SCrISWrapper(object):
 
             LOGGER.debug('Reading ES_RealSW')
             realsw = np.array(geo_all['ES_RealSW'][:], dtype=np.float32)
-            realsw_dim = realsw.size
+            realsw_dim = realsw.shape[-1]
             LOGGER.debug('Its shape is {}'.format(realsw.shape))
             LOGGER.debug('Twisting ES_RealSW')
             realsw = array_twist(realsw)
@@ -95,9 +96,10 @@ class SCrISWrapper(object):
         low_wavenumbers    = np.linspace(650 - 0.625*2, 1095 + 0.625*2, reallw_dim)
         medium_wavenumbers = np.linspace(1210 - 1.25*2, 1750 + 1.25*2,  realmw_dim)
         height_wavenumbers = np.linspace(2155 - 2.50*2, 2550 + 2.50*2,  realsw_dim)
-        
+
+            
         # Remove the first and the last two channels
-        low_wavenumbers = low_wavenumbers[2:-2]
+        low_wavenumbers    = low_wavenumbers[2:-2]
         medium_wavenumbers = medium_wavenumbers[2:-2]
         height_wavenumbers = height_wavenumbers[2:-2]
 
@@ -106,7 +108,6 @@ class SCrISWrapper(object):
                                            medium_wavenumbers,
                                            height_wavenumbers
                                           ))
-
         LOGGER.debug('Generating FOV angles')
         # These are the angles for the detector 5, the central one. The
         # sensors are sorted as the following:

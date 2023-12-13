@@ -99,10 +99,18 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
             output = dict()
             if profile.prall is not None:
                 profile.prall.enable( )
+            solution = inverter.invert(fov, fg, apriori, aemiss,
+                           obs, log=L, profile=profile)
+
+            print(inverter.fm.cx.R)
+            print(inverter.fm.F)
+
             try:
                 time_invert=time.time()
                 solution = inverter.invert(fov, fg, apriori, aemiss,
                                            obs, log=L, profile=profile)
+                print(inverter.fm.cx.R)
+                print(inverter.fm.F)
                 L.log('Elapsed Time in the inverter for OBS '+str(obs)+' : '+
                       repr(time.time()-time_invert)+' s', 3, print_now=False)
                 time_output=time.time()
@@ -230,8 +238,8 @@ def processor(log_file, numobs, process_number, startobs, verbose,
 
     asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
     ahitran = Hitran(amethyst_config.processor_vars["od_file"])
-    obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"])
-    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file_tr"])
+    obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"], indx_file = amethyst_config.processor_vars["instr_chan_list"])
+    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file"],indx_file = amethyst_config.processor_vars["tr_chan_list"])
 
     oss_time=time.time()
 

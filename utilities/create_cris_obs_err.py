@@ -49,7 +49,7 @@ def get_cris_chan_from_iasi(cris_chan, iasi_chan, outdir = None, iasi_tr_chan=No
     out_chan = []
     for ichan in iasi_chan:
         dif = np.abs( cris_chan - ichan  )
-a        min_dif = dif.min()
+        min_dif = dif.min()
         if min_dif < CHAN_THRESHOLD:
             out_chan.append(np.argmin(dif))
     out_chan = np.unique(out_chan)
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', required=True,
                         help="CrIS input file")
-    parser.add_argument('-c', '--chan_file', required=True,
+    parser.add_argument('-c', '--chan_file', required=False,default=None,
                         help="CrIS channel list")
     parser.add_argument('-o', '--outfile', required=True,
                         help="ObsErr Output File")
@@ -140,7 +140,6 @@ if __name__ == "__main__":
     
     
     argv = parser.parse_args()
-    sel_channel = np.loadtxt(argv.chan_file,dtype=int)
     
     print("Computing Observation Error...")
     with h5py.File(argv.input, 'r') as scris_file:
@@ -165,6 +164,11 @@ if __name__ == "__main__":
         err_sw = err_sw[2:-2]
 
     full_err = np.concatenate((err_lw, err_mw,err_sw))
+    if argv.chan_file is None: 
+        print("Selected all channels")
+        sel_channel = np.arange(full_err.shape[0])
+    else:
+        sel_channel = np.loadtxt(argv.chan_file,dtype=int)
     obserr = np.diag( full_err[sel_channel] )
     
     # Write outnetcdf
@@ -224,7 +228,7 @@ if __name__ == "__main__":
     
         nc_fid.close()
         print("NETCDF File saved in {}".format(argv.out_trfile))
-        
+       
         
     
         

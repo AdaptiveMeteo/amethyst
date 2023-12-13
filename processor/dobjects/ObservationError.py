@@ -4,11 +4,19 @@ from numpy.linalg    import cholesky, LinAlgError
 from amethyst_config import processor_vars
 
 
-def create_obs_err(data_filename):
-    return ObservationError(data_filename)
+def create_obs_err(data_filename, indx_file = None):
+    if indx_file is None:
+        return ObservationError(data_filename)
+    else:
+        from numpy import loadtxt
+        return ObservationError(data_filename, indx = loadtxt(indx_file,dtype=int))
 
-def create_obs_err_tr(data_filename, obs_err_type='cris'):
+def create_obs_err_tr(data_filename, obs_err_type='cris', indx_file = None):
+    if indx_file is None:
         return ObservationErrorTR(data_filename)
+    else:
+        from numpy import loadtxt
+        return ObservationErrorTR(data_filename, indx = loadtxt(indx_file,dtype=int))
 
 class SVD:
     def __init__(self, U, D, V):
@@ -38,17 +46,24 @@ class ObservationError(object):
     """
     This class is a wrapper around a netCDF data file
     """
-    def __init__(self, data_filename):
+    def __init__(self, data_filename, indx = None):
         """
         Initialize the ObservationError object
         """
-        with Dataset(data_filename, mode='r') as df:
-            self.__obs_err = array(df.variables['obs_err'][:])
-            self.__inv_obs_err = array(df.variables['inv_obs_err'][:])
 
-            U = array(df.variables['obs_err_U'][:])
+        with Dataset(data_filename, mode='r') as df:
+            if indx is None:
+                 self.__obs_err = array(df.variables['obs_err'][:])
+                 self.__inv_obs_err = array(df.variables['inv_obs_err'][:])
+                 U = array(df.variables['obs_err_U'][:])
+                 D = array(df.variables['obs_err_D'][:])
+            else:
+                 self.__obs_err = array(df.variables['obs_err'][indx,indx])
+                 self.__inv_obs_err = array(df.variables['inv_obs_err'][indx,indx])
+                 U = array(df.variables['obs_err_U'][indx,indx])
+                 D = array(df.variables['obs_err_D'][indx])
+
             V = U.T
-            D = array(df.variables['obs_err_D'][:])
             self.__svd = SVD(U,D,V)
         
         # Check for some kind of properties of the obs_err matrix
@@ -108,18 +123,25 @@ class ObservationErrorTR(object):
     """
     This class is a wrapper around a netCDF data file
     """
-    def __init__(self, data_filename):
+    def __init__(self, data_filename, indx = None):
         """
         Initialize the ObservationError object
         """
         with Dataset(data_filename, mode='r') as df:
-            self.__obs_err = array(df.variables['obs_err'][:])
-            self.__inv_obs_err = array(df.variables['inv_obs_err'][:])
-            self.__oe_sub_indices = array(df.variables['oe_sub_indices'][:])
+            if indx is None:    
+                self.__obs_err = array(df.variables['obs_err'][:])
+                self.__inv_obs_err = array(df.variables['inv_obs_err'][:])
+                self.__oe_sub_indices = array(range(self.__obs_err.shape[0]))
+                U = array(df.variables['obs_err_U'][:])
+                D = array(df.variables['obs_err_D'][:])
+            else:
+                self.__obs_err = array(df.variables['obs_err'][indx,indx])
+                self.__inv_obs_err = array(df.variables['inv_obs_err'][indx,indx])
+                self.__oe_sub_indices = indx
+                U = array(df.variables['obs_err_U'][indx,indx])
+                D = array(df.variables['obs_err_D'][indx])
 
-            U = array(df.variables['obs_err_U'][:])
             V = U.T
-            D = array(df.variables['obs_err_D'][:])
             self.__svd = SVD(U,D,V)
 
         # Check for some kind of properties of the obs_err matrix

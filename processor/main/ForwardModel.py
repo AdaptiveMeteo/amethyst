@@ -95,7 +95,6 @@ class ForwardModel(object):
         xdim = self.xdim
         Jvar = self.cx.Jvar
         ii = self.cx.indx
-
         indata['sfgrd'] = self.cx.sfgrd
         indata['emrf'] = self.cx.emrf
         # State vector temeprature is in [K]
@@ -118,7 +117,6 @@ class ForwardModel(object):
         self.model.compute(indata, self.outdata)
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
-
         SEflag = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0
         Tflag = np.size(np.where(Jvar == 0)) > 0

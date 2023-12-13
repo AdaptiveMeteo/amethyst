@@ -123,9 +123,9 @@ def launch_preprocessing(argv):
     #Find colosest wrf output (previous to overpass) to be used as retrieval first guess 
     sel_wrf_run=get_wrf_dir_time(wrf_fct_times,sat_pass_date)
     log.info('Selected WRF run: {}'.format(sel_wrf_run))
-
+    
     #Get available wrf forecast  times
-    get_wrf_file_times = lambda x: [ glob.glob(x + '/wrf/wrfout_d01*') , [os.path.split(f)[-1] for f in glob.glob(x + '/wrf/wrfout_d01*') ]]
+    get_wrf_file_times = lambda x: [ glob.glob(x + '/wrfout_d01*') , [os.path.split(f)[-1] for f in glob.glob(x + '/wrfout_d01*') ]]
     wrf_fct_files, wrf_fct_file_times = if_exists_runs("/".join([argv.wrfdir,sel_wrf_run]), get_wrf_file_times, 'dir')                       
     sel_wrf_run_file = get_wrf_file_time(wrf_fct_file_times, sat_pass_date)
     log.info('Selected WRF Run File: {}'.format(sel_wrf_run_file))
@@ -135,16 +135,16 @@ def launch_preprocessing(argv):
     wrf_f_fmt = '%Y-%m-%d_%H:%M:%S'
     wrf_o_fmt = 'wrfout_d01_%Y-%m-%d_%H:%M:%S'
     wrffilename = datetime.strptime(sel_wrf_run_file[11:], wrf_f_fmt).strftime(wrf_o_fmt)
-    wrffile = "/".join([argv.wrfdir,sel_wrf_run,'wrf', wrffilename])
+    wrffile = "/".join([argv.wrfdir,sel_wrf_run, wrffilename])
             
     if not os.path.isfile(   wrffile.replace(os.path.basename(wrffile),'DONE') ):
         prev_wrf_dir = datetime.strptime(sel_wrf_run, wrf_fmt)-timedelta(hours=6)
         sel_wrf_run = prev_wrf_dir.strftime(wrf_fmt)
-        wrffile = "/".join([argv.wrfdir,sel_wrf_run,'wrf',wrffilename])
+        wrffile = "/".join([argv.wrfdir,sel_wrf_run,wrffilename])
 
     if not os.path.isfile(wrffile):
-         sysexit('WRF file to be used as retrieval FG: {} NOT FOUND\n'
-                 '... exiting for now\n'.format(wrffilename))
+         sysexit('WRF file to be used as retrieval FG: {} not found\n'
+                 '... exiting for now\n'.format(wrffile))
 
     log.info('WRF file to be used as retrieval FG: {}'.format(wrffilename))   
 
@@ -181,12 +181,14 @@ def launch_preprocessing(argv):
         if argv.instrument == 'cris':
                         
             # Calls to CrIS preprocessor scripts
-            cmd_cascade = [  "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
+            cmd_cascade = [
+                   
+                             "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
                                                            "--outfile {}/cloudmask.nc -v info "
                                                            "--lonmin {} --lonmax {} --latmin {} "
                                                            "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-                                                           
+                                                          
                              "python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc "
                                                            "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
                                                            "--lonmin {} --lonmax {} --latmin {}  "

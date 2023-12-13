@@ -83,7 +83,6 @@ class FovFile(object):
 
         self.file = netcdf_file
         self.filepointer = None
-
         if path.exists(self.file):
             LOGGER.error('File already present! Execution aborted!')
             raise IOError('File already present!')
@@ -110,7 +109,7 @@ class FovFile(object):
             create_var(ZENITHTABLE)
             create_var(SOLAZIMUTHTABLE)
             create_var(SOLZENITHTABLE)
-            
+
             LOGGER.debug(path.realpath(__file__))
             if   instr == 'cris':
                 create_var(AZIMUTHTABLE)
@@ -176,8 +175,9 @@ class FovFile(object):
             raise IOError('Can not read or write the wavenumbers'
                           ' while the file is closed')        
         LOGGER.debug('Saving wavenumbers on {}'.format(self.file))
-        wavenumbers_table = self.filepointer.variables[WAVENUMBERS]
-        wavenumbers_table[:] = wavenumbers.flatten()[filter]
+        #wavenumbers_table = self.filepointer.variables[WAVENUMBERS]
+        #wavenumbers_table[:] = wavenumbers.flatten()[filter]
+        self.filepointer.variables[WAVENUMBERS][:] = wavenumbers.flatten()[filter]
 
     def save_fov_angle(self, angl, filter=None):
         if self.filepointer is None:

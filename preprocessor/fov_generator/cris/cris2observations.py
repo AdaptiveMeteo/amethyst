@@ -184,12 +184,11 @@ def main():
     numobs = np.count_nonzero(obs_filter)
     LOGGER.debug('Saving {} observations'.format(numobs))
     num_channels = scris.radiances.shape[2]
-
     LOGGER.info('Writing the output file')
     try:
         fov_file = FovFile(argv.output, numobs, num_channels,'cris')
     except:
-        LOGGER.error('Write of the output file failed!')
+        LOGGER.error('Writing of the output file failed!')
         LOGGER.debug(format_exc())
         return 3
 

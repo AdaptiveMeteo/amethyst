@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonchL
+
 """
 AMETHYST Configuration File 
 
@@ -26,21 +27,31 @@ AMETHYST_PATH = os.path.dirname(__file__)
 
 common_vars = {
                   "instrument" : "cris",
-                  "fm_version" : 2,
+                  "fm_version" : 3,
                   "levels"     : 81,
                   "wrfdir"     : "/mnt/satellite/amethyst_test_data/wrf",
-                  "wrkdir"     : "/home/mirto/wrkdir/cris",
-                  "geobox"     : { "lonmin" : -166.0,
-                                   "lonmax" : -148.0,
-                                   "latmin" :  11.0,
-                                   "latmax" : 29.0},
+                  "wrkdir"     : "/home/mirto/wrkdir/amethyst_test/cris",
+                  
+                  # Arctic
+                  "geobox"     : { "lonmin" : -180.0,
+                                   "lonmax" :  180.0,
+                                   "latmin" :  70.0,
+                                   "latmax" :  90.0},
+
+                  # Pacific
+                  # "geobox"     : { "lonmin" : -166.0,
+                  #                  "lonmax" : -148.0,
+                  #                  "latmin" :  11.0,
+                  #                  "latmax" : 29.0},
+
              }
+
 
 preprocessor_vars = {
                   "basedir"   : "/mnt/satellite/amethyst_test_data",
-                  "iasidir"   : "/mnt/satellite/amethyst_test_data/iasi/20201120_062454",
-                  "gcrso"     : "/mnt/satellite/amethyst_test_data/cris/20201120_002622/GCRSO_npp_d20201120_t0028319_e0040137_b46969_c20210315153613150425_cspp_dev.h5",
-                  "scris"     : "/mnt/satellite/amethyst_test_data/cris/20201120_002622/SCRIS_npp_d20201120_t0028319_e0040137_b46969_c20210315153613291913_cspp_dev.h5",
+                  "iasidir"   : "/mnt/satellite/amethyst_test_data/iasi/20200820_062454",
+                  "gcrso"     : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
+                  "scris"     : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
                   "l1dir"     : "/mnt/satellite/amethyst_test_data/cris",
                   "iasi_cmt"  : 5,
                   "cris_cmt"  : .95
@@ -55,10 +66,9 @@ preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cr
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
-                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/obserr.nc",
-                "noise_file_tr"   : AMETHYST_PATH + "/ancillary/instrument/obserr_tr.nc",
-                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_chList.dat",
-                "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients.nc",
+                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/cris_obserr.nc",
+                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList_862.dat",
+                "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients_oss_v3.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",
                 "fg_file"         : common_vars['wrkdir'] + "/fg.nc",
                 "apriori_file"    : common_vars['wrkdir'] + "/apriori.nc",
@@ -92,8 +102,8 @@ processor_vars = {
                 "minimum_fraction_rate_change"    : 0.03,
                 
                 # Transformed Retrieval
-                "tr_chan_list"   : AMETHYST_PATH + "/ancillary/instrument/tr_chList.dat",
-
+                "tr_chan_list"   : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList_862_tr.dat",
+                
                 # Amethyst Output
                 "output_file"  : "amethyst_output.nc",
                 "output_vars"  : {   
