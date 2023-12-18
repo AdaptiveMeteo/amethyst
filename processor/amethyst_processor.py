@@ -102,15 +102,10 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
             solution = inverter.invert(fov, fg, apriori, aemiss,
                            obs, log=L, profile=profile)
 
-            print(inverter.fm.cx.R)
-            print(inverter.fm.F)
-
             try:
                 time_invert=time.time()
                 solution = inverter.invert(fov, fg, apriori, aemiss,
                                            obs, log=L, profile=profile)
-                print(inverter.fm.cx.R)
-                print(inverter.fm.F)
                 L.log('Elapsed Time in the inverter for OBS '+str(obs)+' : '+
                       repr(time.time()-time_invert)+' s', 3, print_now=False)
                 time_output=time.time()
@@ -219,12 +214,10 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
     log_data.put(L.output_str) 
 
 
-def processor(log_file, numobs, process_number, startobs, verbose,
+def processor(L, log_file, numobs, process_number, startobs, verbose,
               output_file = amethyst_config.processor_vars["output_file"]):
  
     start_process = time.time()
-
-    L = logger(VERBOSE, LOG_FILE)
     
     #
     # OSS init input
@@ -232,14 +225,16 @@ def processor(log_file, numobs, process_number, startobs, verbose,
     L.log('Reading OSS init input... ', 1, end='')
 
     workingDir  = amethyst_config.common_vars['wrkdir']
-    co2_std     = amethyst_config.processor_vars['constant_co2_std']["value"]
+    co2         = amethyst_config.processor_vars['constant_co2']["value"]
     eigen_land  = amethyst_config.processor_vars['eigenforland']
     eigen_sea   = amethyst_config.processor_vars['eigenforsea']
 
     asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
     ahitran = Hitran(amethyst_config.processor_vars["od_file"])
     obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"], indx_file = amethyst_config.processor_vars["instr_chan_list"])
-    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file"],indx_file = amethyst_config.processor_vars["tr_chan_list"])
+    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file"], 
+                                   amethyst_config.processor_vars["instr_chan_list"], 
+                                   amethyst_config.processor_vars["tr_chan_list"])
 
     oss_time=time.time()
 
@@ -274,7 +269,7 @@ def processor(log_file, numobs, process_number, startobs, verbose,
                            L, 
                            eigen_land, 
                            eigen_sea, 
-                           co2_std, 
+                           co2, 
                            amethyst_config.processor_vars,
                            inverter.cx.variable_selection]
                      )
@@ -408,6 +403,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', default='None',
                         help="Define which debug variables must be saved")
+    parser.add_argument('--debug_file', default=None,
+                        help="Define netcdf debug file")
     parser.add_argument('-l', '--log_file', default='stdout',
                         help="Define where print the log file")
     parser.add_argument('-n', '--numobs', type=int, default=-1,
@@ -420,11 +417,12 @@ if __name__ == '__main__':
                         help="Define the output filename")
     parser.add_argument('-v', '--verbose', type=int, default=2,
                         help="Define the level of verbosity")
-    
+    DBG_FILE = parser.parse_args().debug_file
+
     # Check wether FM is compiled
     if len([ x for x in listdir(OSS_PATH) if 'cpython' in x])==0:
         sys.exit("Compile forward model in {}".format(OSS_PATH))
-        
+
     # INPUT 4 FUNCTION
     LOG_FILE         = read_log_file(parser.parse_args().log_file)
     OUTPUT_FILE      = parser.parse_args().output
@@ -432,7 +430,17 @@ if __name__ == '__main__':
     PROCESSES_NUMBER = parser.parse_args().processes
     STARTOBS         = parser.parse_args().startobs
     VERBOSE          = parser.parse_args().verbose
+    if DBG_FILE != None:
+        if NUMOBS == 1: 
+              L = logger(VERBOSE, LOG_FILE,file_debug=DBG_FILE)
+              debugger = L.debug
+
+        else:
+              sys.exit("Debug file alowed only with one observation")
+    else:
+        L = logger(VERBOSE, LOG_FILE)
+        debugger = None
 
     # Launch processor
-    processor(LOG_FILE, NUMOBS, PROCESSES_NUMBER, STARTOBS, VERBOSE,
+    processor(L, LOG_FILE, NUMOBS, PROCESSES_NUMBER, STARTOBS, VERBOSE,
               output_file = OUTPUT_FILE)

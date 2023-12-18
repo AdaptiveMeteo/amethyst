@@ -1,4 +1,4 @@
-from numpy           import diag, identity, array, allclose, dot, abs,sum
+from numpy           import diag, identity, array, allclose, dot, abs,sum, in1d
 from netCDF4         import Dataset
 from numpy.linalg    import cholesky, LinAlgError
 from amethyst_config import processor_vars
@@ -11,12 +11,9 @@ def create_obs_err(data_filename, indx_file = None):
         from numpy import loadtxt
         return ObservationError(data_filename, indx = loadtxt(indx_file,dtype=int))
 
-def create_obs_err_tr(data_filename, obs_err_type='cris', indx_file = None):
-    if indx_file is None:
-        return ObservationErrorTR(data_filename)
-    else:
-        from numpy import loadtxt
-        return ObservationErrorTR(data_filename, indx = loadtxt(indx_file,dtype=int))
+def create_obs_err_tr(data_filename, indx_file, indx_tr_file, obs_err_type='cris'):
+    from numpy import loadtxt
+    return ObservationErrorTR(data_filename, loadtxt(indx_file,dtype=int), loadtxt(indx_tr_file,dtype=int))
 
 class SVD:
     def __init__(self, U, D, V):
@@ -123,23 +120,20 @@ class ObservationErrorTR(object):
     """
     This class is a wrapper around a netCDF data file
     """
-    def __init__(self, data_filename, indx = None):
+    def __init__(self, data_filename, obserr_indx, obserr_indx_tr):
         """
         Initialize the ObservationError object
         """
+        if in1d(obserr_indx_tr, obserr_indx).size != obserr_indx_tr.size:
+            raise IndexError('TR indices are not a sub selection of the instrument channel list !')
+
+        
         with Dataset(data_filename, mode='r') as df:
-            if indx is None:    
-                self.__obs_err = array(df.variables['obs_err'][:])
-                self.__inv_obs_err = array(df.variables['inv_obs_err'][:])
-                self.__oe_sub_indices = array(range(self.__obs_err.shape[0]))
-                U = array(df.variables['obs_err_U'][:])
-                D = array(df.variables['obs_err_D'][:])
-            else:
-                self.__obs_err = array(df.variables['obs_err'][indx,indx])
-                self.__inv_obs_err = array(df.variables['inv_obs_err'][indx,indx])
-                self.__oe_sub_indices = indx
-                U = array(df.variables['obs_err_U'][indx,indx])
-                D = array(df.variables['obs_err_D'][indx])
+            self.__obs_err = array(df.variables['obs_err'][obserr_indx_tr,obserr_indx_tr])
+            self.__inv_obs_err = array(df.variables['inv_obs_err'][obserr_indx_tr,obserr_indx_tr])
+            self.__oe_sub_indices = array([  i for i,x in enumerate(obserr_indx)  if x in obserr_indx_tr ])
+            U = array(df.variables['obs_err_U'][obserr_indx_tr,obserr_indx_tr])
+            D = array(df.variables['obs_err_D'][obserr_indx_tr])
 
             V = U.T
             self.__svd = SVD(U,D,V)

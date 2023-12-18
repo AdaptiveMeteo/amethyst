@@ -5,17 +5,18 @@ Class to retrieve data from a First Guess Atmospheric state.
 
 import numpy as np
 from netCDF4 import Dataset
-
+import amethyst_config
 
 class FirstGuess(object):
     """
     This class is a wrapper around a netCDF data file
     """
     #PaoloA 31-032021
-    EIGENVALUES_LAND=4
-    EIGENVALUES_SEA=3
-
-    def __init__(self, datafile, eigen_land=EIGENVALUES_LAND, eigen_sea=EIGENVALUES_SEA, co2std=405.,var_selection=None):
+    EIGENVALUES_LAND=amethyst_config.processor_vars['eigenforland']
+    EIGENVALUES_SEA=amethyst_config.processor_vars['eigenforsea']
+    CO2 = amethyst_config.processor_vars['constant_co2']['value']
+    
+    def __init__(self, datafile, co2=CO2, eigen_land=EIGENVALUES_LAND, eigen_sea=EIGENVALUES_SEA, var_selection=None):
 
         """
         Initialize the FirstGuess object
@@ -39,7 +40,7 @@ class FirstGuess(object):
         if var_selection[0]:
             self.LEVEL_SELECTION.append( self.LEVEL_SELECTION[-1] + 1)
 
-        self.co2std = co2std
+        self.co2 = co2
         self.eigen_land = eigen_land
         self.eigen_sea = eigen_sea
 
@@ -75,12 +76,12 @@ class FirstGuess(object):
         p[:] = self.df.groups['atmospheric_components'].variables['p'][obs,:]
 
         x0[0: self.levels] = self.df.groups['atmospheric_components'].variables['T'][obs,:]
-        x0[self.levels:self.levels*2] = np.log(self.df.groups['atmospheric_components'].variables['q'][obs,:]/1000)
-        x0[self.levels*2:self.levels*3] = self.co2std
+        x0[self.levels:self.levels*2]   = np.log(self.df.groups['atmospheric_components'].variables['q'][obs,:]/1000)
+        x0[self.levels*2:self.levels*3] = self.co2
         x0[self.levels*3:self.levels*4] = self.df.groups['atmospheric_components'].variables['O3'][obs,:]
         x0[self.levels*4] = self.df.groups['atmospheric_components'].variables['skT'][obs]
         x0[self.levels*4 + 1:self.levels*4 + 1 + self.eigenvalues(obs)] = 0
-
+        
         return [p, x0, xa]
 
 

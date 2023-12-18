@@ -75,7 +75,7 @@ def main():
                         help='The first guess NetCDF file that will be '
                              'generated')
     parser.add_argument('--covtable', '-cov', type=str,help='The covariance table file')
-    parser.add_argument('--static_apriori', '-sa', type=str, default = AMETHYST_PATH + '/ancillary/atmosphere/hawaii_apriori.nc',
+    parser.add_argument('--static_apriori', '-sa', type=str,
                         help='The static apriori covariance file')
     parser.add_argument('--verbose', '-v', choices=v_levels, default='info',
                         help='the level of verbosity of the software')
@@ -170,7 +170,6 @@ def main():
     with Dataset(argv.output, mode) as output_f:
         # Get the number of the FOVs
         numobs = lats.size
-
         # If the dimension NFOVS is already present, check that it is
         # consistent. Otherwise, create it
         if NFOVS in output_f.dimensions:
@@ -233,7 +232,6 @@ def main():
         if argv.static_apriori:
             LOG.info('Reading file {}'.format(argv.static_apriori))
             with Dataset(argv.static_apriori, 'r') as sa_file:
-              
                 nlevs = sa_file.dimensions['number_of_atmospheric_levels'].size
                 LOG.debug('Number of levels: {}'.format(nlevs))
                 mols = ['T', 'q', 'O3']

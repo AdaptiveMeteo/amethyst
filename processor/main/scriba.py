@@ -164,9 +164,9 @@ def scriba_f(to_write, stop_now, root_file, obsnum, nlev, nem, nselstate,
                         if output_vars['residuals']:
                             residuals[obs-STARTOBS, :] = sol['residuals']
                         #PaoloA 12112018
-                        if output_vars['f_gresiduals']:
+                        if output_vars['fg_residuals']:
                             fgresiduals[obs-STARTOBS, :] = sol['fgresiduals']
-                        if output_vars['Sa']:
+                        if output_vars['sa']:
                             Sa_ret[obs-STARTOBS, :, :] = sol['Sa_ret']
                             SaInv_ret[obs-STARTOBS, :, :] = sol['SaInv_ret']
                     except:

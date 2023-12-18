@@ -91,7 +91,7 @@ class ossFM(object):
         else:
             raise KeyError('Neither xg or temperature data in input')
         sfgrd = indata['sfgrd']
-        emrf = indata['emrf']
+        emrf = indata['emrf'][0]
         pobs = indata['pobs']
         obsang = indata['obsang']
         sunang = indata['sunang']

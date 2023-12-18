@@ -8,7 +8,7 @@ from dobjects.Emissivity          import Emissivity, emissivity_model
 from main.amethyst_code_transform import transform
 
 
-def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2, config_vars, var_selection_flags):
+def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2std, config_vars, var_selection_flags):
 
     # Read data from disc
     start_read_time = time.time()
@@ -18,7 +18,7 @@ def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2, config_var
     L.log('\n   SounderFov opened in ' +str(fov_time - start_read_time)+' seconds', 4)
 
     fg = FirstGuess(    config_vars["fg_file"], 
-                        eigen_land=eigenland, eigen_sea=eigensea, co2=co2,
+                        eigenland, eigensea, co2std,
                         var_selection=var_selection_flags)
     
     fg_time = time.time()
@@ -55,7 +55,7 @@ def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2, config_var
         fg_fast = firstguess(fg, i)
         apriori_fast = covariance_matrix(apriori, i)
         aemiss_fast = emissivity_model(aemiss, i)
-
+        print('---> inside reader ',i)
         to_compute.put((i, (fov_fast, fg_fast, apriori_fast, aemiss_fast)))
     time.sleep(1.0)
     while not to_compute.empty():

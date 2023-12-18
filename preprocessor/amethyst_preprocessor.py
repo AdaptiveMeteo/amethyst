@@ -206,7 +206,7 @@ def launch_preprocessing(argv):
 
                                                            
                              "python {}/preprocessor/apriori_generator/covtable2firstguesscov.py {}/fov.nc "
-                                                           " {}/apriori.nc -v info --compression 9".format(AMETHYST_PATH,argv.output,argv.output)
+                                                           " {}/apriori.nc -v info --compression 9 -sa {}".format(AMETHYST_PATH,argv.output,argv.output,amethyst_config.preprocessor_vars['apriori'])
                                                            
                              ]
 

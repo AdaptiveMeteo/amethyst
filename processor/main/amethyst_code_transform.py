@@ -44,7 +44,6 @@ class transform(object):
         self.A = self.A.reshape((self.Sigma.shape[0],1))
         self.data_structure = DataStructure(nlev)
         self.approach = approach
-        self.chan_selection_file = conf_vars["tr_chan_list"]
         
     def transform_retrievals_for_DA(self, Sa, SaInv, x0, xhat, K, yobs_minus_yhat, profile):
         """ Generate square root of inverse of Sa on VET grid """
@@ -62,8 +61,11 @@ class transform(object):
         #We will use just the first 2*nlev values of Sa
         #Sa = Sa[0:2*nlev, 0:2*nlev]
         
-        indx = np.loadtxt(self.chan_selection_file).astype(int)
-        
+        #indx = np.loadtxt(self.chan_selection_file).astype(int)
+        nlev = self.data_structure.nlev
+        nlev_tr = 81
+        indx=np.concatenate((np.arange(0, nlev_tr), np.arange(nlev,nlev+nlev_tr)),  axis=0)
+
         Sa = Sa[:, indx]
         Sa = Sa[indx, :]
         #Sa[0:nlev_sps, 0:nlev_sps] = Sa[0:nlev_sps, 0:nlev_sps]
@@ -84,14 +86,10 @@ class transform(object):
         # Yprime_rad = mat_mult(self.A,mat_mult(self.LT,Yrad))
 
 
-        # Transform the Jacobians
-        # K = K[:, 0:2*nlev]
-        # PaoloA
-
         spectral_indx = self.obs_err.oe_sub_indices
 
         K = (K[spectral_indx.astype('int64'),:])[:,indx]
-        #K = K[spectral_indx.astype('int64'), indx]
+
         RET.Hprime_rad = self.A * self.obs_err.svd.V_dot(K)
         #print("RET.Hprime_rad shape {}".format(RET.Hprime_rad.shape))
 

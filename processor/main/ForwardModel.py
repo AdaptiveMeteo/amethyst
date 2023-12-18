@@ -64,7 +64,7 @@ class ForwardModel(object):
         self.wnK = None
         self.K = None
         self.F = None
-
+    
     def compute_forward(self, xhat):
         """
         Define Input to radiance calculator
@@ -87,8 +87,6 @@ class ForwardModel(object):
         except FloatingPointError:
             raise NotConvergentIteration
         co2_ppmv = xhat[self.cos:self.coe]
-
-        #print("xhat ozone {}".format(xhat[self.ozs:self.oze]))
         oz_vmr = np.exp(xhat[self.ozs:self.oze])
 
         indata = {}
@@ -96,34 +94,40 @@ class ForwardModel(object):
         Jvar = self.cx.Jvar
         ii = self.cx.indx
         indata['sfgrd'] = self.cx.sfgrd
-        indata['emrf'] = self.cx.emrf
+        indata['emrf']  = np.column_stack([self.cx.emrf, 1 - self.cx.emrf])
+
         # State vector temeprature is in [K]
-        indata['tskin'] = xhat[self.sks:self.ske]
-        indata['psf'] = self.cx.surfacePressure_mb
+        indata['tskin']     = xhat[self.sks:self.ske]
+        indata['psf']       =  self.cx.surfacePressure_mb
         # State vector Temperature is in [K]
-        indata['temp'] = np.flipud(xhat[self.tds:self.tde])
+        indata['temp']      = np.flipud(xhat[self.tds:self.tde])
         # State vector Water vapor is in log(q) where q is in [Kg/Kg]
-        indata['h2o'] = np.flipud(vmr)
+        indata['h2o']       = np.flipud(vmr)
         # State vector CO2 is in ppmv
-        indata['co2'] = np.flipud(1.E-6*(self.Mc/self.Md)*co2_ppmv)
+        indata['co2']       = np.flipud(1.E-6*(self.Mc/self.Md)*co2_ppmv)
         # State vector Ozone is in log(q) where q is in [Kg/Kg]
-        indata['o3'] = np.flipud(oz_vmr)
-        indata['pressure'] = np.flipud(self.cx.pressure_grid)
-        indata['pobs'] = self.cx.observationPressure_mb
-        indata['obsang'] = self.cx.FOVangle
-        indata['sunang'] = self.cx.SunAngle
+        indata['o3']        = np.flipud(oz_vmr)
+        indata['pressure']  = np.flipud(self.cx.pressure_grid)
+        indata['pobs']      = self.cx.observationPressure_mb
+        indata['obsang']    = self.cx.FOVangle
+        indata['sunang']    = self.cx.SunAngle
+        indata['solzenith'] = self.cx.Solar_zenith_angle
+        indata['azangle']   = self.cx.Solar_azimuth_angle
+        indata['obslevel']  = self.cx.oss_obslevel
+        indata['lat']       = self.cx.fov_latitude
 
         # Call the selected forward model (OSS)
         self.model.compute(indata, self.outdata)
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
-        SEflag = np.size(np.where(Jvar == -2)) > 0
+
+        SEflag  = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0
-        Tflag = np.size(np.where(Jvar == 0)) > 0
-        WVflag = np.size(np.where(Jvar == 1)) > 0
+        Tflag   = np.size(np.where(Jvar == 0)) > 0
+        WVflag  = np.size(np.where(Jvar == 1)) > 0
         CO2flag = np.size(np.where(Jvar == 2)) > 0
-        O3flag = np.size(np.where(Jvar == 3)) > 0
-                
+        O3flag  = np.size(np.where(Jvar == 3)) > 0
+
         # Set number of channels
         krow = len(ii)
 
@@ -150,6 +154,7 @@ class ForwardModel(object):
             jcb = np.transpose(self.outdata['xkt'][2*nlev+2:2*nlev+2+nlev, ii])
             # Convert Jacobians in [kg/kg] into jacobians in [ppmv]
             jac[:, self.cos:self.coe] = np.fliplr(jcb)*(self.Mc/self.Md)*1.e-6
+
         if O3flag:
             # Convert state vector ozone from log(vmr)
             # [in log(kg/kg)] to vmr in [kg/kg]
@@ -160,16 +165,19 @@ class ForwardModel(object):
             jcb = np.transpose(self.outdata['xkt'][3*nlev+2:3*nlev+2+nlev, ii])
             # jacobians in log(q)
             jac[:, self.ozs:self.oze] = np.fliplr(jcb)*w_mat
+
         if SKTflag:
             # Surface temperature Jacobians in [K]
             jcb = np.transpose(self.outdata['xkt'][nlev:nlev+1, ii])
             jac[:, self.sks:self.ske] = jcb
+            #print('SKT\n',jac[:, self.sks:self.ske],jac[:, self.sks:self.ske].shape)
         if SEflag:
             # Surface emissivity Jacobians
             jcb = np.transpose(self.outdata['paxkemrf'][0, :])
             jcb = (self.emiss.get_jacobian(self.wnF, jcb))
             jac[:, self.ems:self.eme] = jcb[ii]
             self.cx.Kse = jcb
+            #print('SE\n',jac[:, self.ems:self.eme],jac[:, self.ems:self.eme].shape)
         self.K = np.ascontiguousarray(jac)
         self.wnK = self.wnF[ii]
 

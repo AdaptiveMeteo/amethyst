@@ -53,6 +53,7 @@ preprocessor_vars = {
                   "gcrso"     : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
                   "scris"     : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
                   "l1dir"     : "/mnt/satellite/amethyst_test_data/cris",
+                  "apriori"   : AMETHYST_PATH + "/ancillary/atmosphere/arctic_apriori.nc",
                   "iasi_cmt"  : 5,
                   "cris_cmt"  : .95
             }
@@ -80,15 +81,17 @@ processor_vars = {
                 # State Vector
                 "constant_pressure"                    : {"units":"mb",   "value":1013},
                 "constant_co2"                         : {"units":"ppmv", "value":405.0},
-                "constant_co2_std"                     : {"units":"ppmv", "value":5.0},
+                "constant_co2_std"                     : {"units":"ppmv", "value":16.0},
                 "constant_skt_std"                     : {"units":"K",    "value":3.0},
                 "constant_inflation_surface_emiss_cov" : {"units":1,"value":1},
                 "constant_solar_irradiance_file"       : AMETHYST_PATH + "/ancillary/atmosphere/solar_irradiances.nc",
                 "eigenforland"         : 4,
                 "eigenforsea"          : 3,
+                "eigenfortcov"         : 9,
+                "clear_outside_diag"   : False,
 
                 # Retrieval
-                "selected_state_vector_variables" : [ -2 
+                "selected_state_vector_variables" : [ -2,
                                                       -1,
                                                        0,
                                                        1,
@@ -108,7 +111,7 @@ processor_vars = {
                 "output_file"  : "amethyst_output.nc",
                 "output_vars"  : {   
                                      "pressure"                         : True,
-                                     "tempertaure"                      : True,
+                                     "temperature"                      : True,
                                      "water_vapor"                      : True,
                                      "ozone"                            : True,
                                      "surface_temperature"              : True,
@@ -122,7 +125,10 @@ processor_vars = {
                                      "fg_residuals"                     : False,
                                      "jacobian"                         : False,
                                      "sa"                               : False,
-                                     "indices"                          : False}
+                                     "indices"                          : False},
+                
+                # Forward Model
+                "oss_obslevel" : 0
                 }
 
 postprocessor_vars = {

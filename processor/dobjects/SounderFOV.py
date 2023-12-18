@@ -49,11 +49,13 @@ class SounderFOV(object):
         Latitude  = self.df.variables['Latitude'][obs]
         Longitude = self.df.variables['Longitude'][obs]
         FOVangle  = self.df.variables['FOV_angle'][obs]
+        Solar_zenith_angle = self.df.variables['Solar_zenith_angle'][obs]
+        Solar_azimuth_angle = self.df.variables['Solar_azimuth_angle'][obs]
 
         Rad = self.df.variables['Radiance'][obs, Ellipsis]
         Rad = Rad[self.indx]
 
-        return [Latitude, Longitude, None, FOVangle, np.copy(self.wnR), Rad]
+        return [Latitude, Longitude, None, FOVangle, Solar_zenith_angle, Solar_azimuth_angle, np.copy(self.wnR), Rad]
 
 
 class sounderfov(object):
@@ -71,6 +73,8 @@ class sounderfov(object):
          self.Longitude,
          self.TimeFracDay,
          self.FOVangle,
+         self.Solar_zenith_angle,
+         self.Solar_azimuth_angle,
          self.wnR,
          self.Rad] = fov.fov(obs)
         self.obs = obs
@@ -86,10 +90,13 @@ class sounderfov(object):
                 self.Longitude,
                 self.TimeFracDay,
                 self.FOVangle,
+                self.Solar_zenith_angle,
+                self.Solar_azimuth_angle,
                 self.wnR,
                 self.Rad]
 
 if __name__ == '__main__':
+    import amethyst_config
 
     if __package__ is None:
         raise ImportError('The file "SounderFOV.py" is embedded into '
@@ -97,5 +104,5 @@ if __name__ == '__main__':
                           '"python -m dobjects.SounderFOV" '
                           'from the main directory of this project.')
 
-    measure = SounderFOV('data/fov.nc')
+    measure = SounderFOV(amethyst_config)
     measure.test()

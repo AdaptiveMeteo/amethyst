@@ -66,6 +66,8 @@ class amethyst_core_config(object):
         self.fov_longitude = None
         self.fov_time = None
         self.FOVangle = None
+        self.Solar_azimuth_angle = None
+        self.Solar_zenith_angle  = None
         self.wnR = None
         self.R = None
         # Hardcode this, should be function of latitude an time of day....
@@ -75,7 +77,7 @@ class amethyst_core_config(object):
         self.emiss = None
         self.sfgrd = None
         self.emrf = None
-
+        self.oss_obslevel = amethyst_config.processor_vars["oss_obslevel"]
 
 class amethyst_apriori(object):
     """ Utility class to keep apriori estimate and model error """
@@ -103,6 +105,15 @@ class core(object):
         self.fm = None
         # Default Marquardt-Levemberg parameter
         self.gamma = 0.0
+        
+        # Debug
+        # self.debug_counter = 0
+        # print('Se iteration n.',self.debug_counter)
+        # print(self.obs_err)
+        # print('SeInv iteration n.',self.debug_counter)
+        # print(obserr.inv_obs_err)
+        
+
 
     def compute_chi_square(self, profile):
         """ Compute X^2 from retrieval residuals """
@@ -127,7 +138,18 @@ class core(object):
         dx = (self.state.xhat - self.state.xa)
         d = (np.dot(KtSeInv, self.yobs_minus_yhat) -
              np.dot(self.state.SaInv_ret, dx))
+
+        # self.debug_counter +=1
+        # print('K iteration n.',self.debug_counter)
+        # print(fm.K)
+        # print('A iteration n.',self.debug_counter)
+        # print(A)
+        # print('R iteration n.',self.debug_counter)
+        # print(self.cx.R)
+        # print('F iteration n.',self.debug_counter)
+        # print(fm.F)
         
+
         # Use iterative LU decomposition to determine the solution
         # First iteration
         try:
@@ -139,7 +161,7 @@ class core(object):
         x = solve(U, y)
         # Second iteration
         r = d - np.dot(A, x)
-        dz = solve(L, r)
+        dz  = solve(L, r)
         ddx = solve(U, dz)
         # Solution
         totx = x + ddx
@@ -149,6 +171,10 @@ class core(object):
         self.state.d2 = np.dot(totx.T, d)
         if profile.prlinalg is not None:
             profile.prlinalg.disable()
+        # print('xhat\n',self.state.xhat_new)
+        # print('xtot\n',totx)
+        
+        # print('end update')
 
     def invert(self, fov, fg, apriori, emiss, obs, log, profile=None):
         """ Invert the measurement to get physical sounding profile """
@@ -166,7 +192,7 @@ class core(object):
         converge = self.cx.MFRC * len(self.cx.state_var_indx)
 
         [self.cx.fov_latitude, self.cx.fov_longitude, self.cx.fov_time,
-         self.cx.FOVangle, self.cx.wnR, self.cx.R] = fov.fov(obs)
+         self.cx.FOVangle, self.cx.Solar_zenith_angle, self.cx.Solar_azimuth_angle, self.cx.wnR, self.cx.R] = fov.fov(obs)
 
         [self.cx.p, self.apriori.x0, self.apriori.xa] = fg.state_vector(obs)
         self.cx.pressure_grid = self.cx.p[0:self.cx.xdim[0]]
@@ -350,15 +376,13 @@ class core(object):
         axis = 1 
         pad_size = target_length - fm.K.shape[axis]
         axis_nb = len(fm.K.shape)
-
+        
         if pad_size >=  0:
             npad = [(0, 0) for x in range(axis_nb)]
             npad[axis] = (0, pad_size)
             self.state.jacobian = np.pad(fm.K, pad_width=npad, mode='constant', constant_values=0)
         else:
             self.state.jacobian = self.fm.K 
-
-        #print("fm.K shape {}".format(self.state.jacobian.shape))
 
         #PaoloA 12112018
         self.state.residuals = self.state.yobs_minus_yhat
