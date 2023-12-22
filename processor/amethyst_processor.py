@@ -68,7 +68,7 @@ def read_log_file(arg_passed):
         except:
             raise ValueError('Invalid file name')
 
-def invert_process(inverter, nlev, proc_num, to_compute, to_write,
+def invert_process( nlev, proc_num, to_compute, to_write,
                    reader_is_alive, L, transformer,
                    output_vars, log_data, start_process ):
 
@@ -99,9 +99,6 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
             output = dict()
             if profile.prall is not None:
                 profile.prall.enable( )
-            solution = inverter.invert(fov, fg, apriori, aemiss,
-                           obs, log=L, profile=profile)
-
             try:
                 time_invert=time.time()
                 solution = inverter.invert(fov, fg, apriori, aemiss,
@@ -217,6 +214,54 @@ def invert_process(inverter, nlev, proc_num, to_compute, to_write,
 def processor(L, log_file, numobs, process_number, startobs, verbose,
               output_file = amethyst_config.processor_vars["output_file"]):
  
+    return
+
+
+if __name__ == '__main__':
+
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', default='None',
+                        help="Define which debug variables must be saved")
+    parser.add_argument('--debug_file', default=None,
+                        help="Define netcdf debug file")
+    parser.add_argument('-l', '--log_file', default='stdout',
+                        help="Define where print the log file")
+    parser.add_argument('-n', '--numobs', type=int, default=-1,
+                        help="Define the max number of observations to be computed")
+    parser.add_argument('-p', '--processes', type=int, default=1,
+                        help="Define the number of COMPUTING processes")
+    parser.add_argument('-s', '--startobs', type=int, default=0,
+                        help="Define the number of the first observation to be computed")
+    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["output_file"],
+                        help="Define the output filename")
+    parser.add_argument('-v', '--verbose', type=int, default=2,
+                        help="Define the level of verbosity")
+    DBG_FILE = parser.parse_args().debug_file
+
+    # Check wether FM is compiled
+    if len([ x for x in listdir(OSS_PATH) if 'cpython' in x])==0:
+        sys.exit("Compile forward model in {}".format(OSS_PATH))
+
+    # INPUT 4 FUNCTION
+    LOG_FILE         = read_log_file(parser.parse_args().log_file)
+    OUTPUT_FILE      = parser.parse_args().output
+    NUMOBS           = parser.parse_args().numobs
+    PROCESSES_NUMBER = parser.parse_args().processes
+    STARTOBS         = parser.parse_args().startobs
+    VERBOSE          = parser.parse_args().verbose
+    if DBG_FILE != None:
+        if NUMOBS == 1: 
+              L = logger(VERBOSE, LOG_FILE,file_debug=DBG_FILE)
+              debugger = L.debug
+
+        else:
+              sys.exit("Debug file alowed only with one observation")
+    else:
+        L = logger(VERBOSE, LOG_FILE)
+        debugger = None
+
+
     start_process = time.time()
     
     #
@@ -315,7 +360,7 @@ def processor(L, log_file, numobs, process_number, startobs, verbose,
     L.log('Starting computation... ',1, end='')
     for i in range(min(PROCESSES_NUMBER,len(obsnum))):
         p = Process(target=invert_process,
-                    args=[inverter,nlev, i, to_compute, to_write, reader_is_alive,
+                    args=[nlev, i, to_compute, to_write, reader_is_alive,
                           logger(VERBOSE, LOG_FILE), transformer,
                           amethyst_config.processor_vars["output_vars"] , log_data, start_process])
         process_list.append((i, p))
@@ -394,53 +439,8 @@ def processor(L, log_file, numobs, process_number, startobs, verbose,
                   ' due to some strange errors', file=sys.stderr)
         sys.exit(1)
 
-    return
 
-
-if __name__ == '__main__':
-
-    # Parse arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--debug', default='None',
-                        help="Define which debug variables must be saved")
-    parser.add_argument('--debug_file', default=None,
-                        help="Define netcdf debug file")
-    parser.add_argument('-l', '--log_file', default='stdout',
-                        help="Define where print the log file")
-    parser.add_argument('-n', '--numobs', type=int, default=-1,
-                        help="Define the max number of observations to be computed")
-    parser.add_argument('-p', '--processes', type=int, default=1,
-                        help="Define the number of COMPUTING processes")
-    parser.add_argument('-s', '--startobs', type=int, default=0,
-                        help="Define the number of the first observation to be computed")
-    parser.add_argument('-o', '--output', default=amethyst_config.processor_vars["output_file"],
-                        help="Define the output filename")
-    parser.add_argument('-v', '--verbose', type=int, default=2,
-                        help="Define the level of verbosity")
-    DBG_FILE = parser.parse_args().debug_file
-
-    # Check wether FM is compiled
-    if len([ x for x in listdir(OSS_PATH) if 'cpython' in x])==0:
-        sys.exit("Compile forward model in {}".format(OSS_PATH))
-
-    # INPUT 4 FUNCTION
-    LOG_FILE         = read_log_file(parser.parse_args().log_file)
-    OUTPUT_FILE      = parser.parse_args().output
-    NUMOBS           = parser.parse_args().numobs
-    PROCESSES_NUMBER = parser.parse_args().processes
-    STARTOBS         = parser.parse_args().startobs
-    VERBOSE          = parser.parse_args().verbose
-    if DBG_FILE != None:
-        if NUMOBS == 1: 
-              L = logger(VERBOSE, LOG_FILE,file_debug=DBG_FILE)
-              debugger = L.debug
-
-        else:
-              sys.exit("Debug file alowed only with one observation")
-    else:
-        L = logger(VERBOSE, LOG_FILE)
-        debugger = None
 
     # Launch processor
-    processor(L, LOG_FILE, NUMOBS, PROCESSES_NUMBER, STARTOBS, VERBOSE,
-              output_file = OUTPUT_FILE)
+    # processor(L, LOG_FILE, NUMOBS, PROCESSES_NUMBER, STARTOBS, VERBOSE,
+    #           output_file = OUTPUT_FILE)

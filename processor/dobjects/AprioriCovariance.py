@@ -5,24 +5,25 @@ Class to retrieve a priori Covariances.
 import numpy as np
 from scipy.linalg import inv
 from netCDF4 import Dataset
+import amethyst_config
 
 class AprioriCovariance(object):
     #PaoloA 29-03-2021 
     #EIGENVALUES_TCOV = 4
-    EIGENVALUES_TCOV = 9
+    EIGENVALUES_TCOV = amethyst_config.processor_vars['eigenfortcov']
     #PaoloA 18082017
     #CLEAR_OUTSIDE_DIAGONAL=True
-    CLEAR_OUTSIDE_DIAGONAL=False
+    CLEAR_OUTSIDE_DIAGONAL=amethyst_config.processor_vars['clear_outside_diag']
     #PaoloA 31-03-2021
-    EIGENVALUES_LAND=4
-    EIGENVALUES_SEA=3
-
+    EIGENVALUES_LAND = amethyst_config.processor_vars['eigenforland']
+    EIGENVALUES_SEA  = amethyst_config.processor_vars['eigenforsea']
+    CO2_STD          = amethyst_config.processor_vars['constant_co2_std']['value']
     #PaoloA
     #def __init__(self, datafile, aemiss, eigen_land = 2, eigen_sea = 2):
     #PaoloA 29-03-2021
     #def __init__(self, datafile, aemiss, eigen_land = 5, eigen_sea = 5):
     #PaoloA 31-03-2021
-    def __init__(self, datafile, aemiss, eigen_land = EIGENVALUES_LAND, eigen_sea = EIGENVALUES_SEA, var_selection = None):
+    def __init__(self, datafile, aemiss, eigen_land = EIGENVALUES_LAND, eigen_sea = EIGENVALUES_SEA, var_selection = None, co2_std = CO2_STD):
         """
         Initialize the AprioriCovariance object
         """
@@ -33,7 +34,8 @@ class AprioriCovariance(object):
         self.q = self.f.variables['q']
         self.Tq = self.f.variables['T_q']
         self.O3 = self.f.variables['O3']
-        self.obsnum = self.T.shape[0]
+        self.co2_std  = co2_std
+        self.obsnum   = self.T.shape[0]
         self.n_levels = self.T.shape[1]
 
         # Use all variables if there is no selection
@@ -79,12 +81,13 @@ class AprioriCovariance(object):
     def covariance_matrix(self, obs):
         eigen = self.eigenvalues(obs)
         size = (4 * self.n_levels) + 1 + eigen
+
         Sa = np.zeros((size , size), dtype=np.float64)
         SaInv = np.zeros((size, size), dtype=np.float64)
 
         Sa[self.n_levels*0: self.n_levels*1, self.n_levels*0: self.n_levels*1] = self.T[obs,:]
         Sa[self.n_levels*1: self.n_levels*2, self.n_levels*1: self.n_levels*2] = self.q[obs,:]
-        Sa[self.n_levels*2: self.n_levels*3, self.n_levels*2: self.n_levels*3] = np.eye(self.n_levels, dtype=np.float64) * 16
+        Sa[self.n_levels*2: self.n_levels*3, self.n_levels*2: self.n_levels*3] = np.eye(self.n_levels, dtype=np.float64) * self.co2_std
         Sa[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = self.O3[obs,:]
   
         #print("Sa O3: {}".format(self.O3[obs,:]));

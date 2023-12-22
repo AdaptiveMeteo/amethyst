@@ -13,6 +13,7 @@ from main.ForwardModel import ForwardModel
 from main.ForwardModel import NotConvergentIteration
 import sys
 import amethyst_config
+import traceback
 
 class amethyst_state(object):
     """
@@ -363,6 +364,7 @@ class core(object):
                         xhat_pre[jj] = self.state.xhat
                         xhat[jj] = self.state.xhat_new
                 else:
+                    #traceback.print_stack()
                     raise NotConvergentIteration("Limit of Iterations reached for "
                                                  " OBS " + str(obs)) 
 
