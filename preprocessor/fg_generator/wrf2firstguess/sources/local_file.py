@@ -25,7 +25,7 @@ from utilities.geometry                                                         
 from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.temp_extrapolator    import TempExtrapolator
 from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.level_interpolations import interp_temperature_over_levels, \
                                            interp_water_vapour_over_levels
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.climatology          import generate_ozone_profile
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.climatology          import generate_ozone_profile, TemperatureClimatology, WaterVaporClimatology
 from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.first_guess          import NetcdfAtmosphericFirstGuess
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
@@ -73,7 +73,7 @@ class LocalFile(Source):
     """
 
     @staticmethod
-    def get_obs_profile(time_step, lon, lat, wrf_file):
+    def get_obs_profile(time_step, lon, lat, wrf_file, temperature_climatology, water_vapor_climatology):
         """
         Given an observation and its position, read its profile
         
@@ -124,21 +124,38 @@ class LocalFile(Source):
         profile.lon = lon
         profile.lat = lat
         
+        temp_indx1 = min_distance_indx(
+                                         lon,
+                                         lat,
+                                         temperature_climatology.lons,
+                                         temperature_climatology.lats
+                                         )
+        
+                
+        
         return profile
 
-    def __init__(self, wrf_file):
-        self.path = wrf_file
-        if not path.exists(self.path):
-            raise ValueError('File {} does not exist'.format(self.path))
-        if not path.isfile(self.path):
-            raise ValueError('{} is not a regular file'.format(self.path))
+    def __init__(self, wrf_file, h20_climatology , temperature_climatology, o3_climatology ):
+        self.path             = wrf_file
+        self.h2o_file         = h20_climatology
+        self.temperature_file = temperature_climatology
+        self.o3_file          = o3_climatology
+        
+        for file in [self.path, self.h2o_file, self.temperature_file, self.o3_file]:
+            if not path.exists(file):
+                raise ValueError('File {} does not exist'.format(file))
+            if not path.isfile(file):
+                raise ValueError('{} is not a regular file'.format(file))
 
 
     def read_and_save(self, obs_time, lons, lats,
                       n_levs, top_lev, first_guess_file):
         log.info('Opening WRF file')
 
-        with WrfFile(self.path) as wrf_file:
+        with  WrfFile(self.path) as wrf_file, \
+              TemperatureClimatology(self.temperature_file) as temp_climatology, \
+              WaterVaporClimatology(self.h2o_file)          as wv_climatology:
+                  
             wrf_times = wrf_file.times
             wrf_levels = wrf_file.lev_num
 
@@ -149,7 +166,7 @@ class LocalFile(Source):
 
             # Prepare an extrapolator for the temperature
             t_extr = TempExtrapolator(TEMP_EXTRAPOLATOR_COEFFICIENTS)
-
+   
             # Prepare the space where the data will be saved
             first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time,
                                                       n_levs, first_guess_file)
@@ -168,8 +185,8 @@ class LocalFile(Source):
                     for obs in range(start, end):
                         log.debug('Looking for the position of the '
                                   'observation {}'.format(obs))
-                        p = LocalFile.get_obs_profile(time_step, lons[obs],
-                                                      lats[obs], wrf_file,)
+                        p = LocalFile.get_obs_profile(time_step, lons[obs], lats[obs],
+                                                      wrf_file, temp_climatology, wv_climatology)
 
                         # Now we need to create the levels for the first guess
                         m_levs = p.pressure_levels
@@ -197,7 +214,7 @@ class LocalFile(Source):
                             levs = np.array(np.hstack([m_levs, levs_to_add]),
                                             dtype=np.float32)
 
-                        t = interp_temperature_over_levels(p, levs, t_extr)
+                        t  = interp_temperature_over_levels(p, levs, t_extr)
                         wv = interp_water_vapour_over_levels(p, levs)
                         o3 = generate_ozone_profile(p, levs, wrf_month)
 
