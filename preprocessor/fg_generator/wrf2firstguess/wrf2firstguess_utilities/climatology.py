@@ -20,12 +20,13 @@ import numpy as np
 from scipy.interpolate import interp1d
 from netCDF4 import Dataset
 
-__author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
-__copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
-__credits__ = ["Stefano Piani", "Paolo Antonelli"]
+__authors__ = [ 'Stefano Piani <stefano.piani@exact-lab.it>',
+                'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
+__copyright__ = "Copyright 2016, eXact-lab and Adaptive Meteo S.r.l."
+__credits__ = ["Stefano Piani", "Paolo Antonelli","Paolo Scaccia"]
 __license__ = "GPL"
-__maintainer__ = "Stefano Piani"
-__email__ = "stefano.piani@exact-lab.it"
+__maintainer__ = "Paolo Scaccia"
+__email__ = "paolo.scaccia@adaptivemeteo.com"
 
 # Get the main dir of the software (we expect that the current file
 # is one level inside the tree directory)
@@ -35,6 +36,33 @@ SCRIPT_DIR =path.realpath(__file__).split('amethyst/')[0]+'amethyst'
 OZONE_PROFILE_FILES = path.join(SCRIPT_DIR, 'ancillary/atmosphere/fg_ozone_profiles.nc')
 
 log = logging.getLogger(__name__)
+
+class ClimatologyGrid(object):
+    def __init__(self, file, variable):
+        with Dataset(file,'r') as ncfile:
+            self.__field     = ncfile[variable][:]
+            self.lats        = ncfile['latitude'][:]
+            self.lons        = ncfile['longitude'][:]
+            self.pressure    = ncfile['pressure'][:]
+        return
+    
+class TemperatureClimatology(ClimatologyGrid):
+    def __init__(self, file):
+        super().__init__(self, file, 'T_values')
+        self.temperature = self.__field
+        return
+
+class WaterVaporClimatology(ClimatologyGrid):
+    def __init__(self, file):
+        super().__init__(self, file, 'H2O_values')
+        self.water_vapor = self.__field
+        return
+
+class OzoneClimatology(ClimatologyGrid):
+    def __init__(self, file):
+        super().__init__(self, file, 'O3_values')
+        self.ozone = self.__field
+        return
 
 
 class OzoneClimatologyMatrix(np.ndarray):

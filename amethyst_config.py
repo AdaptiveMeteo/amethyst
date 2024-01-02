@@ -62,6 +62,15 @@ preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto"
 preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris",
                                 "iasi" : preprocessor_vars["basedir"] + "/run_iasi"
                                }
+preprocessor_vars["first_guess"] = { "min_water_vapor"          : 0.003,
+                                     "p_min_water_vapor"        : 45,
+                                     "water_vapor_smooth_after" : 60
+                                    }
+preprocessor_vars["climatology"] = { "h2o"         : AMETHYST_PATH + "/ancillary/atmosphere/h2o_climatology.nc",
+                                     "temperature" : AMETHYST_PATH + "/ancillary/atmosphere/temperature_climatology.nc",
+                                     "o3"          : AMETHYST_PATH + "/ancillary/atmosphere/o3_climatology.nc"
+                                    }
+
 
 
 processor_vars = {

@@ -34,6 +34,7 @@ import numpy as np
 from netCDF4 import Dataset
 
 from sources.local_file import LocalFile
+from amethyst_config import preprocessor_vars
 
 __author__ = 'Stefano Piani'
 __copyright__ = "Copyright 2016, Paolo Antonelli"
@@ -74,6 +75,13 @@ def main():
     parser.add_argument('--top', '-t', type=float, default=0.005,
                         help='The pressure of the heighest level of the '\
                              'output first guess')
+    parser.add_argument('--h2o', type=str, default=preprocessor_vars["climatology"]["h2o"],
+                        help='Water Vapor climatology file')
+    parser.add_argument('--temp', type=str, default=preprocessor_vars["climatology"]["temperature"],
+                        help='Temperature climatology file')
+    parser.add_argument('--o3', type=str, default=preprocessor_vars["climatology"]["o3"],
+                        help='Ozone climatology file')
+
     argv = parser.parse_args()
 
     # Prepare the log class
@@ -126,7 +134,7 @@ def main():
         return 3
 
     if argv.source == 'local_file':
-        wrf_source = LocalFile(argv.input)
+        wrf_source = LocalFile(argv.input, argv.h2o, argv.temperature, argv.o3)
 
     n_levs = argv.levels
     top_lev = np.float32(argv.top)
