@@ -31,17 +31,18 @@ from sys import exit as sysexit
 from traceback import format_exc
 
 import numpy as np
+import pandas as pd
 from netCDF4 import Dataset
 
-from sources.local_file import LocalFile
 from amethyst_config import preprocessor_vars
-
-__author__ = 'Stefano Piani'
-__copyright__ = "Copyright 2016, Paolo Antonelli"
-__credits__ = ["Stefano Piani", "Paolo Antonelli"]
+from preprocessor.fg_generator.fg_generator_utilities.climatology import ClimatologyGrid
+ 
+__author__ = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
+__copyright__ = "Copyright 2023, Adaptive Meteo S.r.l."
+__credits__ = ["Paolo Antonelli","Paolo Scaccia"]
 __license__ = "GPL"
-__version__ = "1.0"
-__maintainer__ = "Stefano Piani"
+__maintainer__ = "Paolo Scaccia"
+__email__ = "paolo.scaccia@adaptivemeteo.com"
 
 if __name__ == '__main__':
     log = logging.getLogger()
@@ -49,9 +50,9 @@ else:
     log = logging.getLogger(__name__)
 
 # The name of the NetCDF tables that will be read by this script
-LATITUDE = 'Latitude'
+LATITUDE  = 'Latitude'
 LONGITUDE = 'Longitude'
-TIME = 'Time'
+TIME      = 'Time'
 
 def main():
     v_levels = ['debug', 'info', 'warning']
@@ -62,9 +63,8 @@ def main():
     parser.add_argument('output', type=str,
                         help='The first guess NetCDF file that will be'
                              ' generated')
-    parser.add_argument('--source', '-s', type=str, default='local_file',
-                        help='Where are the Wrf model data. At the moment, the'
-                             ' only accepted value is "local_file"')
+    parser.add_argument('--source', '-s', type=str, required = False, default = None,
+                        help='Where are the Wrf model data.')
     parser.add_argument('--input', '-i', type=str, default=None,
                         help='If the source is "local_file", please specify the'
                              ' path of the input file')
@@ -75,26 +75,25 @@ def main():
     parser.add_argument('--top', '-t', type=float, default=0.005,
                         help='The pressure of the heighest level of the '\
                              'output first guess')
+    parser.add_argument('--h2o', type=str, default=preprocessor_vars["climatology"]["h2o"],
+                        help='Water Vapor climatology file')
+    parser.add_argument('--temp', type=str, default=preprocessor_vars["climatology"]["temperature"],
+                        help='Temperature climatology file')
+    parser.add_argument('--o3', type=str, default=preprocessor_vars["climatology"]["o3"],
+                        help='Ozone climatology file')
 
     argv = parser.parse_args()
 
     # Prepare the log class
     verbosity = getattr(logging, argv.verbose.upper())
     log.setLevel(verbosity)
-
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - '
                                   '%(filename)s: %(message)s',
                                   datefmt='%m/%d/%Y %H:%M:%S')
-
     streamhandler = logging.StreamHandler()
     streamhandler.setLevel(verbosity)
     streamhandler.setFormatter(formatter)
     log.addHandler(streamhandler)
-
-    # Read the input
-    if argv.source == 'local_file' and argv.input is None:
-        log.error('No input file specified even if the source is "local_file"')
-        return 11
 
     log.info('Opening observation file')
     try:
@@ -114,32 +113,40 @@ def main():
             obs_times = position_file.variables[TIME][:]
             # Convert to numpy datetime
             obs_times.dtype = 'datetime64[ms]'
+            day_of_year = pd.DatetimeIndex(obs_times).dayofyear[0] - 1
     except:
         log.error('Read of observation time failed!')
         log.debug(format_exc())
         return 4
-    print(argv.observations)
+
     max_date = str(np.max(obs_times))
     min_date = str(np.min(obs_times))
     log.debug('Observations from {} to {}'.format(min_date, max_date))
 
-    if argv.source not in ('local_file',):
-        log.error('Unknown source for the WRF files')
-        return 3
+    if argv.source != None:
+        # SOURCE READING: To be Implemented!
+        log.error('Not yet implemented!')
+        return 99
+        # wrf_source = LocalFile(argv.input, argv.h2o, argv.temperature, argv.o3)
+        
+    # Read input Climatology grid: argv.temp for temperature, argv.h20 
+    #                        for water vapor and argv.o3 for ozone.
+    known_climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3)
+    
+    # Extract Climatology profiles at each observation site (lat, lon) 
+    # and save first guess file (argv.output).
+    known_climatology.read_and_save(obs_times, 
+                                    day_of_year, 
+                                    lons, lats, 
+                                    argv.output)
 
-    if argv.source == 'local_file':
-        wrf_source = LocalFile(argv.input)
-
-    n_levs = argv.levels
-    top_lev = np.float32(argv.top)
-
-    #try:
-    wrf_source.read_and_save(obs_times, lons, lats,
-                                 n_levs, top_lev, argv.output)
-    #except:
-    #    log.error('Error converting data!')
-    #   log.debug(format_exc())
-    #    return 100
+    # SOURCE READING: To be Implemented!
+    #
+    # n_levs = argv.levels
+    # top_lev = np.float32(argv.top)
+    # try:
+    #   wrf_source.read_and_save(obs_times, lons, lats,
+    #                            n_levs, top_lev, argv.output)
 
     log.info('Execution complete')
     return 0
