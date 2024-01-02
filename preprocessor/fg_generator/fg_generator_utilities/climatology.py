@@ -16,7 +16,7 @@
 import logging
 from netCDF4 import Dataset
 from preprocessor.fg_generator.fg_generator_utilities.first_guess import NetcdfAtmosphericFirstGuess
-from preprocessor.fg_generator.wrf2firstguess.utilities.geometry  import min_distance_indx, dist_on_earth
+from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.geometry  import min_distance_indx, dist_on_earth
 
 __author__ = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
 __copyright__ = "Copyright 2023, Adaptive Meteo S.r.l."
@@ -74,7 +74,6 @@ class ClimatologyGrid(Profile):
         return
     
     
-    @staticmethod
     def get_obs_profile(self, day_of_year, lon, lat):
         """
         Given an observation and its position, read its profile
@@ -127,7 +126,7 @@ class ClimatologyGrid(Profile):
 
 
         # Prepare the space where the data will be saved
-        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, first_guess_file)
+        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, self.pressure.size, first_guess_file)
 
         # Open the first_guess object and prepare it for saving
         # the read data

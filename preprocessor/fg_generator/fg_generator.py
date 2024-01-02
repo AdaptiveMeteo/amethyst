@@ -122,6 +122,10 @@ def main():
     max_date = str(np.max(obs_times))
     min_date = str(np.min(obs_times))
     log.debug('Observations from {} to {}'.format(min_date, max_date))
+    log.debug('Climatology Files: \n'
+              '                   {} (Temperature) \n'
+              '                   {} (Water Vapor) \n'
+              '                   {} (Ozone)'.format(argv.temp,argv.h2o,argv.o3))
 
     if argv.source != None:
         # SOURCE READING: To be Implemented!
