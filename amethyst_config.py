@@ -30,7 +30,7 @@ common_vars = {
                   "fm_version" : 3,
                   "levels"     : 81,
                   "wrfdir"     : "/mnt/satellite/amethyst_test_data/wrf",
-                  "wrkdir"     : "/home/mirto/wrkdir/amethyst_test/cris",
+                  "wrkdir"     : "/dev/shm/amethyst_test/",
                   
                   # Arctic
                   "geobox"     : { "lonmin" : -180.0,
