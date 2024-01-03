@@ -180,9 +180,9 @@ class ClimatologyGrid(Profile):
     def read_and_save(self, obs_time, day_of_year, lons, lats, first_guess_file,
                       pressure_grid = None, keep_top_climatology = False):
 
-
+        n_lev = self.pressure.size if pressure_grid is None else  pressure_grid.size
         # Prepare the space where the data will be saved
-        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, self.pressure.size, first_guess_file)
+        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, n_lev, first_guess_file)
 
         # Open the first_guess object and prepare it for saving
         # the read data
