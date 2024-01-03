@@ -141,7 +141,7 @@ def main():
         # log space
         pressure_grid = np.linspace(np.log(argv.top),
                                     np.log(argv.bottom),
-                                    argv.levels + 1)
+                                    argv.levels )
         pressure_grid = np.exp(pressure_grid)[::-1]
         
     # Read input Climatology grid: argv.temp for temperature, argv.h20 

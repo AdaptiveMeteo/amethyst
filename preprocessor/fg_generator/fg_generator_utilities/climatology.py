@@ -165,9 +165,9 @@ class ClimatologyGrid(Profile):
                                      copy=False,
                                      bounds_error=True,
                                      )
-            return Profile(temperature = np.exp(log_temp_interp( np.log(pressure_grid)))[::-1],
-                           water_vapor = np.exp(log_wv_interp( np.log(pressure_grid) ))[::-1],
-                           ozone       = np.exp(log_ozone_interp( np.log(pressure_grid) ))[::-1],
+            return Profile(temperature = log_temp_interp( np.log(pressure_grid)[::-1] )[::-1],
+                           water_vapor = log_wv_interp( np.log(pressure_grid)[::-1] )[::-1],
+                           ozone       = log_ozone_interp( np.log(pressure_grid)[::-1] )[::-1],
                            pressure    = pressure_grid )
 
         else:
@@ -181,6 +181,7 @@ class ClimatologyGrid(Profile):
                       pressure_grid = None, keep_top_climatology = False):
 
         n_lev = self.pressure.size if pressure_grid is None else  pressure_grid.size
+        print(n_lev)
         # Prepare the space where the data will be saved
         first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, n_lev, first_guess_file)
 
