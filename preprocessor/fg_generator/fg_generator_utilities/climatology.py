@@ -32,7 +32,7 @@ class ClimatologyReadingError(Exception):
     pass
 
 
-class ClimatologyBoundError(Exception):
+class ClimatologyBoundsError(Exception):
     pass
 
 class Profile(object):
@@ -79,11 +79,11 @@ class ClimatologyGrid(Profile):
     
     def check_pressure_bounds(self, top, bottom):
         if self.pressure.min() > top:
-            raise ClimatologyBoundError(f'The given pressure top ({top} hPa) is'
-                                        'outside the climatology pressure grid.')
-        if self.pressure.max() < bottom:
-            raise ClimatologyBoundError(f'The given pressure bottom ({bottom} hPa) is'
-                                        'outside the climatology pressure grid.')
+            print(self.pressure.min(), top)
+            raise ClimatologyBoundsError("The given pressure top is outside the climatology pressure grid.\n")
+        elif self.pressure.max() < bottom:
+            print(self.pressure.max(), bottom)
+            raise ClimatologyBoundsError('The given pressure bottom is outside the climatology pressure grid.\n')
         return
     
     def get_obs_profile(self, day_of_year, lon, lat):
@@ -118,13 +118,13 @@ class ClimatologyGrid(Profile):
                              )
 
         if dist < 100:
-            log.debug('Using point ({:.2f},{:.2f}) of the model (indices '
+            log.debug('Using point ({:.2f},{:.2f}) of the climatology (indices '
                       '({})) for the point ({:.2f},{:.2f}) which is '
                       '{:.2f} Km far.'.format(reference_lat, reference_lon,
                                               indx, lat, lon, dist))
 
         if dist >= 100:
-            log.warning('Using point ({:.2f},{:.2f}) of the model for the '
+            log.warning('Using point ({:.2f},{:.2f}) of the climatology for the '
                         'point ({:.2f},{:.2f}) which is {:.2f} Km far.'
                         ''.format(reference_lat, reference_lon, lat, lon, dist))
                 
