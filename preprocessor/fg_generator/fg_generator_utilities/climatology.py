@@ -177,7 +177,8 @@ class ClimatologyGrid(Profile):
 
             raise ClimatologyBoundsError("Not implemented yet!")
 
-    def read_and_save(self, obs_time, day_of_year, lons, lats, first_guess_file):
+    def read_and_save(self, obs_time, day_of_year, lons, lats, first_guess_file,
+                      pressure_grid = None, keep_top_climatology = False):
 
 
         # Prepare the space where the data will be saved
@@ -190,7 +191,7 @@ class ClimatologyGrid(Profile):
                 for obs, lat, lon in zip(range(lats.size), lats, lons):
                     log.debug('Looking for the position of the '
                               'observation {}'.format(obs))
-                    p = self.get_obs_profile(day_of_year, lon, lat)
+                    p = self.get_obs_profile(day_of_year, lon, lat, pressure_grid = pressure_grid)
 
                     # Save the profiles on the first guess object
                     first_guess.pressure_levels[obs, :] = p.pressure[:]

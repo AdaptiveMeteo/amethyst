@@ -146,8 +146,7 @@ def main():
         
     # Read input Climatology grid: argv.temp for temperature, argv.h20 
     #                        for water vapor and argv.o3 for ozone.
-    known_climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3, 
-                                        pressure_grid = pressure_grid)
+    known_climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3)
     
     # Check consistency between the given pressure grid and climatology profiles
     # in order to avoid extrapolations.
@@ -158,7 +157,8 @@ def main():
     known_climatology.read_and_save(obs_times, 
                                     day_of_year, 
                                     lons, lats, 
-                                    argv.output)
+                                    argv.output,
+                                    pressure_grid = pressure_grid)
 
     log.info('Execution complete')
     return 0
