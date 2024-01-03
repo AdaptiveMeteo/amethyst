@@ -17,6 +17,8 @@ import logging
 from netCDF4 import Dataset
 from preprocessor.fg_generator.fg_generator_utilities.first_guess import NetcdfAtmosphericFirstGuess
 from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.geometry  import min_distance_indx, dist_on_earth
+from scipy.interpolate import interp1d
+import numpy as np
 
 __author__     = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
 __copyright__  = "Copyright 2023, Adaptive Meteo S.r.l."
@@ -86,15 +88,19 @@ class ClimatologyGrid(Profile):
             raise ClimatologyBoundsError('The given pressure bottom is outside the climatology pressure grid.\n')
         return
     
-    def get_obs_profile(self, day_of_year, lon, lat):
+    def get_obs_profile(self, day_of_year, lon, lat, 
+                        pressure_grid = None, keep_top_climatology = False):
         """
         Given an observation and its position, read its profile
         
         Args:
+            - *day_of_year*: The day of the year (0-363)
             - *lon*: The longitude of the observation
             - *lat*: The latitude of the observation
-            - *day_of_year*: The day of the year (0-363)
-
+            - *pressure_grid*: (optional) Reference pressure grid above which 
+                                          to interpolate the extracted profiles
+            - *keep_top_climatology*: (optional) Boolean to keep the climatology 
+                                      profile above the reference pressure grid
         Returns:
             A Climatology profile over that point
         """
@@ -127,12 +133,49 @@ class ClimatologyGrid(Profile):
             log.warning('Using point ({:.2f},{:.2f}) of the climatology for the '
                         'point ({:.2f},{:.2f}) which is {:.2f} Km far.'
                         ''.format(reference_lat, reference_lon, lat, lon, dist))
-                
-        
-        return Profile(temperature = self.temperature[indx,day_of_year,:],
-                       water_vapor = self.water_vapor[indx,day_of_year,:],
-                       ozone       = self.ozone[indx,day_of_year,:],
-                       pressure    = self.pressure )
+            
+        if pressure_grid is None:
+            # Case with no pressure grid in input
+            return Profile(temperature = self.temperature[indx,day_of_year,:],
+                           water_vapor = self.water_vapor[indx,day_of_year,:],
+                           ozone       = self.ozone[indx,day_of_year,:],
+                           pressure    = self.pressure )
+
+        elif not keep_top_climatology:
+            # Interpolate above the given pressure grid
+            # and cut the climatology profiles above the top
+            log_wv_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.water_vapor[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+            log_temp_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.temperature[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+            log_ozone_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.ozone[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+            return Profile(temperature = np.exp(log_temp_interp( np.log(pressure_grid)))[::-1],
+                           water_vapor = np.exp(log_wv_interp( np.log(pressure_grid) ))[::-1],
+                           ozone       = np.exp(log_ozone_interp( np.log(pressure_grid) ))[::-1],
+                           pressure    = pressure_grid )
+
+        else:
+            # Otherwise, interpolate above the given pressure grid,
+            # mantain the climatology above the top and smooth
+            # the values to ensure the continuity at the merging point
+
+            raise ClimatologyBoundsError("Not implemented yet!")
 
     def read_and_save(self, obs_time, day_of_year, lons, lats, first_guess_file):
 
