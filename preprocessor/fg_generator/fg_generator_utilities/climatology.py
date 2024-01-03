@@ -18,17 +18,21 @@ from netCDF4 import Dataset
 from preprocessor.fg_generator.fg_generator_utilities.first_guess import NetcdfAtmosphericFirstGuess
 from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.geometry  import min_distance_indx, dist_on_earth
 
-__author__ = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
-__copyright__ = "Copyright 2023, Adaptive Meteo S.r.l."
-__credits__ = ["Paolo Antonelli","Paolo Scaccia"]
-__license__ = "GPL"
+__author__     = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
+__copyright__  = "Copyright 2023, Adaptive Meteo S.r.l."
+__credits__    = ["Paolo Antonelli","Paolo Scaccia"]
+__license__    = "GPL"
 __maintainer__ = "Paolo Scaccia"
-__email__ = "paolo.scaccia@adaptivemeteo.com"
+__email__      = "paolo.scaccia@adaptivemeteo.com"
 
 log = logging.getLogger(__name__)
 
 
 class ClimatologyReadingError(Exception):
+    pass
+
+
+class ClimatologyBoundError(Exception):
     pass
 
 class Profile(object):
@@ -73,6 +77,14 @@ class ClimatologyGrid(Profile):
 
         return
     
+    def check_pressure_bound(self, top, bottom):
+        if self.pressure.min() > top:
+            raise ClimatologyBoundError(f'The given pressure top ({top} hPa) is'
+                                        'outside the climatology pressure grid.')
+        if self.pressure.max() < bottom:
+            raise ClimatologyBoundError(f'The given pressure bottom ({bottom} hPa) is'
+                                        'outside the climatology pressure grid.')
+        return
     
     def get_obs_profile(self, day_of_year, lon, lat):
         """
@@ -142,5 +154,5 @@ class ClimatologyGrid(Profile):
                     first_guess.temperature[obs, :]     = p.temperature[:]
                     first_guess.water_vapour[obs, :]    = p.water_vapor[:]
                     first_guess.ozone[obs, :]           = p.ozone[:]
-                    first_guess.skin_temperature[obs] = 300
-                    first_guess.surface_pressure[obs] = 1000
+                    first_guess.skin_temperature[obs]   = 300
+                    first_guess.surface_pressure[obs]   = 1013
