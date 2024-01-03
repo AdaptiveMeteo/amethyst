@@ -150,7 +150,7 @@ def main():
     
     # Check consistency between the given pressure grid and climatology profiles
     # in order to avoid extrapolations.
-    known_climatology.check_pressure_bound(argv.top, argv.bottom)
+    known_climatology.check_pressure_bounds(argv.top, argv.bottom)
     
     # Extract Climatology profiles at each observation site (lat, lon) 
     # and save first guess file (argv.output).

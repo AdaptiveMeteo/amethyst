@@ -77,7 +77,7 @@ class ClimatologyGrid(Profile):
 
         return
     
-    def check_pressure_bound(self, top, bottom):
+    def check_pressure_bounds(self, top, bottom):
         if self.pressure.min() > top:
             raise ClimatologyBoundError(f'The given pressure top ({top} hPa) is'
                                         'outside the climatology pressure grid.')
