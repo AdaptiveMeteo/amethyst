@@ -52,6 +52,24 @@ class Profile(object):
 
 class ClimatologyGrid(Profile):
     def __init__(self, temp_climatology, h2o_climatology, o3_climatology, precision = False):
+        """
+            This class contains the climatology grid
+            readining the three input files (temperature, water vapor
+            and ozone) as input, togheter with the method to extract 
+            a profile and the corresponding error near a given point (lat,lon).
+            
+            Parameters
+            ----------
+            temp_climatology : str
+                Netcdf file with the temperature climatology.
+            h2o_climatology : str
+                Netcdf file with the water vapor climatology.
+            o3_climatology : str
+                Netcdf file with the ozone climatology.
+            precision : bool, optional
+                Flag for precision reading. The default is False.
+    
+        """
         super().__init__(self)
         try:
             with Dataset(temp_climatology,'r') as temp_file:
@@ -274,10 +292,11 @@ class ClimatologyGrid(Profile):
             raise ClimatologyBoundsError("Not implemented yet!")
 
     def read_and_save_profiles(self, obs_time, day_of_year, lons, lats, first_guess_file,
-                               pressure_grid = None, keep_top_climatology = False):
+                               pressure_grid = None, keep_top_climatology = False, 
+                               surface_pressure = 1013):
 
         n_lev = self.pressure.size if pressure_grid is None else  pressure_grid.size
-        print(n_lev)
+
         # Prepare the space where the data will be saved
         first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, n_lev, first_guess_file)
 
@@ -296,5 +315,5 @@ class ClimatologyGrid(Profile):
                     first_guess.water_vapour[obs, :]    = p.water_vapor[:]
                     first_guess.ozone[obs, :]           = p.ozone[:]
                     first_guess.skin_temperature[obs]   = p.temperature[0]
-                    first_guess.surface_pressure[obs]   = 1013
+                    first_guess.surface_pressure[obs]   = surface_pressure
                     

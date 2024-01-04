@@ -158,7 +158,8 @@ def main():
                                              day_of_year, 
                                              lons, lats, 
                                              argv.output,
-                                             pressure_grid = pressure_grid)
+                                             pressure_grid = pressure_grid,
+                                             surface_pressure = preprocessor_vars['first_guess']['surface_pressure'] )
 
     log.info('Execution complete')
     return 0

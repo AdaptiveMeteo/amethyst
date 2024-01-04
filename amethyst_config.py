@@ -62,9 +62,9 @@ preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto"
 preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris",
                                 "iasi" : preprocessor_vars["basedir"] + "/run_iasi"
                                }
-
 preprocessor_vars["first_guess"] = { "top_pressure"             : 0.005,
                                      "bottom_pressure"          : 1000,
+                                     "surface_pressure"         : 1013,
                                      "min_water_vapor"          : 0.003,
                                      "p_min_water_vapor"        : 45,
                                      "water_vapor_smooth_after" : 60
