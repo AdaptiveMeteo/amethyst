@@ -110,10 +110,8 @@ class ClimatologyGrid(Profile):
             fall outside the climatology pressure grid.
         """
         if self.pressure.min() > top:
-            print(self.pressure.min(), top)
             raise ClimatologyBoundsError("The given pressure top is outside the climatology pressure grid.\n")
         elif self.pressure.max() < bottom:
-            print(self.pressure.max(), bottom)
             raise ClimatologyBoundsError('The given pressure bottom is outside the climatology pressure grid.\n')
         return
     

@@ -270,7 +270,6 @@ def main():
                                                  table_name,
                                                  table_type,
                                                  table_dims,
-                                                 fill_value=0.,
                                                  zlib=enable_cmp,
                                                  chunksizes=chunks,
                                                  complevel=cmp_level
@@ -281,11 +280,11 @@ def main():
         output_tables['T_q'] = cov_group.createVariable('T_q',
                                                       'f4',
                                                       (NFOVS, NATMLEVELS, NATMLEVELS),
-                                                      fill_value=0.,
                                                       zlib=enable_cmp,
                                                       chunksizes=chunks,
                                                       complevel=cmp_level)
-            
+        output_tables['T_q'][:] = np.zeros_like(output_tables['T_q'][:])
+
         # Read Known Climatology
         climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3, precision = True)
         
@@ -303,7 +302,6 @@ def main():
                                                         pressure_grid = pressure_grid[i])
             
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
-                print(precision.shape,output_tables[mol][i,:].shape)
                 # Save Covariance Matrix as diagonal matrix using climatology precision
                 output_tables[mol][i, :] = np.diag(precision**2)
 
