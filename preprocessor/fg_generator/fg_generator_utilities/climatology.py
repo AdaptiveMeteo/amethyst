@@ -156,7 +156,8 @@ class ClimatologyGrid(Profile):
                         'point ({:.2f},{:.2f}) which is {:.2f} Km far.'
                         ''.format(reference_lat, reference_lon, lat, lon, dist))
             
-        return indx
+        return np.ravel_multi_index(indx, self.lons.shape)
+
     
     def get_obs_profile(self, day_of_year, lon, lat, 
                         pressure_grid = None, keep_top_climatology = False):
