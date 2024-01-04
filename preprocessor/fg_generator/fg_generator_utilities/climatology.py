@@ -72,7 +72,7 @@ class ClimatologyGrid(Profile):
             with Dataset(h2o_climatology,'r') as wv_file:
                 self.water_vapor     = wv_file['H2O_values'][:]
                 if precision:
-                    self.wv_precision  = temp_file['H2O_precision'][:]
+                    self.wv_precision  = wv_file['H2O_precision'][:]
         except:
             raise ClimatologyReadingError("Error in reading water vapor climatology")
 
@@ -80,7 +80,7 @@ class ClimatologyGrid(Profile):
             with Dataset(o3_climatology,'r') as ozone_file:
                 self.ozone     = ozone_file['O3_values'][:]
                 if precision:
-                    self.ozone_precision  = temp_file['O3_precision'][:]
+                    self.ozone_precision  = ozone_file['O3_precision'][:]
         except:
             raise ClimatologyReadingError("Error in reading temperature climatology")
 
@@ -256,28 +256,3 @@ class ClimatologyGrid(Profile):
                     first_guess.skin_temperature[obs]   = p.temperature[0]
                     first_guess.surface_pressure[obs]   = 1013
                     
-
-    def read_and_save_precision(self, obs_time, day_of_year, lons, lats, first_guess_file,
-                                pressure_grid = None, keep_top_climatology = False):
-
-        n_lev = self.pressure.size if pressure_grid is None else  pressure_grid.size
-        print(n_lev)
-        # Prepare the space where the data will be saved
-        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, n_lev, first_guess_file)
-
-        # Open the first_guess object and prepare it for saving
-        # the read data
-        with first_guess:
-            
-                for obs, lat, lon in zip(range(lats.size), lats, lons):
-                    log.debug('Looking for the position of the '
-                              'observation {}'.format(obs))
-                    p = self.get_obs_profile(day_of_year, lon, lat, pressure_grid = pressure_grid)
-
-                    # Save the profiles on the first guess object
-                    first_guess.pressure_levels[obs, :] = p.pressure[:]
-                    first_guess.temperature[obs, :]     = p.temperature[:]
-                    first_guess.water_vapour[obs, :]    = p.water_vapor[:]
-                    first_guess.ozone[obs, :]           = p.ozone[:]
-                    first_guess.skin_temperature[obs]   = p.temperature[0]
-                    first_guess.surface_pressure[obs]   = 1013

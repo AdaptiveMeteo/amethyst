@@ -120,14 +120,6 @@ def main():
             enable_cmp = True
             LOG.debug('Compression enabled with level {}'.format(cmp_level))
 
-    # Prepare the list of the excluded molecules
-    if argv.exclude == '':
-        exclude_mols = []
-        LOG.debug('All the molecules will be processed')
-    else:
-        exclude_mols = argv.exclude.split(',')
-        LOG.debug('The following molecules will be excluded: '
-                  '{}'.format(exclude_mols))
         
     # Read the input
     LOG.info('Opening observation file')
@@ -300,7 +292,7 @@ def main():
             temp_precision, wv_precision, ozone_precision = climatology.get_precision(day_of_year, lons[i],lats[i])
             
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
-                
+                print(precision.shape,output_tables[mol][i,:].shape)
                 # Save Covariance Matrix as diagonal matrix using climatology precision
                 output_tables[mol][i, :] = np.diag(precision**2)
 
