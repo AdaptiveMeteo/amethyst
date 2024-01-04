@@ -154,11 +154,11 @@ def main():
     
     # Extract Climatology profiles at each observation site (lat, lon) 
     # and save first guess file (argv.output).
-    known_climatology.read_and_save(obs_times, 
-                                    day_of_year, 
-                                    lons, lats, 
-                                    argv.output,
-                                    pressure_grid = pressure_grid)
+    known_climatology.read_and_save_profiles(obs_times, 
+                                             day_of_year, 
+                                             lons, lats, 
+                                             argv.output,
+                                             pressure_grid = pressure_grid)
 
     log.info('Execution complete')
     return 0
