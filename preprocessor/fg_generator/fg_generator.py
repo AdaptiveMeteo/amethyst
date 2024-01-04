@@ -35,7 +35,7 @@ import pandas as pd
 from netCDF4 import Dataset
 
 from amethyst_config import common_vars, preprocessor_vars
-from preprocessor.fg_generator.fg_generator_utilities.climatology import ClimatologyGrid
+from preprocessor.fg_generator.utilities.climatology import ClimatologyGrid
  
 __author__ = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
 __copyright__ = "Copyright 2023, Adaptive Meteo S.r.l."
