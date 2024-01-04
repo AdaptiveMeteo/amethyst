@@ -77,6 +77,8 @@ def main():
     parser.add_argument('output', type=str,
                         help='The first guess NetCDF file that will be '
                              'generated')
+    parser.add_argument('--firstguess', '-f', required = True,
+                        help='Amethyst First Guess')
     parser.add_argument('--verbose', '-v', choices=v_levels, default='info',
                         help='the level of verbosity of the software')
     parser.add_argument('--h2o', type=str, default=preprocessor_vars["climatology"]["h2o"],
@@ -140,13 +142,18 @@ def main():
         LOG.debug(format_exc())
         return 2
 
-    LOG.info('Saving output on file {}'.format(argv.output))
-    mode = 'w'
-    if path.exists(argv.output):
-        LOG.info('File is already present, the content will be appended')
-        mode = 'a'
+    # Read the first guess
+    LOG.info('Opening first guess file')
+    try:
+        with Dataset(argv.firstguess, 'r') as obs_file:
+            LOG.debug('Reading pressure')
+            pressure_grid = obs_file.groups[ATMGROUP].variables[PRESSVAR][:]
 
-    
+    except:
+        LOG.error('Read of the first guess pressure failed!')
+        LOG.debug(format_exc())
+        return 2
+
     LOG.info('Saving output on file {}'.format(argv.output))
     mode = 'w'
     if path.exists(argv.output):
@@ -282,14 +289,18 @@ def main():
         # Read Known Climatology
         climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3, precision = True)
         
-        # Now, for each FOV, we will look for the closest point in the
-        # covariance table
+        # Now, for each FOV, the closest precision is extracted from
+        # the climatology grid
         for i in range(lats.size):
             # For each molecule, look for the profile number that must
             # be used in the association tables
             
             # Read Climatology Precision
-            temp_precision, wv_precision, ozone_precision = climatology.get_precision(day_of_year, lons[i],lats[i])
+            temp_precision, \
+            wv_precision, \
+            ozone_precision = climatology.get_precision(day_of_year, 
+                                                        lons[i],lats[i],
+                                                        pressure_grid = pressure_grid[i])
             
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
                 print(precision.shape,output_tables[mol][i,:].shape)

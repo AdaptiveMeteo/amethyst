@@ -221,16 +221,58 @@ class ClimatologyGrid(Profile):
             A Climatology precision over that point
         """
         
+        # Check if the climatology precision has been loaded
+        if not all( [ hasattr(self, 'temp_precision'), 
+                      hasattr(self, 'wv_precision'), 
+                      hasattr(self, 'ozone_precision')]):
+            raise ClimatologyReadingError("Climatology precision not loaded!")
+        
         # Get closest grid cell
         indx = self.get_closest_cell(lon,lat)
         
-        try:
+        if pressure_grid is None:
+            # Case with no pressure grid in input: just read the precision
+
             return self.temp_precision[indx,day_of_year,:],\
                    self.wv_precision[indx,day_of_year,:],\
                    self.ozone_precision[indx,day_of_year,:]
-        except:
-            raise ClimatologyReadingError("Climatology precision not loaded!")
-    
+        elif not keep_top_climatology:
+            # Interpolate above the given pressure grid
+            # and cut the climatology precision profiles above the top pressure
+            
+            temp_precision_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.temp_precision[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+            wv_precision_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.wv_precision[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+            ozone_precision_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.ozone_precision[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+
+            return  temp_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
+                    wv_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
+                    ozone_precision_interp( np.log(pressure_grid)[::-1] )[::-1],
+
+        else:
+            # Otherwise, interpolate above the given pressure grid,
+            # mantain the climatology above the top and smooth
+            # the values to ensure the continuity at the merging point
+
+            raise ClimatologyBoundsError("Not implemented yet!")
+
     def read_and_save_profiles(self, obs_time, day_of_year, lons, lats, first_guess_file,
                                pressure_grid = None, keep_top_climatology = False):
 
