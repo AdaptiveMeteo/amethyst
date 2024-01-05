@@ -29,10 +29,8 @@ __email__      = "paolo.scaccia@adaptivemeteo.com"
 
 log = logging.getLogger(__name__)
 
-
 class ClimatologyReadingError(Exception):
     pass
-
 
 class ClimatologyBoundsError(Exception):
     pass
@@ -51,6 +49,9 @@ class Profile(object):
         
 
 class ClimatologyGrid(Profile):
+    def convert_units(values, var):
+        
+        return 
     def __init__(self, temp_climatology, h2o_climatology, o3_climatology, precision = False):
         """
             This class contains the climatology grid
@@ -73,7 +74,7 @@ class ClimatologyGrid(Profile):
         super().__init__(self)
         try:
             with Dataset(temp_climatology,'r') as temp_file:
-                self.temperature     = temp_file['T_values'][:]
+                self.temperature     = temp_file['mm_T_values'][:]
                 self.n_lats          = temp_file.dimensions['lats'].size
                 self.n_lons          = temp_file.dimensions['lons'].size
                 self.latlons         = temp_file['latlons'][:]
@@ -81,24 +82,24 @@ class ClimatologyGrid(Profile):
                 self.lons            = self.latlons[:,1].reshape(self.n_lats,self.n_lons)
                 self.pressure        = temp_file['pressure'][:]
                 if precision:
-                    self.temp_precision  = temp_file['T_precision'][:]
+                    self.temp_precision  = temp_file['mm_T_precision'][:]
                 
         except:
             raise ClimatologyReadingError("Error in reading temperature climatology")
             
         try:
             with Dataset(h2o_climatology,'r') as wv_file:
-                self.water_vapor     = wv_file['H2O_values'][:]
+                self.water_vapor     = wv_file['mm_H2O_values'][:]
                 if precision:
-                    self.wv_precision  = wv_file['H2O_precision'][:]
+                    self.wv_precision  = wv_file['mm_H2O_precision'][:]*1e4
         except:
             raise ClimatologyReadingError("Error in reading water vapor climatology")
 
         try:  
             with Dataset(o3_climatology,'r') as ozone_file:
-                self.ozone     = ozone_file['O3_values'][:]
+                self.ozone     = ozone_file['mm_O3_values'][:]*1e4
                 if precision:
-                    self.ozone_precision  = ozone_file['O3_precision'][:]
+                    self.ozone_precision  = ozone_file['mm_O3_precision'][:]
         except:
             raise ClimatologyReadingError("Error in reading temperature climatology")
 
@@ -187,30 +188,30 @@ class ClimatologyGrid(Profile):
         elif not keep_top_climatology:
             # Interpolate above the given pressure grid
             # and cut the climatology profiles above the top pressure
-            log_wv_interp = interp1d(
-                                     np.log(self.pressure[::-1]),
-                                     self.water_vapor[indx,day_of_year,:][::-1],
-                                     kind='linear',
-                                     copy=False,
-                                     bounds_error=True,
-                                     )
-            log_temp_interp = interp1d(
+            temp_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      self.temperature[indx,day_of_year,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
                                      )
-            log_ozone_interp = interp1d(
+            wv_interp = interp1d(
+                                     np.log(self.pressure[::-1]),
+                                     self.water_vapor[indx,day_of_year,:][::-1],
+                                     kind='linear',
+                                     copy=False,
+                                     bounds_error=True,
+                                     )
+            ozone_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      self.ozone[indx,day_of_year,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
                                      )
-            return Profile(temperature = log_temp_interp( np.log(pressure_grid)[::-1] )[::-1],
-                           water_vapor = log_wv_interp(   np.log(pressure_grid)[::-1] )[::-1],
-                           ozone       = log_ozone_interp( np.log(pressure_grid)[::-1] )[::-1],
+            return Profile(temperature = temp_interp( np.log(pressure_grid)[::-1] )[::-1],
+                           water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1],
+                           ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1],
                            pressure    = pressure_grid )
 
         else:
@@ -264,16 +265,18 @@ class ClimatologyGrid(Profile):
                                      copy=False,
                                      bounds_error=True,
                                      )
+            # Interpolate Relative error: STDEV / Q 
             wv_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     self.wv_precision[indx,day_of_year,:][::-1],
+                                     (self.wv_precision/self.water_vapor)[indx,day_of_year,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
                                      )
+            # Interpolate Relative error: STDEV / O3 
             ozone_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     self.ozone_precision[indx,day_of_year,:][::-1],
+                                     (self.ozone_precision/self.ozone)[indx,day_of_year,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
