@@ -135,7 +135,7 @@ def main():
             obs_times = obs_file.variables[TIME][:]
             # Convert to numpy datetime
             obs_times.dtype = 'datetime64[ms]'
-            day_of_year = pd.DatetimeIndex(obs_times).dayofyear[0] - 1
+            month = pd.DatetimeIndex(obs_times).month[0] - 1
 
     except:
         LOG.error('Read of the latitude or longitude failed!')
@@ -297,9 +297,9 @@ def main():
             # Read Climatology Precision
             temp_precision, \
             wv_precision, \
-            ozone_precision = climatology.get_precision(day_of_year, 
+            ozone_precision = climatology.get_precision(month, 
                                                         lons[i],lats[i],
-                                                        pressure_grid = pressure_grid[i])
+                                                        pressure_grid = np.array(pressure_grid[i]))
             
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
                 # Save Covariance Matrix as diagonal matrix using climatology precision

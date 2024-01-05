@@ -82,16 +82,16 @@ class ClimatologyGrid(Profile):
                 self.lons            = self.latlons[:,1].reshape(self.n_lats,self.n_lons)
                 self.pressure        = temp_file['pressure'][:]
                 if precision:
-                    self.temp_precision  = temp_file['mm_T_precision'][:]
+                    self.temp_precision  = np.abs(temp_file['mm_T_prec'][:])
                 
         except:
             raise ClimatologyReadingError("Error in reading temperature climatology")
             
         try:
             with Dataset(h2o_climatology,'r') as wv_file:
-                self.water_vapor     = wv_file['mm_H2O_values'][:]
+                self.water_vapor     = wv_file['mm_H2O_values'][:]*1e4
                 if precision:
-                    self.wv_precision  = wv_file['mm_H2O_precision'][:]*1e4
+                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:])*1e4
         except:
             raise ClimatologyReadingError("Error in reading water vapor climatology")
 
@@ -99,7 +99,7 @@ class ClimatologyGrid(Profile):
             with Dataset(o3_climatology,'r') as ozone_file:
                 self.ozone     = ozone_file['mm_O3_values'][:]*1e4
                 if precision:
-                    self.ozone_precision  = ozone_file['mm_O3_precision'][:]
+                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:])*1e4
         except:
             raise ClimatologyReadingError("Error in reading temperature climatology")
 
@@ -158,13 +158,13 @@ class ClimatologyGrid(Profile):
         return np.ravel_multi_index(indx, self.lons.shape)
 
     
-    def get_obs_profile(self, day_of_year, lon, lat, 
+    def get_obs_profile(self, month, lon, lat, 
                         pressure_grid = None, keep_top_climatology = False):
         """
         Given an observation and its position, read its profile
         
         Args:
-            - *day_of_year*: The day of the year (0-363)
+            - *month*: Month of the year (0-11)
             - *lon*: The longitude of the observation
             - *lat*: The latitude of the observation
             - *pressure_grid*: (optional) Reference pressure grid above which 
@@ -180,9 +180,9 @@ class ClimatologyGrid(Profile):
         
         if pressure_grid is None:
             # Case with no pressure grid in input: just read the profile
-            return Profile(temperature = self.temperature[indx,day_of_year,:],
-                           water_vapor = self.water_vapor[indx,day_of_year,:],
-                           ozone       = self.ozone[indx,day_of_year,:],
+            return Profile(temperature = self.temperature[indx,month,:],
+                           water_vapor = self.water_vapor[indx,month,:],
+                           ozone       = self.ozone[indx,month,:],
                            pressure    = self.pressure )
 
         elif not keep_top_climatology:
@@ -190,21 +190,21 @@ class ClimatologyGrid(Profile):
             # and cut the climatology profiles above the top pressure
             temp_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     self.temperature[indx,day_of_year,:][::-1],
+                                     self.temperature[indx,month,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
                                      )
             wv_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     self.water_vapor[indx,day_of_year,:][::-1],
+                                     self.water_vapor[indx,month,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
                                      )
             ozone_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     self.ozone[indx,day_of_year,:][::-1],
+                                     self.ozone[indx,month,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
@@ -222,13 +222,13 @@ class ClimatologyGrid(Profile):
             raise ClimatologyBoundsError("Not implemented yet!")
 
 
-    def get_precision(self, day_of_year, lon, lat, 
+    def get_precision(self, month, lon, lat, 
                         pressure_grid = None, keep_top_climatology = False):
         """
         Given an observation and its position, read its precision
         
         Args:
-            - *day_of_year*: The day of the year (0-363)
+            - *month*: Month of the year (0-363)
             - *lon*: The longitude of the observation
             - *lat*: The latitude of the observation
             - *pressure_grid*: (optional) Reference pressure grid above which 
@@ -251,16 +251,16 @@ class ClimatologyGrid(Profile):
         if pressure_grid is None:
             # Case with no pressure grid in input: just read the precision
 
-            return self.temp_precision[indx,day_of_year,:],\
-                   self.wv_precision[indx,day_of_year,:],\
-                   self.ozone_precision[indx,day_of_year,:]
+            return self.temp_precision[indx,month,:],\
+                   self.wv_precision[indx,month,:],\
+                   self.ozone_precision[indx,month,:]
         elif not keep_top_climatology:
             # Interpolate above the given pressure grid
             # and cut the climatology precision profiles above the top pressure
-            
+            print(self.temp_precision[indx,month,:])
             temp_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     self.temp_precision[indx,day_of_year,:][::-1],
+                                     self.temp_precision[indx,month,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
@@ -268,7 +268,7 @@ class ClimatologyGrid(Profile):
             # Interpolate Relative error: STDEV / Q 
             wv_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     (self.wv_precision/self.water_vapor)[indx,day_of_year,:][::-1],
+                                     (self.wv_precision/self.water_vapor)[indx,month,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
@@ -276,7 +276,7 @@ class ClimatologyGrid(Profile):
             # Interpolate Relative error: STDEV / O3 
             ozone_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
-                                     (self.ozone_precision/self.ozone)[indx,day_of_year,:][::-1],
+                                     (self.ozone_precision/self.ozone)[indx,month,:][::-1],
                                      kind='linear',
                                      copy=False,
                                      bounds_error=True,
@@ -293,7 +293,7 @@ class ClimatologyGrid(Profile):
 
             raise ClimatologyBoundsError("Not implemented yet!")
 
-    def read_and_save_profiles(self, obs_time, day_of_year, lons, lats, first_guess_file,
+    def read_and_save_profiles(self, obs_time, month, lons, lats, first_guess_file,
                                pressure_grid = None, keep_top_climatology = False, 
                                surface_pressure = 1013):
 
@@ -309,7 +309,7 @@ class ClimatologyGrid(Profile):
                 for obs, lat, lon in zip(range(lats.size), lats, lons):
                     log.debug('Looking for the position of the '
                               'observation {}'.format(obs))
-                    p = self.get_obs_profile(day_of_year, lon, lat, pressure_grid = pressure_grid)
+                    p = self.get_obs_profile(month, lon, lat, pressure_grid = pressure_grid)
 
                     # Save the profiles on the first guess object
                     first_guess.pressure_levels[obs, :] = p.pressure[:]

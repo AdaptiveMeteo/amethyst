@@ -116,7 +116,7 @@ def main():
             obs_times = position_file.variables[TIME][:]
             # Convert to numpy datetime
             obs_times.dtype = 'datetime64[ms]'
-            day_of_year = pd.DatetimeIndex(obs_times).dayofyear[0] - 1
+            month = pd.DatetimeIndex(obs_times).month[0] - 1
     except:
         log.error('Read of observation time failed!')
         log.debug(format_exc())
@@ -155,7 +155,7 @@ def main():
     # Extract Climatology profiles at each observation site (lat, lon) 
     # and save first guess file (argv.output).
     known_climatology.read_and_save_profiles(obs_times, 
-                                             day_of_year, 
+                                             month, 
                                              lons, lats, 
                                              argv.output,
                                              pressure_grid = pressure_grid,
