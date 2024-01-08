@@ -37,7 +37,7 @@ from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 
-from preprocessor.fg_generator.utilities.climatology import ClimatologyGrid
+from preprocessor.utilities.climatology import ClimatologyGrid
 from utilities.geometry import min_distance_indx, dist_on_earth
 from amethyst_config import common_vars, preprocessor_vars
 

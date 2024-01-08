@@ -150,11 +150,6 @@ class ClimatologyGrid(Profile):
                       '{:.2f} Km far.'.format(reference_lat, reference_lon,
                                               indx, lat, lon, dist))
 
-        if dist >= 100:
-            log.warning('Using point ({:.2f},{:.2f}) of the climatology for the '
-                        'point ({:.2f},{:.2f}) which is {:.2f} Km far.'
-                        ''.format(reference_lat, reference_lon, lat, lon, dist))
-            
         return np.ravel_multi_index(indx, self.lons.shape)
 
     
@@ -257,7 +252,6 @@ class ClimatologyGrid(Profile):
         elif not keep_top_climatology:
             # Interpolate above the given pressure grid
             # and cut the climatology precision profiles above the top pressure
-            print(self.temp_precision[indx,month,:])
             temp_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      self.temp_precision[indx,month,:][::-1],
