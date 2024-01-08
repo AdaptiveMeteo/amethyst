@@ -284,6 +284,7 @@ def main():
                                                       chunksizes=chunks,
                                                       complevel=cmp_level)
         output_tables['T_q'][:] = np.zeros_like(output_tables['T_q'][:])
+        output_tables['T_q'].units = 'K'
 
         # Read Known Climatology
         climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3, precision = True)
@@ -304,6 +305,12 @@ def main():
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
                 # Save Covariance Matrix as diagonal matrix using climatology precision
                 output_tables[mol][i, :] = np.diag(precision**2)
+
+        # Set variable units
+        output_tables['T'].units = 'K'
+        output_tables['q'].units = 'log(kg/kg)'
+        output_tables['O3'].units = 'log(kg/kg)'
+
 
     LOG.info('Execution complete')
     return 0

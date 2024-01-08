@@ -89,17 +89,17 @@ class ClimatologyGrid(Profile):
             
         try:
             with Dataset(h2o_climatology,'r') as wv_file:
-                self.water_vapor     = wv_file['mm_H2O_values'][:]*1e4
+                self.water_vapor     = wv_file['mm_H2O_values'][:]*10 # kg/kg
                 if precision:
-                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:])*1e4
+                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:])*10 # kg/kg
         except:
             raise ClimatologyReadingError("Error in reading water vapor climatology")
 
         try:  
             with Dataset(o3_climatology,'r') as ozone_file:
-                self.ozone     = ozone_file['mm_O3_values'][:]*1e4
+                self.ozone     = ozone_file['mm_O3_values'][:]*10 # kg/kg
                 if precision:
-                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:])*1e4
+                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:])*10 # kg/kg
         except:
             raise ClimatologyReadingError("Error in reading temperature climatology")
 
@@ -176,8 +176,8 @@ class ClimatologyGrid(Profile):
         if pressure_grid is None:
             # Case with no pressure grid in input: just read the profile
             return Profile(temperature = self.temperature[indx,month,:],
-                           water_vapor = self.water_vapor[indx,month,:],
-                           ozone       = self.ozone[indx,month,:],
+                           water_vapor = self.water_vapor[indx,month,:], # kg/kg
+                           ozone       = self.ozone[indx,month,:],       # kg/kg
                            pressure    = self.pressure )
 
         elif not keep_top_climatology:
@@ -205,8 +205,8 @@ class ClimatologyGrid(Profile):
                                      bounds_error=True,
                                      )
             return Profile(temperature = temp_interp( np.log(pressure_grid)[::-1] )[::-1],
-                           water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1]/1000,  # kg/kg
-                           ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1]/1000, # kg/kg
+                           water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1],  # kg/kg
+                           ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1], # kg/kg
                            pressure    = pressure_grid )
 
         else:
