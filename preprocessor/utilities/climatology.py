@@ -205,8 +205,8 @@ class ClimatologyGrid(Profile):
                                      bounds_error=True,
                                      )
             return Profile(temperature = temp_interp( np.log(pressure_grid)[::-1] )[::-1],
-                           water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1],
-                           ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1],
+                           water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1]/1000,  # kg/kg
+                           ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1]/1000, # kg/kg
                            pressure    = pressure_grid )
 
         else:

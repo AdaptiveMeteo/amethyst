@@ -259,10 +259,10 @@ class NetcdfAtmosphericFirstGuess(AtmosphericFirstGuess):
             create_var_in_atm(TEMPERATURE, 'K', min=170., max=360.)
 
             # Save water vapour
-            create_var_in_atm(WATERVAPOUR, 'g/kg', max=100.)
+            create_var_in_atm(WATERVAPOUR, 'kg/kg', min = 0., max = 1.0)
 
             # Save ozone
-            create_var_in_atm(OZONE, 'log(kg/kg)', min=np.log(1e-25), max=0)
+            create_var_in_atm(OZONE, 'kg/kg', min=0., max=1)
 
             # Save skin temperature
             create_var_in_atm(SKINTEMPERATURE, 'K', dims=(FOVNUM,),
