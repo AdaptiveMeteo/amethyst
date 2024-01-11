@@ -16,9 +16,11 @@
 import logging
 from netCDF4 import Dataset
 from preprocessor.fg_generator.fg_generator_utilities.first_guess import NetcdfAtmosphericFirstGuess
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.geometry  import min_distance_indx, dist_on_earth
+from preprocessor.fg_generator.fg_generator_utilities.geometry  import min_distance_indx, dist_on_earth
+from preprocessor.fg_generator.fg_generator_utilities.wrf_file  import WrfFile
 from scipy.interpolate import interp1d
 import numpy as np
+from pandas import DatetimeIndex
 
 __author__     = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
 __copyright__  = "Copyright 2023, Adaptive Meteo S.r.l."
@@ -33,6 +35,9 @@ class ClimatologyReadingError(Exception):
     pass
 
 class ClimatologyBoundsError(Exception):
+    pass
+
+class AdditionalFileReadingError(Exception):
     pass
 
 class Profile(object):
@@ -153,36 +158,37 @@ class ClimatologyGrid(Profile):
         return np.ravel_multi_index(indx, self.lons.shape)
 
     
-    def get_obs_profile(self, month, lon, lat, 
-                        pressure_grid = None, keep_top_climatology = False):
+    def get_obs_profile(self, month, time, lon, lat, 
+                        pressure_grid = None,  source_data = None):
         """
         Given an observation and its position, read its profile
         
         Args:
             - *month*: Month of the year (0-11)
+            - *time*: The time (np.datetime64[ms]) of the observation
             - *lon*: The longitude of the observation
             - *lat*: The latitude of the observation
             - *pressure_grid*: (optional) Reference pressure grid above which 
                                           to interpolate the extracted profiles
-            - *keep_top_climatology*: (optional) Boolean to keep the climatology 
-                                      profile above the reference pressure grid
+            - *source_data*: (optional) Additional data from wich to read 
+                                  atmospheric profiles for the first guess
         Returns:
             A Climatology profile over that point
         """
 
-        # Get closest grid cell
+        # Get closest climatology grid cell
         indx = self.get_closest_cell(lon,lat)
         
-        if pressure_grid is None:
+        if pressure_grid is None and source_data is None:
             # Case with no pressure grid in input: just read the profile
             return Profile(temperature = self.temperature[indx,month,:],
                            water_vapor = self.water_vapor[indx,month,:], # kg/kg
                            ozone       = self.ozone[indx,month,:],       # kg/kg
                            pressure    = self.pressure )
-
-        elif not keep_top_climatology:
-            # Interpolate above the given pressure grid
-            # and cut the climatology profiles above the top pressure
+        else:
+            # Case in which a pressure_grid and/or source data are given
+            
+            # Create climatology interpolators
             temp_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      self.temperature[indx,month,:][::-1],
@@ -204,19 +210,56 @@ class ClimatologyGrid(Profile):
                                      copy=False,
                                      bounds_error=True,
                                      )
-            return Profile(temperature = temp_interp( np.log(pressure_grid)[::-1] )[::-1],
-                           water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1],  # kg/kg
-                           ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1], # kg/kg
-                           pressure    = pressure_grid )
+            
+            if source_data is None:
+                # If an external file is not given then use the
+                # return the interpolated climatology profiles
 
-        else:
-            # Otherwise, interpolate above the given pressure grid,
-            # mantain the climatology above the top and smooth
-            # the values to ensure the continuity at the merging point
+                return Profile(temperature = temp_interp( np.log(pressure_grid)[::-1] )[::-1],
+                               water_vapor = wv_interp(   np.log(pressure_grid)[::-1] )[::-1],  # kg/kg
+                               ozone       = ozone_interp( np.log(pressure_grid)[::-1] )[::-1], # kg/kg
+                               pressure    = pressure_grid )
 
-            raise ClimatologyBoundsError("Not implemented yet!")
-
-
+            else:
+                # Otherwise, read the source profile and merge it with the climatology,
+                # and then smooth the values to ensure the continuity at the merging point
+                
+                # Get source timestep
+                timestep = source_data.get_closest_cell(time)
+                
+                # Read source profile
+                source_profile = source_data.get_profile(timestep, lon, lat)
+                
+                # Define climatology pressure levels above the source
+                n_climatology_levels  = pressure_grid.shape[-1] - source_profile.n_of_levels
+                source_top            = np.min(source_profile.pressure_levels)
+                climatology_top       = np.min(pressure_grid)
+                log_top_pressure_grid = np.linspace( source_top,
+                                                 climatology_top,
+                                                 n_climatology_levels )[::-1]
+                top_pressure_grid   = np.exp(log_top_pressure_grid)
+                
+                # Retrieve climatology profile for the levels avove the source
+                climatology_profile =  Profile(temperature = temp_interp(  np.log(top_pressure_grid)[::-1] )[::-1],
+                                               water_vapor = wv_interp(    np.log(top_pressure_grid)[::-1] )[::-1],  # kg/kg
+                                               ozone       = ozone_interp( np.log(top_pressure_grid)[::-1] )[::-1], # kg/kg
+                                               pressure    = top_pressure_grid )
+                
+                # Merge and smooth the two profiles
+                merged_temperature = np.concatenate((source_profile.temperature, 
+                                                     climatology_profile.temperature))
+                merged_water_vapor = np.concatenate((source_profile.water_vapour, 
+                                                     climatology_profile.water_vapor))
+                merged_water_ozone = np.concatenate(( ozone_interp( np.log(source_profile.pressure_levels)[::-1])[::-1], 
+                                                      climatology_profile.ozone))
+                merged_pressure    = np.concatenate((source_profile.pressure_levels, top_pressure_grid))
+                
+                return Profile(temperature = merged_temperature,
+                               water_vapor = merged_water_vapor,
+                               ozone       = merged_water_ozone,
+                               pressure    = merged_pressure
+                               )
+            
     def get_precision(self, month, lon, lat, 
                         pressure_grid = None, keep_top_climatology = False):
         """
@@ -287,29 +330,51 @@ class ClimatologyGrid(Profile):
 
             raise ClimatologyBoundsError("Not implemented yet!")
 
-    def read_and_save_profiles(self, obs_time, month, lons, lats, first_guess_file,
-                               pressure_grid = None, keep_top_climatology = False, 
-                               surface_pressure = 1013):
+    def read_and_save_profiles(self, obs_times, month,  lons, lats, first_guess_file,
+                               pressure_grid = None,   keep_top_climatology = False, 
+                               source_file = None, default_surface_pressure = 1013, ):
+
+        
+        obs_month = DatetimeIndex(obs_times).month[0] - 1
 
         n_lev = self.pressure.size if pressure_grid is None else  pressure_grid.size
 
         # Prepare the space where the data will be saved
-        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_time, n_lev, first_guess_file)
+        first_guess = NetcdfAtmosphericFirstGuess(lons, lats, obs_times, n_lev, first_guess_file)
 
+        # If the additional file is given, try to read it
+        # using different wrappers (right now WrfFile is the only implemented).
+        if source_file is None:
+            source_data = None
+        else:
+            try:
+                # using different wrappers (right now only WrfFile is implemented)
+                # Try to read externel file with the WRF wrapper
+                source_data = WrfFile(source_file)
+            except:
+                raise AdditionalFileReadingError("Source is not a WRF File. Specific wrapper not implemented yet!")
+            
         # Open the first_guess object and prepare it for saving
         # the read data
         with first_guess:
             
-                for obs, lat, lon in zip(range(lats.size), lats, lons):
+                for obs, time, lat, lon in zip(range(lats.size), obs_times, lats, lons):
                     log.debug('Looking for the position of the '
                               'observation {}'.format(obs))
-                    p = self.get_obs_profile(month, lon, lat, pressure_grid = pressure_grid)
-
+                    
+                    # Retrieve profile closest to the observation
+                    p = self.get_obs_profile(obs_month, time, lon, lat, 
+                                             pressure_grid = pressure_grid,
+                                             source_data = source_data)
+                    
+                    # Read Superificial Values
+                    skin_temperature = p.temperature[0] if source_data is None else source_data.skin_temperature
+                    surface_pressure = default_surface_pressure if source_data is None else source_data.surface_pressure
+                    
                     # Save the profiles on the first guess object
                     first_guess.pressure_levels[obs, :] = p.pressure[:]
                     first_guess.temperature[obs, :]     = p.temperature[:]
                     first_guess.water_vapour[obs, :]    = p.water_vapor[:]
                     first_guess.ozone[obs, :]           = p.ozone[:]
-                    first_guess.skin_temperature[obs]   = p.temperature[0]
+                    first_guess.skin_temperature[obs]   = skin_temperature
                     first_guess.surface_pressure[obs]   = surface_pressure
-                    

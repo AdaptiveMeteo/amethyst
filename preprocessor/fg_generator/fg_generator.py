@@ -31,7 +31,6 @@ from sys import exit as sysexit
 from traceback import format_exc
 
 import numpy as np
-import pandas as pd
 from netCDF4 import Dataset
 
 from amethyst_config import common_vars, preprocessor_vars
@@ -64,7 +63,7 @@ def main():
                         help='The first guess NetCDF file that will be'
                              ' generated')
     parser.add_argument('--source', '-s', type=str, required = False, default = None,
-                        help='Where are the Wrf model data.')
+                        help='Source file for the atmospheric profiles')
     parser.add_argument('--input', '-i', type=str, default=None,
                         help='If the source is "local_file", please specify the'
                              ' path of the input file')
@@ -116,7 +115,6 @@ def main():
             obs_times = position_file.variables[TIME][:]
             # Convert to numpy datetime
             obs_times.dtype = 'datetime64[ms]'
-            month = pd.DatetimeIndex(obs_times).month[0] - 1
     except:
         log.error('Read of observation time failed!')
         log.debug(format_exc())
@@ -130,19 +128,11 @@ def main():
               '                   {} (Water Vapor) \n'
               '                   {} (Ozone)'.format(argv.temp,argv.h2o,argv.o3))
 
-    # Define First Guess Pressure Grid
-    if argv.source != None:
-        # SOURCE READING: To be Implemented!
-        log.error('Not yet implemented!')
-        return 99
-        # wrf_source = LocalFile(argv.input, argv.h2o, argv.temperature, argv.o3)
-    else:
-        # Otherwise, introduce new levels equispaced in the
-        # log space
-        pressure_grid = np.linspace(np.log(argv.top),
-                                    np.log(argv.bottom),
-                                    argv.levels )
-        pressure_grid = np.exp(pressure_grid)[::-1]
+    # Define Climatology Pressure Grid
+    pressure_grid = np.linspace(np.log(argv.top),
+                                np.log(argv.bottom),
+                                argv.levels )
+    pressure_grid = np.exp(pressure_grid)[::-1]
         
     # Read input Climatology grid: argv.temp for temperature, argv.h20 
     #                        for water vapor and argv.o3 for ozone.
@@ -155,11 +145,11 @@ def main():
     # Extract Climatology profiles at each observation site (lat, lon) 
     # and save first guess file (argv.output).
     known_climatology.read_and_save_profiles(obs_times, 
-                                             month, 
                                              lons, lats, 
                                              argv.output,
                                              pressure_grid = pressure_grid,
-                                             surface_pressure = preprocessor_vars['first_guess']['surface_pressure'] )
+                                             surface_pressure = preprocessor_vars['first_guess']['surface_pressure'],
+                                             additional_file  = argv.source )
 
     log.info('Execution complete')
     return 0
