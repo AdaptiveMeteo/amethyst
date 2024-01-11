@@ -17,7 +17,7 @@ import logging
 from netCDF4 import Dataset
 from preprocessor.fg_generator.fg_generator_utilities.first_guess import NetcdfAtmosphericFirstGuess
 from preprocessor.fg_generator.fg_generator_utilities.geometry  import min_distance_indx, dist_on_earth
-from preprocessor.fg_generator.fg_generator_utilities.wrf_file  import WrfFile
+from preprocessor.fg_generator.fg_generator_utilities.source  import SourceFile
 from scipy.interpolate import interp1d
 import numpy as np
 from pandas import DatetimeIndex
@@ -350,8 +350,7 @@ class ClimatologyGrid(Profile):
             try:
                 # using different wrappers (right now only WrfFile is implemented)
                 # Try to read externel file with the WRF wrapper
-                source_data = WrfFile(source_file)
-                print(source_file)
+                source_data = SourceFile(source_file)
                 print('here',source_data.times)
             except:
                 raise AdditionalFileReadingError("Source is not a WRF File. Specific wrapper not implemented yet!")

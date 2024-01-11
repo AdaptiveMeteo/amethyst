@@ -118,7 +118,7 @@ def main():
         log.error('Read of observation time failed!')
         log.debug(format_exc())
         return 4
-    print(argv.observations)
+
     max_date = str(np.max(obs_times))
     min_date = str(np.min(obs_times))
     log.debug('Observations from {} to {}'.format(min_date, max_date))

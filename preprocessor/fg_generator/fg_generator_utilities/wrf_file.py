@@ -106,7 +106,7 @@ class WrfFile(object):
         self.__mode = 'r'
         self.__filepointer = None
         self.clean_cache()
-
+        
     def clean_cache(self):
         """
         The WrfFile keeps in memory all the information that it reads to recall
@@ -330,73 +330,3 @@ class WrfFile(object):
     def lev_num(self):
         return self.water_vapour.shape[-1]
 
-    def get_closest_timestep(self, obs_time):
-        """
-        Given the observation time return the closest timestep
-        
-        Args:
-            -*obs_time*: The observation time in np.datetime64[ms]
-            
-        Returns:
-            Index of the closest WRF timestep
-        """
-        print(self.times)
-        return argmin(abs(self.times - obs_time))
-    
-    def get_profile(self, time_step, lon, lat):
-        """
-        Given an observation and its position, read its profile
-        
-        Args:
-            - *lon*: The longitude of the observation
-            - *lat*: The latitude of the observation
-            - *time_step*: The time step of the wrf_model
-            - *wrf_file*: The output of a wrf model which contains the data
-              that must be saved
-
-        Returns:
-            A WrfProfile over that point
-        """
-
-        wrf_lons = self.lons[time_step, :]
-        wrf_lats = self.lats[time_step, :]
-
-        i, j = min_distance_indx(
-                                         lon,
-                                         lat,
-                                         wrf_lons,
-                                         wrf_lats,
-                                         )
-
-        reference_lon = wrf_lons[i, j]
-        reference_lat = wrf_lats[i, j]
-
-        dist = dist_on_earth(
-                             lon,
-                             lat,
-                             reference_lon,
-                             reference_lat
-                             )
-
-        if dist < 100:
-            log.debug('Using point ({:.2f},{:.2f}) of the model (indices '
-                      '({}, {})) for the point ({:.2f},{:.2f}) which is '
-                      '{:.2f} Km far.'.format(reference_lat, reference_lon,
-                                              i, j, lat, lon, dist))
-
-        if dist >= 100:
-            log.warning('Using point ({:.2f},{:.2f}) of the model for the '
-                        'point ({:.2f},{:.2f}) which is {:.2f} Km far.'
-                        ''.format(reference_lat, reference_lon, lat, lon, dist))
-        
-        n_of_levels      = self.lev_num
-        pressure         = self.pressure[time_step, i, j]
-        temperature      = self.temperature[time_step, i, j]
-        water_vapour     = self.water_vapour[time_step, i, j]
-        skin_temperature = self.skin_temperature[time_step, i, j]
-        surface_pressure = self.surface_pressure[time_step, i, j]
-
-        p = WrfProfile(lon, lat, n_of_levels, pressure, temperature,
-                       water_vapour, skin_temperature, surface_pressure)
-
-        return p
