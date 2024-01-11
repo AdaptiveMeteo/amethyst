@@ -18,7 +18,7 @@ import logging
 import numpy as np
 from scipy.interpolate import interp1d
 from supersmoother import SuperSmoother
-from amethyst_config import preprocessing_vars
+from amethyst_config import preprocessor_vars
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
@@ -29,15 +29,15 @@ __email__ = "stefano.piani@exact-lab.it"
 
 # The minimum value of the water vapour reached in the highest levels of the
 # atmosphere
-MIN_WATER_VAPOUR = preprocessing_vars["first_guess"]["min_water_vapor"]
+MIN_WATER_VAPOUR = preprocessor_vars["first_guess"]["min_water_vapor"]
 
 # The pressure (in hPa) where such value is reached
-P_MIN_WATER_VAPOUR = preprocessing_vars["first_guess"]["p_min_water_vapor"]
+P_MIN_WATER_VAPOUR = preprocessor_vars["first_guess"]["p_min_water_vapor"]
 
 # The pressure (in hPa) where the profile will start to be smoothed
 # If you put here the same value of P_MIN_WATER_VAPOUR, no smoothing
 # will be performed
-WATER_VAPOUR_SMOOTH_AFTER = preprocessing_vars["first_guess"]["water_vapor_smooth_after"]
+WATER_VAPOUR_SMOOTH_AFTER = preprocessor_vars["first_guess"]["water_vapor_smooth_after"]
 
 log = logging.getLogger(__name__)
 

@@ -179,23 +179,23 @@ def launch_preprocessing(argv):
         
         #Build command cascade for qsub
         if argv.instrument == 'cris':
-                        
+            print(wrffile)
             # Calls to CrIS preprocessor scripts
             cmd_cascade = [
-                   
-                             "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
-                                                           "--outfile {}/cloudmask.nc -v info "
-                                                           "--lonmin {} --lonmax {} --latmin {} "
-                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
-                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-                                                          
-                             "python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc "
-                                                           "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
-                                                           "--lonmin {} --lonmax {} --latmin {}  "
-                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
-                                                                                argv.output,argv.cmt,argv.output,
-                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-                                                    
+                             #
+                             #"python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
+                             #                              "--outfile {}/cloudmask.nc -v info "
+                             #                              "--lonmin {} --lonmax {} --latmin {} "
+                             #                              "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
+                             #                                                   argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+                             #                             
+                             #"python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc "
+                             #                              "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
+                             #                              "--lonmin {} --lonmax {} --latmin {}  "
+                             #                              "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
+                             #                                                   argv.output,argv.cmt,argv.output,
+                             #                                                   argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
+                             
                              "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {} "
                                                            " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
