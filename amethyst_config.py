@@ -83,8 +83,8 @@ processor_vars = {
                 "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList_862.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients_oss_v3.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",
-                "fg_file"         : common_vars['wrkdir'] + "/fg_climatology_weighted.nc",
-                "apriori_file"    : common_vars['wrkdir'] + "/apriori_climatology_weighted.nc",
+                "fg_file"         : common_vars['wrkdir'] + "/fg.nc",
+                "apriori_file"    : common_vars['wrkdir'] + "/apriori.nc",
                 
                 # Geometry
                 "observation_altitude" : {"units":"Km",   "value":100.0},

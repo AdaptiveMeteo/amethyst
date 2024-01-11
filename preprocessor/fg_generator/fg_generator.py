@@ -148,8 +148,8 @@ def main():
                                              lons, lats, 
                                              argv.output,
                                              pressure_grid = pressure_grid,
-                                             surface_pressure = preprocessor_vars['first_guess']['surface_pressure'],
-                                             additional_file  = argv.source )
+                                             default_surface_pressure = preprocessor_vars['first_guess']['surface_pressure'],
+                                             source_file  = argv.source )
 
     log.info('Execution complete')
     return 0

@@ -145,16 +145,17 @@ class WrfFile(object):
         if self.cache['times'] is None:
             if self.__filepointer is not None:
                 log.debug('Reading "Times" table')
-                raw_time = self.__filepointer.variables['Times']
+                raw_time = self.__filepointer.variables['Times'][:]
             else:
                 log.debug('Opening file {}'.format(self.__filename))
                 with Dataset(self.__filename, 'r') as f:
                     log.debug('Reading "Times" table')
-                    raw_time = f.variables['Times']
+                    raw_time = f.variables['Times'][:]
 
             # The raw times are array of bytes; we have to convert them in
             # strings
             string_times = []
+            print(raw_time)
             for t in raw_time:
                 t_str = ''.join(k.decode('ASCII') for k in t)
                 string_times.append(t_str)
@@ -339,7 +340,7 @@ class WrfFile(object):
         Returns:
             Index of the closest WRF timestep
         """
-        
+        print(self.times)
         return argmin(abs(self.times - obs_time))
     
     def get_profile(self, time_step, lon, lat):

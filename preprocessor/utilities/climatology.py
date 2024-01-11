@@ -225,7 +225,7 @@ class ClimatologyGrid(Profile):
                 # and then smooth the values to ensure the continuity at the merging point
                 
                 # Get source timestep
-                timestep = source_data.get_closest_cell(time)
+                timestep = source_data.get_closest_timestep(time)
                 
                 # Read source profile
                 source_profile = source_data.get_profile(timestep, lon, lat)
@@ -330,7 +330,7 @@ class ClimatologyGrid(Profile):
 
             raise ClimatologyBoundsError("Not implemented yet!")
 
-    def read_and_save_profiles(self, obs_times, month,  lons, lats, first_guess_file,
+    def read_and_save_profiles(self, obs_times, lons, lats, first_guess_file,
                                pressure_grid = None,   keep_top_climatology = False, 
                                source_file = None, default_surface_pressure = 1013, ):
 
@@ -351,6 +351,8 @@ class ClimatologyGrid(Profile):
                 # using different wrappers (right now only WrfFile is implemented)
                 # Try to read externel file with the WRF wrapper
                 source_data = WrfFile(source_file)
+                print(source_file)
+                print('here',source_data.times)
             except:
                 raise AdditionalFileReadingError("Source is not a WRF File. Specific wrapper not implemented yet!")
             

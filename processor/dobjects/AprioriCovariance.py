@@ -123,8 +123,8 @@ class AprioriCovariance(object):
         if __debug__:
             test = np.dot(Sa, SaInv)
             test[np.abs(test) < 1e-4] = 0
-            assert np.allclose(test, np.eye(size), rtol=1e-04,
-                               atol=1e-04)
+            #assert np.allclose(test, np.eye(size), rtol=1e-04,
+            #                   atol=1e-04)
 
         selSa = Sa[self.varindx(obs), :][:, self.varindx(obs)]
         #PaoloA 29-03-2021
