@@ -155,7 +155,6 @@ class WrfFile(object):
             # The raw times are array of bytes; we have to convert them in
             # strings
             string_times = []
-            print(raw_time)
             for t in raw_time:
                 t_str = ''.join(k.decode('ASCII') for k in t)
                 string_times.append(t_str)
@@ -168,18 +167,18 @@ class WrfFile(object):
     def lats(self):
         if self.cache['lats'] is None:
             if self.__filepointer is not None:
-                log.debug('Reading "XLAT" table')
                 fp = self.__filepointer
+                log.debug('Reading "XLAT" table')
                 self.cache['lats'] = array(
                                            fp.variables['XLAT'][:],
                                            dtype=float32
                                            )
             else:
                 log.debug('Opening file {}'.format(self.__filename))
-                with Dataset(self.__filename, 'r') as f:
+                with Dataset(self.__filename, 'r') as fp:
                     log.debug('Reading "XLAT" table')
                     self.cache['lats'] = array(
-                                               f.variables['XLAT'][:],
+                                               fp.variables['XLAT'][:],
                                                dtype=float32,
                                                )
         return self.cache['lats']
@@ -188,15 +187,15 @@ class WrfFile(object):
     def lons(self):
         if self.cache['lons'] is None:
             if self.__filepointer is not None:
-                log.debug('Reading "XLONG" table')
                 fp = self.__filepointer
+                log.debug('Reading "XLONG" table')
                 self.cache['lons'] = array(
                                            fp.variables['XLONG'][:],
                                            dtype=float32,
                                            )
             else:
                 log.debug('Opening file {}'.format(self.__filename))
-                with Dataset(self.__filename, 'r') as f:
+                with Dataset(self.__filename, 'r') as fp:
                     log.debug('Reading "XLONG" table')
                     self.cache['lons'] = array(
                                                fp.variables['XLONG'][:],
@@ -208,8 +207,8 @@ class WrfFile(object):
     def water_vapour(self):
         if self.cache['water_vapour'] is None:
             if self.__filepointer is not None:
-                log.debug('Reading "QVAPOR" table')
                 fp = self.__filepointer
+                log.debug('Reading "QVAPOR" table')
                 vapour = array(
                                fp.variables['QVAPOR'][:],
                                dtype=float32
@@ -217,7 +216,7 @@ class WrfFile(object):
                 # Multiply by 1000 to return values in g/Kg                
             else:
                 log.debug('Opening file {}'.format(self.__filename))
-                with Dataset(self.__filename, 'r') as f:
+                with Dataset(self.__filename, 'r') as fp:
                     log.debug('Reading "QVAPOR" table')
                     vapour = array(
                                    fp.variables['QVAPOR'][:],
@@ -330,3 +329,32 @@ class WrfFile(object):
     def lev_num(self):
         return self.water_vapour.shape[-1]
 
+
+    def get_profile(self, t, i, j):
+        """
+        Return the profile for the point of coordinate t, i, j in the model.
+        Be carefull that t, i and j are not physical quantities, but just the
+        index of the particular point in the model
+
+        Args:
+            - *t*: the time-step of the point in the model
+            - *i*: the first index of the spacial grid of the model
+            - *j*: the second index of the spacial grid of the model
+
+        Return:
+            A WrfProfile over that point
+        """
+
+        lon = self.lons[t, i, j]
+        lat = self.lats[t, i, j]
+        n_of_levels = self.lev_num
+        pressure = self.pressure[t, i, j]
+        temperature = self.temperature[t, i, j]
+        water_vapour = self.water_vapour[t, i, j]
+        skin_temperature = self.skin_temperature[t, i, j]
+        surface_pressure = self.surface_pressure[t, i, j]
+
+        p = WrfProfile(lon, lat, n_of_levels, pressure, temperature,
+                       water_vapour, skin_temperature, surface_pressure)
+
+        return p

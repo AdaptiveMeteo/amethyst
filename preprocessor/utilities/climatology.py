@@ -44,12 +44,15 @@ class Profile(object):
     def __init__(self, temperature = None, 
                        pressure    = None, 
                        water_vapor = None,
-                       ozone       = None):
+                       ozone       = None,
+                       skin_temperature = None,
+                       surface_pressure = None):
         self.temperature = temperature
         self.pressure    = pressure
         self.water_vapor = water_vapor
         self.ozone       = ozone
-        
+        self.skin_temperature = skin_temperature
+        self.surface_pressure = surface_pressure
         return
         
 
@@ -228,36 +231,46 @@ class ClimatologyGrid(Profile):
                 timestep = source_data.get_closest_timestep(time)
                 
                 # Read source profile
-                source_profile = source_data.get_profile(timestep, lon, lat)
-                
+                source_profile = source_data.get_obs_profile(timestep, lon, lat)
+
                 # Define climatology pressure levels above the source
                 n_climatology_levels  = pressure_grid.shape[-1] - source_profile.n_of_levels
                 source_top            = np.min(source_profile.pressure_levels)
                 climatology_top       = np.min(pressure_grid)
-                log_top_pressure_grid = np.linspace( source_top,
-                                                 climatology_top,
-                                                 n_climatology_levels )[::-1]
+                log_top_pressure_grid = np.linspace( np.log(climatology_top),
+                                                     np.log(source_top),
+                                                     n_climatology_levels )[::-1]
                 top_pressure_grid   = np.exp(log_top_pressure_grid)
-                
                 # Retrieve climatology profile for the levels avove the source
-                climatology_profile =  Profile(temperature = temp_interp(  np.log(top_pressure_grid)[::-1] )[::-1],
-                                               water_vapor = wv_interp(    np.log(top_pressure_grid)[::-1] )[::-1],  # kg/kg
-                                               ozone       = ozone_interp( np.log(top_pressure_grid)[::-1] )[::-1], # kg/kg
+                climatology_profile =  Profile(temperature = temp_interp(  log_top_pressure_grid[::-1] )[::-1],
+                                               water_vapor = wv_interp(    log_top_pressure_grid[::-1] )[::-1], # kg/kg
+                                               ozone       = ozone_interp( log_top_pressure_grid[::-1] )[::-1], # kg/kg
                                                pressure    = top_pressure_grid )
                 
-                # Merge and smooth the two profiles
+                # Merge all profiles
+                merged_pressure    = np.concatenate((source_profile.pressure_levels, top_pressure_grid))
                 merged_temperature = np.concatenate((source_profile.temperature, 
                                                      climatology_profile.temperature))
                 merged_water_vapor = np.concatenate((source_profile.water_vapour, 
                                                      climatology_profile.water_vapor))
-                merged_water_ozone = np.concatenate(( ozone_interp( np.log(source_profile.pressure_levels)[::-1])[::-1], 
-                                                      climatology_profile.ozone))
-                merged_pressure    = np.concatenate((source_profile.pressure_levels, top_pressure_grid))
-                
+                if merged_pressure.max() > self.pressure.max():
+                       # If WRF pressure grid starts below the climatology pressure
+                       # fill the gap with constant ozone levels
+                       ozone_start_indx = np.where( merged_pressure <= self.pressure.max())[0]
+                       n_missing_levs   = merged_pressure.size - ozone_start_indx.size
+                       const_ozone_levels  = np.array([ self.ozone[indx,month,0] for i in range(n_missing_levs) ])
+                       merged_ozone = np.concatenate(( const_ozone_levels, 
+                                                       ozone_interp( np.log(merged_pressure[ozone_start_indx])[::-1])[::-1]
+                                                    )) # kg/kg
+                else:
+                       merged_ozone = ozone_interp( np.log(merged_pressure)[::-1])[::-1] # kg/kg
+
                 return Profile(temperature = merged_temperature,
                                water_vapor = merged_water_vapor,
-                               ozone       = merged_water_ozone,
-                               pressure    = merged_pressure
+                               ozone       = merged_ozone,
+                               pressure    = merged_pressure,
+                               skin_temperature = source_profile.skin_temperature,
+                               surface_pressure = source_profile.surface_pressure
                                )
             
     def get_precision(self, month, lon, lat, 
@@ -351,7 +364,6 @@ class ClimatologyGrid(Profile):
                 # using different wrappers (right now only WrfFile is implemented)
                 # Try to read externel file with the WRF wrapper
                 source_data = SourceFile(source_file)
-                print('here',source_data.times)
             except:
                 raise AdditionalFileReadingError("Source is not a WRF File. Specific wrapper not implemented yet!")
             
@@ -369,9 +381,9 @@ class ClimatologyGrid(Profile):
                                              source_data = source_data)
                     
                     # Read Superificial Values
-                    skin_temperature = p.temperature[0] if source_data is None else source_data.skin_temperature
-                    surface_pressure = default_surface_pressure if source_data is None else source_data.surface_pressure
-                    
+                    skin_temperature = p.temperature[0] if p.skin_temperature is None else p.skin_temperature
+                    surface_pressure = default_surface_pressure if p.surface_pressure is None else p.surface_pressure
+
                     # Save the profiles on the first guess object
                     first_guess.pressure_levels[obs, :] = p.pressure[:]
                     first_guess.temperature[obs, :]     = p.temperature[:]

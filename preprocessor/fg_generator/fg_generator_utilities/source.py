@@ -19,15 +19,8 @@ import logging
 import numpy as np
 from sys import exit as sysexit
 
-from sources.source import Source
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.wrf_file             import WrfFile
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.split_by_time        import split_by_time
-from utilities.geometry                                                                     import min_distance_indx, dist_on_earth
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.temp_extrapolator    import TempExtrapolator
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.level_interpolations import interp_temperature_over_levels, \
-                                           interp_water_vapour_over_levels
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.climatology          import generate_ozone_profile
-from preprocessor.fg_generator.wrf2firstguess.wrf2firstguess_utilities.first_guess          import NetcdfAtmosphericFirstGuess
+from preprocessor.fg_generator.fg_generator_utilities.wrf_file  import WrfFile
+from preprocessor.fg_generator.fg_generator_utilities.geometry  import min_distance_indx, dist_on_earth
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
@@ -47,7 +40,7 @@ TEMP_EXTRAPOLATOR_COEFFICIENTS = path.join(
 log = logging.getLogger(__name__)
 
 
-class SourceFile(Source):
+class SourceFile(object):
     """
     A LocalFile source retrieves information for the first guess from a single
     file on the disk (usually, the output of a WRF model).
@@ -81,9 +74,11 @@ class SourceFile(Source):
             raise ValueError('{} is not a regular file'.format(self.path))
 
         with  WrfFile(self.path) as open_wrf_file:
-            self.times = wrf_file.times
+            self.times    = open_wrf_file.times
             self.wrf_file = open_wrf_file
-            
+            self.skin_temperature = open_wrf_file.skin_temperature
+            self.surface_pressure = open_wrf_file.surface_pressure
+
     def __exit__(self):
         del(self.wrf_file)
         return
@@ -102,7 +97,7 @@ class SourceFile(Source):
         Returns:
             A WrfProfile over that point
         """
-        wrf_file = self.open_wrf_file
+        wrf_file = self.wrf_file
         wrf_lons = wrf_file.lons[time_step, :]
         wrf_lats = wrf_file.lats[time_step, :]
 
