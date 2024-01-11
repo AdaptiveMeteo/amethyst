@@ -21,6 +21,7 @@ from preprocessor.fg_generator.fg_generator_utilities.source  import SourceFile
 from scipy.interpolate import interp1d
 import numpy as np
 from pandas import DatetimeIndex
+from supersmoother import SuperSmoother
 
 __author__     = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
 __copyright__  = "Copyright 2023, Adaptive Meteo S.r.l."
@@ -265,6 +266,12 @@ class ClimatologyGrid(Profile):
                 else:
                        merged_ozone = ozone_interp( np.log(merged_pressure)[::-1])[::-1] # kg/kg
 
+                # Smooth merged profiles
+                sm = SuperSmoother() # Define Smoother
+                for profile in [ merged_temperature, merged_water_vapor, merged_ozone ]:
+                    sm.fit( merged_pressure, profile)
+                    profile = sm.predict(merged_pressure)
+                    
                 return Profile(temperature = merged_temperature,
                                water_vapor = merged_water_vapor,
                                ozone       = merged_ozone,
