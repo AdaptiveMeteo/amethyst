@@ -268,12 +268,16 @@ class ClimatologyGrid(Profile):
 
                 # Smooth merged profiles
                 sm = SuperSmoother() # Define Smoother
-                for profile in [ merged_temperature, merged_water_vapor, merged_ozone ]:
-                    sm.fit( merged_pressure, profile)
-                    profile = sm.predict(merged_pressure)
-                    
-                return Profile(temperature = merged_temperature,
-                               water_vapor = merged_water_vapor,
+                def smooth(x, cut, n_points = 2):
+                   sm.fit(merged_pressure, x)
+                   
+                   return np.concatenate(( x[:cut - n_points:] ,
+                                           sm.predict(merged_pressure[cut - n_points:cut + n_points ]),
+                                           x[cut + n_points:] ))
+                smoothed_temperature = smooth(merged_temperature, cut = source_profile.n_of_levels)
+                smoothed_water_vapor = smooth(merged_water_vapor, cut = source_profile.n_of_levels)
+                return Profile(temperature = smoothed_temperature,
+                               water_vapor = smoothed_water_vapor,
                                ozone       = merged_ozone,
                                pressure    = merged_pressure,
                                skin_temperature = source_profile.skin_temperature,
