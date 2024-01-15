@@ -284,8 +284,7 @@ class ClimatologyGrid(Profile):
                                surface_pressure = source_profile.surface_pressure
                                )
             
-    def get_precision(self, month, lon, lat, 
-                        pressure_grid = None):
+    def get_precision(self, month, lon, lat):
         """
         Given an observation and its position, read its precision
         
@@ -293,8 +292,6 @@ class ClimatologyGrid(Profile):
             - *month*: Month of the year (0-363)
             - *lon*: The longitude of the observation
             - *lat*: The latitude of the observation
-            - *pressure_grid*: (optional) Reference pressure grid above which 
-                                          to interpolate the extracted profiles
         Returns:
             A Climatology precision over that point
         """
@@ -307,45 +304,51 @@ class ClimatologyGrid(Profile):
         
         # Get closest grid cell
         indx = self.get_closest_cell(lon,lat)
+        return  self.temp_precision[indx,month,:],  \
+                self.wv_precision[indx,month,:],    \
+                self.ozone_precision[indx,month,:]
+        """
+        # Deprecated Version: the interpolation is not 
+        # correct neither necessary
         
-        if pressure_grid is None:
-            # Case with no pressure grid in input: just read the precision
+        # if pressure_grid is None:
+        #     # Case with no pressure grid in input: just read the precision
 
-            return self.temp_precision[indx,month,:],\
-                   self.wv_precision[indx,month,:],\
-                   self.ozone_precision[indx,month,:]
+        #     return self.temp_precision[indx,month,:],\
+        #            self.wv_precision[indx,month,:],\
+        #            self.ozone_precision[indx,month,:]
                    
-        else:
-            # Interpolate above the given pressure grid
-            temp_precision_interp = interp1d(
-                                     np.log(self.pressure[::-1]),
-                                     self.temp_precision[indx,month,:][::-1],
-                                     kind='linear',
-                                     copy=False,
-                                     bounds_error=True,
-                                     )
+        # else:
+        #     # Interpolate above the given pressure grid
+        #     temp_precision_interp = interp1d(
+        #                              np.log(self.pressure[::-1]),
+        #                              self.temp_precision[indx,month,:][::-1],
+        #                              kind='linear',
+        #                              copy=False,
+        #                              bounds_error=True,
+        #                              )
             
-            # Interpolate Log error: STDEV / Q 
-            wv_precision_interp = interp1d(
-                                     np.log(self.pressure[::-1]),
-                                     (self.wv_precision/self.water_vapor)[indx,month,:][::-1],
-                                     kind='linear',
-                                     copy=False,
-                                     bounds_error=True,
-                                     )
-            # Interpolate Log error: STDEV / O3 
-            ozone_precision_interp = interp1d(
-                                     np.log(self.pressure[::-1]),
-                                     (self.ozone_precision/self.ozone)[indx,month,:][::-1],
-                                     kind='linear',
-                                     copy=False,
-                                     bounds_error=True,
-                                     )
+        #     # Interpolate Log error: STDEV / Q 
+        #     wv_precision_interp = interp1d(
+        #                              np.log(self.pressure[::-1]),
+        #                              (self.wv_precision/self.water_vapor)[indx,month,:][::-1],
+        #                              kind='linear',
+        #                              copy=False,
+        #                              bounds_error=True,
+        #                              )
+        #     # Interpolate Log error: STDEV / O3 
+        #     ozone_precision_interp = interp1d(
+        #                              np.log(self.pressure[::-1]),
+        #                              (self.ozone_precision/self.ozone)[indx,month,:][::-1],
+        #                              kind='linear',
+        #                              copy=False,
+        #                              bounds_error=True,
+        #                              )
 
-            return  temp_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
-                    wv_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
-                    ozone_precision_interp( np.log(pressure_grid)[::-1] )[::-1],
-
+        #     return  temp_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
+        #             wv_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
+        #             ozone_precision_interp( np.log(pressure_grid)[::-1] )[::-1],
+        """
 
     def read_and_save_profiles(self, obs_times, lons, lats, first_guess_file,
                                pressure_grid = None,  keep_top_climatology = False, 
