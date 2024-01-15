@@ -38,16 +38,17 @@ import numpy as np
 import pandas as pd
 
 from preprocessor.utilities.climatology import ClimatologyGrid
+from preprocessor.apriori_generator.apriori_generator_utilities.source_apriori_tools import scale_apriori_covariance
 from utilities.geometry import min_distance_indx, dist_on_earth
 from amethyst_config import common_vars, preprocessor_vars
 
-__author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
-__copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
-__credits__ = ["Stefano Piani", "Paolo Antonelli"]
-__license__ = "GPL"
-__version__ = "1.0"
-__maintainer__ = "Stefano Piani"
-__email__ = "stefano.piani@exact-lab.it"
+__author__     = 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>'
+__copyright__  = "Copyright 2023, AdaptiveMeteo S.r.l."
+__credits__    = ["Paolo Scaccia", "Paolo Antonelli"]
+__license__    = "GPL"
+__version__    = "1.0"
+__maintainer__ = "Paolo Scaccia"
+__email__      = "paolo.scaccia@adaptivemeteo.com"
 
 if __name__ == '__main__':
     LOG = logging.getLogger()
@@ -91,6 +92,9 @@ def main():
                         help='The level of compression of the output file. By '
                              'default is 4, 0 means "no compression", 9 is the '
                              'maximum')
+    parser.add_argument('--source_apriori', type=str, required = False, default = None,
+                        help='Path to netcdf containing the apriori covariance of '
+                             'the external source (i.e. WRF covariance).')
     argv = parser.parse_args()
 
     # Prepare the log class
@@ -145,15 +149,41 @@ def main():
     # Read the first guess
     LOG.info('Opening first guess file')
     try:
-        with Dataset(argv.firstguess, 'r') as obs_file:
+        with Dataset(argv.firstguess, 'r') as fg_file:
             LOG.debug('Reading pressure')
-            pressure_grid = obs_file.groups[ATMGROUP].variables[PRESSVAR][:]
-
+            pressure_grid = fg_file.groups[ATMGROUP].variables[PRESSVAR][:]
     except:
         LOG.error('Read of the first guess pressure failed!')
         LOG.debug(format_exc())
         return 2
 
+    # Read source apriori covariance, if given,
+    # and project it to the source pressure grid
+    if argv.source_apriori is not None:
+        LOG.info('Opening source apriori file')
+        try:
+            with Dataset(argv.source_apriori, 'r') as source_file:
+                LOG.debug('Reading source apriori')
+                n_source_lev = source_file.n_lev
+                
+                # Read Source Static pressure grid
+                apriori_source_pressure = source_file.groups[ATMGROUP].variables[PRESSVAR][:]
+                
+                # Split fg pressure grid into source and climatology profiles
+                fg_source_pressure      = pressure_grid[:,:n_source_lev]
+                ozone_pressure_grid     = np.copy(pressure_grid)
+                pressure_grid           = pressure_grid[:,n_source_lev:]
+
+                # Read Source Static Covariances
+                static_covariances = {}
+                for mol in ['T', 'q', 'T_q']:
+                    static_covariances[mol] = source_file.groups[ATMGROUP].groups[COVGROUP].variables[mol][:]
+                    
+        except:
+            LOG.error('Read of the source apriori failed!')
+            LOG.debug(format_exc())
+            return 2
+    
     LOG.info('Saving output on file {}'.format(argv.output))
     mode = 'w'
     if path.exists(argv.output):
@@ -292,23 +322,54 @@ def main():
         # Now, for each FOV, the closest precision is extracted from
         # the climatology grid
         for i in range(lats.size):
-            # For each molecule, look for the profile number that must
-            # be used in the association tables
             
             # Read Climatology Precision
-            temp_precision, \
-            wv_precision, \
-            ozone_precision = climatology.get_precision(month, 
-                                                        lons[i],lats[i],
-                                                        pressure_grid = np.array(pressure_grid[i]))
+            temp_precision, wv_precision, ozone_precision = climatology.get_precision(month, 
+                                                                                      lons[i],lats[i],
+                                                                                      pressure_grid = np.array(pressure_grid[i]))
             
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
-                # Save Covariance Matrix as diagonal matrix using climatology precision
-                output_tables[mol][i, :] = np.diag(precision**2)
+                if argv.source_apriori is not None:
+                    # If a source static apriori is given, 
+                    # merge the climatology covariance with the
+                    # reprojected source apriori covariance
+                    
+                    if mol == 'O3':
+                        # Fill Ozone Apriori Covariance
+
+                        # Read Ozone Precision
+                        _, _, ozone_precision = climatology.get_precision(month, 
+                                                                          lons[i],lats[i],
+                                                                          pressure_grid = ozone_pressure_grid[i])
+                        # Save the Ozone Covariance Matrix as diagonal matrix 
+                        output_tables[mol][i, :] = np.diag(ozone_precision**2)
+                    else:
+                        # Fill Temperature and Water Vapor Apriori Covariance
+                        
+                        # For the top levels  save the climatology Covariance Matrix 
+                        # as diagonal matrix using the read precision
+                        output_tables[mol][i, n_source_lev:] = np.diag(precision**2)
+                        
+                        # Use the rescaled source apriori covariance for bottom levels (T and q)
+                        output_tables[mol][i, :n_source_lev] = scale_apriori_covariance( static_covariances[mol], 
+                                                                                         apriori_source_pressure, 
+                                                                                         fg_source_pressure[i] )
+                    
+                else:
+                    # Otherwise just use the climatology precision
+                    # Save Covariance Matrix as diagonal matrix using climatology precision
+                    output_tables[mol][i, :] = np.diag(precision**2)
+
+            if argv.source_apriori is not None:
+                # If the source apriori covariance is given 
+                # use it also for the Temperature-Water Vapor covariance                
+                output_tables['T_q'][i, :n_source_lev] = scale_apriori_covariance( static_covariances['T_q'], 
+                                                                                   apriori_source_pressure, 
+                                                                                   fg_source_pressure[i] )
 
         # Set variable units
-        output_tables['T'].units = 'K'
-        output_tables['q'].units = 'log(kg/kg)'
+        output_tables['T'].units  = 'K'
+        output_tables['q'].units  = 'log(kg/kg)'
         output_tables['O3'].units = 'log(kg/kg)'
 
 

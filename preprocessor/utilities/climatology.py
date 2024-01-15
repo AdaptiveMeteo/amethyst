@@ -316,6 +316,7 @@ class ClimatologyGrid(Profile):
             return self.temp_precision[indx,month,:],\
                    self.wv_precision[indx,month,:],\
                    self.ozone_precision[indx,month,:]
+                   
         elif not keep_top_climatology:
             # Interpolate above the given pressure grid
             # and cut the climatology precision profiles above the top pressure
@@ -326,7 +327,7 @@ class ClimatologyGrid(Profile):
                                      copy=False,
                                      bounds_error=True,
                                      )
-            # Interpolate Relative error: STDEV / Q 
+            # Interpolate Log error: STDEV / Q 
             wv_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      (self.wv_precision/self.water_vapor)[indx,month,:][::-1],
@@ -334,7 +335,7 @@ class ClimatologyGrid(Profile):
                                      copy=False,
                                      bounds_error=True,
                                      )
-            # Interpolate Relative error: STDEV / O3 
+            # Interpolate Log error: STDEV / O3 
             ozone_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      (self.ozone_precision/self.ozone)[indx,month,:][::-1],
@@ -355,8 +356,8 @@ class ClimatologyGrid(Profile):
             raise ClimatologyBoundsError("Not implemented yet!")
 
     def read_and_save_profiles(self, obs_times, lons, lats, first_guess_file,
-                               pressure_grid = None,   keep_top_climatology = False, 
-                               source_file = None, default_surface_pressure = 1013, ):
+                               pressure_grid = None,  keep_top_climatology = False, 
+                               source_file = None,    default_surface_pressure = 1013 ):
 
         
         obs_month = DatetimeIndex(obs_times).month[0] - 1
