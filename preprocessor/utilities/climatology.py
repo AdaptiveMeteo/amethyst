@@ -285,7 +285,7 @@ class ClimatologyGrid(Profile):
                                )
             
     def get_precision(self, month, lon, lat, 
-                        pressure_grid = None, keep_top_climatology = False):
+                        pressure_grid = None):
         """
         Given an observation and its position, read its precision
         
@@ -295,8 +295,6 @@ class ClimatologyGrid(Profile):
             - *lat*: The latitude of the observation
             - *pressure_grid*: (optional) Reference pressure grid above which 
                                           to interpolate the extracted profiles
-            - *keep_top_climatology*: (optional) Boolean to keep the climatology 
-                                      profile above the reference pressure grid
         Returns:
             A Climatology precision over that point
         """
@@ -317,9 +315,8 @@ class ClimatologyGrid(Profile):
                    self.wv_precision[indx,month,:],\
                    self.ozone_precision[indx,month,:]
                    
-        elif not keep_top_climatology:
+        else:
             # Interpolate above the given pressure grid
-            # and cut the climatology precision profiles above the top pressure
             temp_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
                                      self.temp_precision[indx,month,:][::-1],
@@ -327,6 +324,7 @@ class ClimatologyGrid(Profile):
                                      copy=False,
                                      bounds_error=True,
                                      )
+            
             # Interpolate Log error: STDEV / Q 
             wv_precision_interp = interp1d(
                                      np.log(self.pressure[::-1]),
@@ -348,12 +346,6 @@ class ClimatologyGrid(Profile):
                     wv_precision_interp( np.log(pressure_grid)[::-1] )[::-1],\
                     ozone_precision_interp( np.log(pressure_grid)[::-1] )[::-1],
 
-        else:
-            # Otherwise, interpolate above the given pressure grid,
-            # mantain the climatology above the top and smooth
-            # the values to ensure the continuity at the merging point
-
-            raise ClimatologyBoundsError("Not implemented yet!")
 
     def read_and_save_profiles(self, obs_times, lons, lats, first_guess_file,
                                pressure_grid = None,  keep_top_climatology = False, 
