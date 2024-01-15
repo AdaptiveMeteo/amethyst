@@ -164,7 +164,8 @@ def main():
         try:
             with Dataset(argv.source_apriori, 'r') as source_file:
                 LOG.debug('Reading source apriori')
-                n_source_lev = source_file.n_lev
+                LOG.debug(argv.source_apriori)
+                n_source_lev = source_file.dimensions['number_of_atmospheric_levels'].size
                 
                 # Read Source Static pressure grid
                 apriori_source_pressure = source_file.groups[ATMGROUP].variables[PRESSVAR][:]
@@ -177,7 +178,7 @@ def main():
                 # Read Source Static Covariances
                 static_covariances = {}
                 for mol in ['T', 'q', 'T_q']:
-                    static_covariances[mol] = source_file.groups[ATMGROUP].groups[COVGROUP].variables[mol][:]
+                    static_covariances[mol] = source_file.groups[ATMGROUP].groups[COVGROUP].variables[mol][0,:,:]
                     
         except:
             LOG.error('Read of the source apriori failed!')
@@ -339,21 +340,24 @@ def main():
 
                         # Read Ozone Precision
                         _, _, ozone_precision = climatology.get_precision(month, 
-                                                                          lons[i],lats[i],
-                                                                          pressure_grid = ozone_pressure_grid[i])
-                        # Save the Ozone Covariance Matrix as diagonal matrix 
-                        output_tables[mol][i, :] = np.diag(ozone_precision**2)
+                                                                          lons[i],lats[i])
+                        # Define ozone covariance matrix
+                        ozone_covariance = np.diag(ozone_precision**2)
+                        
+                        # Rescale Ozone Covariance for the ozone pressure grid
+                        output_tables['O3'][i, :] = scale_apriori_covariance( ozone_covariance,
+                                                                              climatology.pressure,
+                                                                              ozone_pressure_grid[i], warning = False)
                     else:
                         # Fill Temperature and Water Vapor Apriori Covariance
                         
                         # For the top levels  save the climatology Covariance Matrix 
                         # as diagonal matrix using the read precision
                         output_tables[mol][i, n_source_lev:] = np.diag(precision**2)
-                        
                         # Use the rescaled source apriori covariance for bottom levels (T and q)
                         output_tables[mol][i, :n_source_lev] = scale_apriori_covariance( static_covariances[mol], 
-                                                                                         apriori_source_pressure, 
-                                                                                         fg_source_pressure[i] )
+                                                                                         apriori_source_pressure,
+                                                                                         fg_source_pressure[i], warning = False) 
                     
                 else:
                     # Otherwise just use the climatology precision
@@ -365,7 +369,7 @@ def main():
                 # use it also for the Temperature-Water Vapor covariance                
                 output_tables['T_q'][i, :n_source_lev] = scale_apriori_covariance( static_covariances['T_q'], 
                                                                                    apriori_source_pressure, 
-                                                                                   fg_source_pressure[i] )
+                                                                                   fg_source_pressure[i], warning = False)
 
         # Set variable units
         output_tables['T'].units  = 'K'
