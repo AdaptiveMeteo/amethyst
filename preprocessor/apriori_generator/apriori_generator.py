@@ -380,7 +380,7 @@ def main():
                     reverse_top_covariance = np.diag(precision[::-1]**2)
                     output_tables[mol][i, :]  = scale_apriori_covariance( reverse_top_covariance, 
                                                                           np.log(climatology.pressure)[::-1],
-                                                                          np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1]
+                                                                          np.log(pressure_grid[i]), warning = False)[::-1,::-1]
 
             if argv.source_apriori is not None:
                 # If the source apriori covariance is given 
