@@ -166,15 +166,15 @@ def main():
                 LOG.debug('Reading source apriori')
                 LOG.debug(argv.source_apriori)
                 n_source_lev = source_file.dimensions['number_of_atmospheric_levels'].size
-                
+
                 # Read Source Static pressure grid
-                reverse_apriori_source_pressure = source_file.groups[ATMGROUP].variables[PRESSVAR][:,::-1]
+                reverse_apriori_source_pressure = source_file.groups[ATMGROUP].variables[PRESSVAR][::-1]
+                print(pressure_grid.shape,'here',n_source_lev)
                 
                 # Split fg pressure grid into source and climatology profiles
-                reverse_fg_source_pressure = pressure_grid[:,:n_source_lev][:,::-1]
+                reverse_fg_source_pressure = np.copy(pressure_grid[:,:n_source_lev])[:,::-1]
                 reverse_ozone_pressure     = np.copy(pressure_grid)[:,::-1]
                 pressure_grid              = pressure_grid[:,n_source_lev:]
-
                 # Read Source Static Covariances
                 static_covariances = {}
                 for mol in ['T', 'q', 'T_q']:
@@ -350,8 +350,9 @@ def main():
                         # For the top levels  save the climatology Covariance Matrix 
                         # as diagonal matrix using the read precision
                         reverse_top_covariance = np.diag(precision[::-1]**2)
+                        print(pressure_grid.shape,reverse_fg_source_pressure[i].shape)
                         output_tables[mol][i, n_source_lev:]  = scale_apriori_covariance( reverse_top_covariance, 
-                                                                                          np.log(pressure_grid)[::-1],
+                                                                                          np.log(pressure_grid[i])[::-1],
                                                                                           np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1]
                         
                         # Use the rescaled source apriori covariance for bottom levels (T and q)
