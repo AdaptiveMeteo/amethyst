@@ -169,12 +169,11 @@ def main():
 
                 # Read Source Static pressure grid
                 reverse_apriori_source_pressure = source_file.groups[ATMGROUP].variables[PRESSVAR][::-1]
-                print(pressure_grid.shape,'here',n_source_lev)
                 
-                # Split fg pressure grid into source and climatology profiles
+                # Split fg pressure grid into source and climatology levels
                 reverse_fg_source_pressure = np.copy(pressure_grid[:,:n_source_lev])[:,::-1]
                 reverse_ozone_pressure     = np.copy(pressure_grid)[:,::-1]
-                pressure_grid              = pressure_grid[:,n_source_lev:]
+                pressure_grid              = pressure_grid[:,n_source_lev:] # new climatology levels
                 # Read Source Static Covariances
                 static_covariances = {}
                 for mol in ['T', 'q', 'T_q']:
@@ -319,7 +318,6 @@ def main():
 
         # Read Known Climatology
         climatology = ClimatologyGrid(argv.temp, argv.h2o, argv.o3, precision = True)
-        
         # Now, for each FOV, the closest precision is extracted from
         # the climatology grid
         for i in range(lats.size):
@@ -339,7 +337,6 @@ def main():
                         # Fill Ozone Apriori Covariance
                         # Define ozone covariance matrix
                         ozone_covariance = np.diag(ozone_precision[::-1]**2)
-                        
                         # Rescale Ozone Covariance for the ozone pressure grid
                         output_tables['O3'][i, :] = scale_apriori_covariance( ozone_covariance,
                                                                               np.log(climatology.pressure)[::-1],
@@ -350,13 +347,13 @@ def main():
                         # For the top levels  save the climatology Covariance Matrix 
                         # as diagonal matrix using the read precision
                         reverse_top_covariance = np.diag(precision[::-1]**2)
-                        print(pressure_grid.shape,reverse_fg_source_pressure[i].shape)
-                        output_tables[mol][i, n_source_lev:]  = scale_apriori_covariance( reverse_top_covariance, 
-                                                                                          np.log(pressure_grid[i])[::-1],
-                                                                                          np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1]
-                        
+                        rescaled_top_covariance  = scale_apriori_covariance( reverse_top_covariance, 
+                                                                                          np.log(climatology.pressure)[::-1],
+                                                                                          np.log(pressure_grid[i])[::-1], warning = False)[::-1,::-1]
+                        output_tables[mol][i, n_source_lev:,n_source_lev:] = rescaled_top_covariance
+
                         # Use the rescaled source apriori covariance for bottom levels (T and q)
-                        output_tables[mol][i, :n_source_lev] = scale_apriori_covariance( static_covariances[mol][::-1,::-1], 
+                        output_tables[mol][i, :n_source_lev,:n_source_lev] = scale_apriori_covariance( static_covariances[mol][::-1,::-1], 
                                                                                          np.log(reverse_apriori_source_pressure),
                                                                                          np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1] 
                     
@@ -370,10 +367,10 @@ def main():
 
             if argv.source_apriori is not None:
                 # If the source apriori covariance is given 
-                # use it also for the Temperature-Water Vapor covariance                
-                output_tables['T_q'][i, :n_source_lev] = scale_apriori_covariance( static_covariances['T_q'][::-1,::-1], 
-                                                                                   np.log(reverse_apriori_source_pressure), 
-                                                                                   np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1]
+                # use it also for the Temperature-Water Vapor covariance
+                output_tables['T_q'][i, :n_source_lev, :n_source_lev] = scale_apriori_covariance( static_covariances['T_q'][::-1,::-1], 
+                                                                                                  np.log(reverse_apriori_source_pressure), 
+                                                                                                  np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1]
 
         # Set variable units
         output_tables['T'].units  = 'K'

@@ -89,7 +89,6 @@ def scale_apriori_covariance(source_apriori, source_grid, fg_grid, J = None, war
     if J is None:
         # Compute the Matrix associated with the linear interpolation
         J = compute_LERP_jacobian(source_grid, fg_grid, warning = warning)
-    
     # Return the rescaled apriori covariance
     return (J.dot(source_apriori)).dot(J.transpose())
     
