@@ -95,6 +95,9 @@ def main():
     parser.add_argument('--source_apriori', type=str, required = False, default = None,
                         help='Path to netcdf containing the apriori covariance of '
                              'the external source (i.e. WRF covariance).')
+    parser.add_argument('--source', type=str, required = False, default = None,
+                        help='Path to netcdf containing the source profiles used for the'
+                             'first guess.')
     argv = parser.parse_args()
 
     # Prepare the log class
@@ -161,6 +164,13 @@ def main():
     # and project it to the source pressure grid
     if argv.source_apriori is not None:
         LOG.info('Opening source apriori file')
+        
+        # A source file with atmospheric profile is necessary
+        # for the consistency check
+        if argv.source is None:
+            LOG.error('Read of the source file (used for the first guess) failed!')
+            return 3
+        
         try:
             with Dataset(argv.source_apriori, 'r') as source_file:
                 LOG.debug('Reading source apriori')
@@ -169,7 +179,6 @@ def main():
 
                 # Read Source Static pressure grid
                 reverse_apriori_source_pressure = source_file.groups[ATMGROUP].variables[PRESSVAR][::-1]
-                print(pressure_grid.shape,'here',n_source_lev)
                 
                 # Split fg pressure grid into source and climatology profiles
                 reverse_fg_source_pressure = np.copy(pressure_grid[:,:n_source_lev])[:,::-1]
@@ -179,11 +188,18 @@ def main():
                 static_covariances = {}
                 for mol in ['T', 'q', 'T_q']:
                     static_covariances[mol] = source_file.groups[ATMGROUP].groups[COVGROUP].variables[mol][0,:,:]
-                    
+
+            # Open the source file and check consistency with 
+            # number of levels of the source apriori covariance matrix
+            with Dataset(argv.source, 'r') as source_file:
+                if source_file.dimensions['bottom_top'].size != n_source_lev:
+                    LOG.error('Source apriori file and source file have a different number of pressure levels.')
+                    return 3
+                
         except:
             LOG.error('Read of the source apriori failed!')
             LOG.debug(format_exc())
-            return 2
+            return 3
     
     LOG.info('Saving output on file {}'.format(argv.output))
     mode = 'w'
