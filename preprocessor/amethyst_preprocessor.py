@@ -179,8 +179,8 @@ def launch_preprocessing(argv):
         
         #Build command cascade for qsub
         if argv.instrument == 'cris':
-            print(wrffile)
-            # Calls to CrIS preprocessor scripts
+            # Call to CrIS FOV generator
+            
             cmd_cascade = [
                              #
                              #"python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
@@ -196,64 +196,59 @@ def launch_preprocessing(argv):
                              #                                                   argv.output,argv.cmt,argv.output,
                              #                                                   argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                              
-                             "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {} "
-                                                           " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
-                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-
-    
-                             "python {}/preprocessor/fg_generator/emissivity2firstguess/emiss2firstguess.py {}/fov.nc"
-                                                           " {}/fg.nc -v info".format(AMETHYST_PATH,argv.output,argv.output),
-
-                                                           
-                             "python {}/preprocessor/apriori_generator/covtable2firstguesscov.py {}/fov.nc "
-                                                           " {}/apriori.nc -v info --compression 9 -sa {}".format(AMETHYST_PATH,argv.output,argv.output,amethyst_config.preprocessor_vars['apriori'])
-                                                           
-                             ]
+                         ]
 
             # CrIS Logger Printouts
             logger_cascade = ["Generating CloudMask for CrIS...",
-                              "Generating CrIS observations...",
-                              "Generating atmospheric first guess...",
-                              "Generating surface first guess...",
-                              "Generating atmospheric first guess covariance..."]
+                              "Generating CrIS observations..."]
 
         else:
+            # Call to IASI FOV generator
+
             iasi_native_file = [  x for x in os.listdir(argv.iasidir)  if 'IASI_xxx' in x  ]
             if len(iasi_native_file) == 0:
                 sysexit("IASI Native file not found in {}".format(argv.iasidir))
             else:
                 iasi_native_file = argv.iasidir + '/' + iasi_native_file[0]
 
-            # Calls to IASI preprocessor scripts
             cmd_cascade = [  
                              "python {}/preprocessor/fov_generator/iasi/iasi2observations.py {} "
                                                            "{}/fov.nc -cmt {} -v info "
                                                            "--lonmin {} --lonmax {} "
                                                            "--latmin {} --latmax {} ".format(AMETHYST_PATH,iasi_native_file,argv.output,
-                                                                                argv.cmt, argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-                                                    
-                             "python {}/preprocessor/fg_generator/wrf2firstguess/wrf2firstguess.py --input {} "
-                                                           " {}/fov.nc {}/fg.nc -v info --levels 81".format(AMETHYST_PATH,wrffile,argv.output,argv.output,
-                                                                                argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
-
-    
-                             "python {}/preprocessor/fg_generator/emissivity2firstguess/emiss2firstguess.py {}/fov.nc"
-                                                           " {}/fg.nc -v info".format(AMETHYST_PATH,argv.output,argv.output),
-
-                                                           
-                             "python {}/preprocessor/apriori_generator/covtable2firstguesscov.py {}/fov.nc "
-                                                           " {}/apriori.nc -v info --compression 9".format(AMETHYST_PATH,argv.output,argv.output)
-                                                           
-                             ]
+                                                                                argv.cmt, argv.lonmin,argv.lonmax,argv.latmin,argv.latmax)
+                            ]          
 
             # IASI Logger Printouts
-            logger_cascade = ["Generating IASI observations...",
-                              "Generating atmospheric first guess...",
-                              "Generating surface first guess...",
-                              "Generating atmospheric first guess covariance..."]
+            logger_cascade = ["Generating IASI observations..."]
 
 
-        # Run cascade
+
+        # Last and common part of the command cascade: 
+        # first guess and apriori covariance creation
+        cmd_cascade += [
+
+            "python {}/preprocessor/fg_generator/fg_generator.py --source {} "
+                                          " {}/fov.nc {}/fg.nc -v info".format(AMETHYST_PATH,
+                                                                               wrffile,
+                                                                               argv.output,
+                                                                               argv.output),
+
+            "python {}/preprocessor/apriori_generator/apriori_generator.py {}/fov.nc "
+                                          " {}/apriori.nc -f {}/fg.nc --source {}    "
+                                          " --source_apriori {}  -v info".format(AMETHYST_PATH,
+                                                                                 argv.output,
+                                                                                 argv.output,
+                                                                                 argv.output,
+                                                                                 wrffile,
+                                                                                 amethyst_config.preprocessor_vars['static_apriori'])
+                        ]
+        # Common Log cascade                                          
+        logger_cascade += [ "Generating atmospheric first guess...",
+                            "Generating surface first guess...",
+                            "Generating atmospheric first guess covariance..." ]
+
+        # Execute command cascade
         for cmd, printout in zip(cmd_cascade,logger_cascade):
 
             log.debug(cmd)  # Debug printout

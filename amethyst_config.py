@@ -25,6 +25,7 @@ import os
 
 AMETHYST_PATH = os.path.dirname(__file__)
 
+### COMMON
 common_vars = {
                   "instrument" : "cris",
                   "fm_version" : 3,
@@ -46,36 +47,38 @@ common_vars = {
 
              }
 
-
+#### PRE-PROCESSOR
 preprocessor_vars = {
-                  "basedir"   : "/mnt/satellite/amethyst_test_data",
-                  "iasidir"   : "/mnt/satellite/amethyst_test_data/iasi/20200820_062454",
-                  "gcrso"     : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
-                  "scris"     : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
-                  "l1dir"     : "/mnt/satellite/amethyst_test_data/cris",
-                  "apriori"   : AMETHYST_PATH + "/ancillary/atmosphere/arctic_apriori.nc",
-                  "iasi_cmt"  : 5,
-                  "cris_cmt"  : .95
-            }
-preprocessor_vars["bindir"] = preprocessor_vars["basedir"] + "/bin"
+                  "basedir"          : "/mnt/satellite/amethyst_test_data",
+                  "iasidir"          : "/mnt/satellite/amethyst_test_data/iasi/20200820_062454",
+                  "gcrso"            : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
+                  "scris"            : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
+                  "l1dir"            : "/mnt/satellite/amethyst_test_data/cris",
+                  "static_apriori"   : AMETHYST_PATH + "/ancillary/atmosphere/arctic_apriori.nc",
+                  "iasi_cmt"         : 5,
+                  "cris_cmt"         : .95,
+                  "first_guess"      : { 
+                                          "top_pressure"             : 0.005,
+                                          "bottom_pressure"          : 1000,
+                                          "surface_pressure"         : 1013,
+                                          "min_water_vapor"          : 0.003,
+                                          "p_min_water_vapor"        : 45,
+                                          "water_vapor_smooth_after" : 60
+                                        },
+                  "climatology"      : { 
+                                          "h2o"         : AMETHYST_PATH + "/ancillary/atmosphere/h2o_climatology.nc",
+                                          "temperature" : AMETHYST_PATH + "/ancillary/atmosphere/temperature_climatology.nc",
+                                          "o3"          : AMETHYST_PATH + "/ancillary/atmosphere/o3_climatology.nc"
+                                       }
+                  }
+preprocessor_vars["bindir"] = preprocessor_vars["basedir"] + "/bin",
 preprocessor_vars["logdir"] = preprocessor_vars["basedir"] + "/log/mirto"
-preprocessor_vars["rundir"] = { "cris" : preprocessor_vars["basedir"] + "/run_cris",
+preprocessor_vars["rundir"] = { 
+                                "cris" : preprocessor_vars["basedir"] + "/run_cris",
                                 "iasi" : preprocessor_vars["basedir"] + "/run_iasi"
-                               }
-preprocessor_vars["first_guess"] = { "top_pressure"             : 0.005,
-                                     "bottom_pressure"          : 1000,
-                                     "surface_pressure"         : 1013,
-                                     "min_water_vapor"          : 0.003,
-                                     "p_min_water_vapor"        : 45,
-                                     "water_vapor_smooth_after" : 60
-                                    }
-preprocessor_vars["climatology"] = { "h2o"         : AMETHYST_PATH + "/ancillary/atmosphere/h2o_climatology.nc",
-                                     "temperature" : AMETHYST_PATH + "/ancillary/atmosphere/temperature_climatology.nc",
-                                     "o3"          : AMETHYST_PATH + "/ancillary/atmosphere/o3_climatology.nc"
-                                    }
+                                }
 
-
-
+#### PROCESSOR
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
@@ -143,6 +146,7 @@ processor_vars = {
                 "oss_obslevel" : 0
                 }
 
+### POST-PROCESSOR
 postprocessor_vars = {
                 """
                       INSERT POSTPROCESSOR VARS  

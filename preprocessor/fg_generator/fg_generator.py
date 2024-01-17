@@ -64,9 +64,6 @@ def main():
                              ' generated')
     parser.add_argument('--source', '-s', type=str, required = False, default = None,
                         help='Source file for the atmospheric profiles')
-    parser.add_argument('--input', '-i', type=str, default=None,
-                        help='If the source is "local_file", please specify the'
-                             ' path of the input file')
     parser.add_argument('--verbose', '-v', choices=v_levels, default='info',
                         help='the level of verbosity of the software')
     parser.add_argument('--levels', '-l', type=int, default=common_vars['levels'],
