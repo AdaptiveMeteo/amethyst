@@ -34,13 +34,13 @@ from traceback import format_exc
 from os import path
 
 from netCDF4 import Dataset
-import numpy as np
+import numpy  as np
 import pandas as pd
 
 from preprocessor.utilities.climatology import ClimatologyGrid
 from preprocessor.apriori_generator.apriori_generator_utilities.source_apriori_tools import scale_apriori_covariance
 from utilities.geometry import min_distance_indx, dist_on_earth
-from amethyst_config import common_vars, preprocessor_vars
+from amethyst_config    import common_vars, preprocessor_vars
 
 __author__     = 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>'
 __copyright__  = "Copyright 2023, AdaptiveMeteo S.r.l."

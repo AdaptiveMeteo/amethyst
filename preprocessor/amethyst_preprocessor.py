@@ -13,9 +13,9 @@ elaborating meteorological interferometer data
 """
 
 import logging
-from sys              import exit as sysexit
+from   sys              import exit as sysexit
 import sys
-from datetime         import datetime, timedelta
+from   datetime         import datetime, timedelta
 import amethyst_config
 import os
 import glob

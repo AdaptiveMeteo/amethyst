@@ -17,8 +17,7 @@ import logging
 from traceback import format_exc
 
 from netCDF4 import Dataset
-from numpy import array, datetime64, rollaxis, power, float32, argmin, abs
-from preprocessor.fg_generator.fg_generator_utilities.geometry  import min_distance_indx, dist_on_earth
+from numpy import array, datetime64, rollaxis, power, float32
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"

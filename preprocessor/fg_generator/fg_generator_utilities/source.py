@@ -19,8 +19,8 @@ import logging
 import numpy as np
 from sys import exit as sysexit
 
+from utilities.geometry  import min_distance_indx, dist_on_earth
 from preprocessor.fg_generator.fg_generator_utilities.wrf_file  import WrfFile
-from preprocessor.fg_generator.fg_generator_utilities.geometry  import min_distance_indx, dist_on_earth
 
 __author__ = 'Stefano Piani <stefano.piani@exact-lab.it>'
 __copyright__ = "Copyright 2016, eXact-lab and Paolo Antonelli"
