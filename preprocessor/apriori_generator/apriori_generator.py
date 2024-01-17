@@ -330,7 +330,7 @@ def main():
                                                       zlib=enable_cmp,
                                                       chunksizes=chunks,
                                                       complevel=cmp_level)
-        output_tables['T_q'][:] = np.zeros_like(output_tables['T_q'][:])
+        output_tables['T_q'][:] = np.zeros( (numobs, nlevs, nlevs) )
         output_tables['T_q'].units = 'K'
 
         # Read Known Climatology
@@ -361,6 +361,9 @@ def main():
                     else:
                         # Fill Temperature and Water Vapor Apriori Covariance
                         
+                        # Init matrix
+                        output_tables[mol][i,:,:] = np.zeros( (nlevs, nlevs) )
+
                         # For the top levels  save the climatology Covariance Matrix 
                         # as diagonal matrix using the read precision
                         reverse_top_covariance = np.diag(precision[::-1]**2)
