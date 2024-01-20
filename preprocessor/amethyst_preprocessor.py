@@ -181,7 +181,7 @@ def launch_preprocessing(argv):
         if argv.instrument == 'cris':
             # Call to CrIS FOV generator
             
-            cmd_cascade = [
+            cmd_cascade = [  
                              "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
                                                            "--outfile {}/cloudmask.nc -v info "
                                                            "--lonmin {} --lonmax {} --latmin {} "
@@ -195,7 +195,7 @@ def launch_preprocessing(argv):
                                                                                 argv.output,argv.cmt,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                          ]
-
+            cmd_cascade = []
             # CrIS Logger Printouts
             logger_cascade = ["Generating CloudMask for CrIS...",
                               "Generating CrIS observations..."]

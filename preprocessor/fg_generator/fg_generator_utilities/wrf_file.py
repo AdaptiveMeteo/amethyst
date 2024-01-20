@@ -211,8 +211,7 @@ class WrfFile(object):
                 vapour = array(
                                fp.variables['QVAPOR'][:],
                                dtype=float32
-                               )
-                # Multiply by 1000 to return values in g/Kg                
+                               ) # kg/kg
             else:
                 log.debug('Opening file {}'.format(self.__filename))
                 with Dataset(self.__filename, 'r') as fp:
@@ -221,8 +220,6 @@ class WrfFile(object):
                                    fp.variables['QVAPOR'][:],
                                    dtype=float32
                                    )
-
-            vapour *= 1E03
 
             # move the levels on the last position
             vapour = rollaxis(vapour, 2, 1)

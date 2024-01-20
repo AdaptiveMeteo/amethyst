@@ -256,7 +256,7 @@ class NetcdfAtmosphericFirstGuess(AtmosphericFirstGuess):
             create_var_in_atm(PRESSURELEVELS, 'hPa', max=1500.)
 
             # Save temperature
-            create_var_in_atm(TEMPERATURE, 'K', min=170., max=360.)
+            create_var_in_atm(TEMPERATURE, 'K', min=0., max=5000.)
 
             # Save water vapour
             create_var_in_atm(WATERVAPOUR, 'kg/kg', min = 0., max = 1.0)

@@ -15,8 +15,8 @@
 
 import logging
 from netCDF4 import Dataset
+from utilities.geometry  import min_distance_indx, dist_on_earth
 from preprocessor.fg_generator.fg_generator_utilities.first_guess import NetcdfAtmosphericFirstGuess
-from preprocessor.fg_generator.fg_generator_utilities.geometry  import min_distance_indx, dist_on_earth
 from preprocessor.fg_generator.fg_generator_utilities.source  import SourceFile
 from scipy.interpolate import interp1d
 import numpy as np
@@ -98,19 +98,19 @@ class ClimatologyGrid(Profile):
             
         try:
             with Dataset(h2o_climatology,'r') as wv_file:
-                self.water_vapor     = wv_file['mm_H2O_values'][:]*10 # kg/kg
+                self.water_vapor     = wv_file['mm_H2O_values'][:] # kg/kg
                 if precision:
-                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:])*10 # kg/kg
+                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:]) # kg/kg
         except:
             raise ClimatologyReadingError("Error in reading water vapor climatology")
 
         try:  
             with Dataset(o3_climatology,'r') as ozone_file:
-                self.ozone     = ozone_file['mm_O3_values'][:]*10 # kg/kg
+                self.ozone     = np.abs(ozone_file['mm_O3_values'][:]) # kg/kg
                 if precision:
-                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:])*10 # kg/kg
-        except:
-            raise ClimatologyReadingError("Error in reading temperature climatology")
+                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:]) # kg/kg
+        except Exception as e:
+            raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
 
         return
     
@@ -234,6 +234,11 @@ class ClimatologyGrid(Profile):
                 # Read source profile
                 source_profile = source_data.get_obs_profile(timestep, lon, lat)
 
+                #print('DEBUG')
+                #print('temp clima',self.temperature[indx,month,:])
+                #print('ozone clima',self.ozone[indx,month,:])
+                #print('pressure clima',self.pressure)
+
                 # Define climatology pressure levels above the source
                 n_climatology_levels  = pressure_grid.shape[-1] - source_profile.n_of_levels
                 source_top            = np.min(source_profile.pressure_levels)
@@ -242,29 +247,33 @@ class ClimatologyGrid(Profile):
                                                      np.log(source_top),
                                                      n_climatology_levels )[::-1]
                 top_pressure_grid   = np.exp(log_top_pressure_grid)
+
+
                 # Retrieve climatology profile for the levels avove the source
                 climatology_profile =  Profile(temperature = temp_interp(  log_top_pressure_grid[::-1] )[::-1],
                                                water_vapor = wv_interp(    log_top_pressure_grid[::-1] )[::-1], # kg/kg
                                                ozone       = ozone_interp( log_top_pressure_grid[::-1] )[::-1], # kg/kg
                                                pressure    = top_pressure_grid )
-                
+
                 # Merge all profiles
                 merged_pressure    = np.concatenate((source_profile.pressure_levels, top_pressure_grid))
                 merged_temperature = np.concatenate((source_profile.temperature, 
                                                      climatology_profile.temperature))
                 merged_water_vapor = np.concatenate((source_profile.water_vapour, 
                                                      climatology_profile.water_vapor))
-                if merged_pressure.max() > self.pressure.max():
+
+                if merged_pressure.max() > self.pressure.max() or merged_pressure.min() < self.pressure.min() :
                        # If WRF pressure grid starts below the climatology pressure
                        # fill the gap with constant ozone levels
-                       ozone_start_indx = np.where( merged_pressure <= self.pressure.max())[0]
-                       n_missing_levs   = merged_pressure.size - ozone_start_indx.size
-                       const_ozone_levels  = np.array([ self.ozone[indx,month,0] for i in range(n_missing_levs) ])
-                       merged_ozone = np.concatenate(( const_ozone_levels, 
-                                                       ozone_interp( np.log(merged_pressure[ozone_start_indx])[::-1])[::-1]
-                                                    )) # kg/kg
+                       ozone_indx = np.logical_and(  merged_pressure <= self.pressure.max(), merged_pressure >= self.pressure.min()) 
+                       merged_ozone = np.empty_like(merged_pressure)*np.nan
+                       merged_ozone[ ~ ozone_indx  ] = self.ozone[indx,month,0]
+                       merged_ozone[ozone_indx] = ozone_interp( np.log(merged_pressure[ozone_indx])[::-1])[::-1] # kg/kg
+                       #print('interp pressure',merged_pressure[ozone_indx])
+
                 else:
                        merged_ozone = ozone_interp( np.log(merged_pressure)[::-1])[::-1] # kg/kg
+                #print('interp ozone', merged_ozone)
 
                 # Smooth merged profiles
                 sm = SuperSmoother() # Define Smoother
@@ -381,7 +390,8 @@ class ClimatologyGrid(Profile):
                 for obs, time, lat, lon in zip(range(lats.size), obs_times, lats, lons):
                     log.debug('Looking for the position of the '
                               'observation {}'.format(obs))
-                    
+
+                    #print('preparing obs n',obs)
                     # Retrieve profile closest to the observation
                     p = self.get_obs_profile(obs_month, time, lon, lat, 
                                              pressure_grid = pressure_grid,
