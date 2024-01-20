@@ -100,7 +100,7 @@ class ClimatologyGrid(Profile):
             with Dataset(h2o_climatology,'r') as wv_file:
                 self.water_vapor     = wv_file['mm_H2O_values'][:] # kg/kg
                 if precision:
-                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:]) # kg/kg
+                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:])/self.water_vapor # log(kg/kg)
         except:
             raise ClimatologyReadingError("Error in reading water vapor climatology")
 
@@ -108,7 +108,7 @@ class ClimatologyGrid(Profile):
             with Dataset(o3_climatology,'r') as ozone_file:
                 self.ozone     = np.abs(ozone_file['mm_O3_values'][:]) # kg/kg
                 if precision:
-                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:]) # kg/kg
+                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:])/self.ozone # log( kg/kg )
         except Exception as e:
             raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
 
