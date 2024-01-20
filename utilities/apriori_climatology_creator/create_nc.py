@@ -82,6 +82,13 @@ def create_nc_file(GESDISC_Wrapper,  workdir = "/."):
     mm_values.standard_name       = tag+"_values_monthly_means"
     mm_values.valid_min           = var_bounds[tag]['min']
     mm_values.valid_max           = var_bounds[tag]['max']
+
+    mm_apriori_values                     = ncfile.createVariable(f"mm_apriori_{tag}_values", np.float32, ('coords_idxs','months','pres'))
+    mm_apriori_values.units               = GESDISC_Wrapper.unit
+    mm_apriori_values.long_name           = GESDISC_Wrapper.variable+" values monthly means"
+    mm_apriori_values.standard_name       = tag+"_values_monthly_means"
+    mm_apriori_values.valid_min           = var_bounds[tag]['min']
+    mm_apriori_values.valid_max           = var_bounds[tag]['max']
     
     mm_precision                  = ncfile.createVariable(f"mm_{tag}_prec", np.float32, ('coords_idxs','months','pres'))
     mm_precision.units            = GESDISC_Wrapper.unit
@@ -90,6 +97,12 @@ def create_nc_file(GESDISC_Wrapper,  workdir = "/."):
     mm_precision.valid_min        = var_bounds[tag]['min']
     mm_precision.valid_max        = var_bounds[tag]['max']
 
+    mm_apriori_precision                  = ncfile.createVariable(f"mm_apriori_{tag}_prec", np.float32, ('coords_idxs','months','pres'))
+    mm_apriori_precision.units            = GESDISC_Wrapper.unit
+    mm_apriori_precision.long_name        = GESDISC_Wrapper.variable+" precision monthly means"
+    mm_apriori_precision.standard_name    = tag+"_prec_monthly_means"
+    mm_apriori_precision.valid_min        = var_bounds[tag]['min']
+    mm_apriori_precision.valid_max        = var_bounds[tag]['max']
     
     date_now              = datetime.now()
     date_now              = datetime.strftime(date_now,"%Y-%m-%d %H:%M:%S")
@@ -103,12 +116,12 @@ def create_nc_file(GESDISC_Wrapper,  workdir = "/."):
     longitudes[:]      = GESDISC_Wrapper.unique_longitude
     pressure_levels[:] = GESDISC_Wrapper.pressure_levels
     values[:]          = GESDISC_Wrapper.values.values
-    precision[:]       = GESDISC_Wrapper.precision.values
-    mm_values[:]       = GESDISC_Wrapper.mm_values.values
+    precision[:]         = GESDISC_Wrapper.precision.values
+    mm_values[:]               = GESDISC_Wrapper.mm_values.values
+    mm_apriori_values[:]       = GESDISC_Wrapper.mm_apriori_values.values
     mm_precision[:]    = GESDISC_Wrapper.mm_precision.values
-    
-    
-   
+    mm_apriori_precision[:]    = GESDISC_Wrapper.mm_ap_precision.values
+       
     ncfile.close()
     
     return 

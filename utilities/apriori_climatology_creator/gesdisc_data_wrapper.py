@@ -131,8 +131,8 @@ class GESDISC_Wrapper(object):
         
         organized_values            = np.zeros((len(unique_coordinates), num_time_steps, len(pressure_levels)))*np.nan
         organized_precision         = organized_values.copy()
-        # organized_apriori_values    = organized_values.copy()
-        # organized_apriori_precision = organized_values.copy()
+        organized_apriori_values    = organized_values.copy()
+        organized_apriori_precision = organized_values.copy()
 
         time_idx = np.where(TIME == date)[0][0]
         lat = x["HDFEOS"]["SWATHS"][tag]["Geolocation Fields"]["Latitude"][:]
@@ -141,20 +141,20 @@ class GESDISC_Wrapper(object):
         
         values            = x["HDFEOS"]["SWATHS"][tag]["Data Fields"]["L2gpValue"][:]
         precision         = x["HDFEOS"]["SWATHS"][tag]["Data Fields"]["L2gpPrecision"][:]
-        # apriori_values    = x["HDFEOS"]["SWATHS"][apriori_tag]["Data Fields"]["L2gpValue"][:]
+        apriori_values    = x["HDFEOS"]["SWATHS"][apriori_tag]["Data Fields"]["L2gpValue"][:]
         apriori_precision = x["HDFEOS"]["SWATHS"][apriori_tag]["Data Fields"]["L2gpPrecision"][:]
         precision[ precision<0 ] = apriori_precision[ precision < 0]
 
         quality           = x["HDFEOS"]["SWATHS"][tag]["Data Fields"]["Quality"][:]
         values[quality<1]            = 9999
         precision[quality<1]         = 9999
-        # apriori_values[quality<1]    = 9999
-        # apriori_precision[quality<1] = 9999
+        apriori_values[quality<1]    = 9999
+        apriori_precision[quality<1] = 9999
         
         values            = np.ma.masked_where(values == 9999, values)
         precision         = np.ma.masked_where(precision == 9999, precision)
-        # apriori_values    = np.ma.masked_where(apriori_values == 9999, apriori_values)
-        # apriori_precision = np.ma.masked_where(apriori_precision == 9999, apriori_precision)
+        apriori_values    = np.ma.masked_where(apriori_values == 9999, apriori_values)
+        apriori_precision = np.ma.masked_where(apriori_precision == 9999, apriori_precision)
         
         done_yet = []
         for i in indices:    
@@ -162,16 +162,16 @@ class GESDISC_Wrapper(object):
                 continue
             filt = indices == i            
             v_mean,p_mean     = get_means(values,precision,filt)
-            # apv_mean,app_mean = get_means(apriori_values,apriori_precision,filt)
+            apv_mean,app_mean = get_means(apriori_values,apriori_precision,filt)
             
             organized_values[i, time_idx, :] = v_mean
             organized_precision[i, time_idx, :] = p_mean
-            # organized_apriori_values[i, time_idx, :] = apv_mean
-            # organized_apriori_precision[i,time_idx, :] = app_mean
+            organized_apriori_values[i, time_idx, :] = apv_mean
+            organized_apriori_precision[i,time_idx, :] = app_mean
             
             done_yet.append(i)
             
-        del(values, precision, done_yet)#, apriori_values, apriori_precision)
+        del(values, precision, done_yet, apriori_values, apriori_precision)
         
         self.latlons = unique_coordinates
         
@@ -187,9 +187,9 @@ class GESDISC_Wrapper(object):
 
         self.precision = create_DataArray(organized_precision, unique_coordinates, TIME, pressure_levels)
         
-        # self.apriori_values = create_DataArray(organized_apriori_values, unique_coordinates, TIME, pressure_levels)
+        self.apriori_values = create_DataArray(organized_apriori_values, unique_coordinates, TIME, pressure_levels)
         
-        # self.apriori_precision = create_DataArray(organized_apriori_precision, unique_coordinates, TIME, pressure_levels)
+        self.apriori_precision = create_DataArray(organized_apriori_precision, unique_coordinates, TIME, pressure_levels)
         
         self.unit              = x['HDFEOS']['SWATHS'][tag]['Data Fields']['L2gpValue'].attrs['Units']
         
@@ -200,7 +200,7 @@ class GESDISC_Wrapper(object):
         #     self.logq              = create_DataArray(logq, unique_coordinates, TIME, pressure_levels)
         #     self.dlogq             = create_DataArray(dlogq, unique_coordinates, TIME, pressure_levels)
             
-        del(organized_values, organized_precision)#, organized_apriori_values, organized_apriori_precision)
+        del(organized_values, organized_precision, organized_apriori_values, organized_apriori_precision)
         
        
     def add_data(self, new_GESDISC_data):
@@ -209,8 +209,8 @@ class GESDISC_Wrapper(object):
             self.time = np.concatenate((self.time,new_GESDISC_data.time))
             self.values            = xr.concat([self.values,new_GESDISC_data.values], "time")
             self.precision         = xr.concat([self.precision,new_GESDISC_data.precision], "time")
-            # self.apriori_values    = xr.concat([self.apriori_values,new_GESDISC_data.apriori_values], "time")
-            # self.apriori_precision = xr.concat([self.apriori_precision,new_GESDISC_data.apriori_precision], "time")
+            self.apriori_values    = xr.concat([self.apriori_values,new_GESDISC_data.apriori_values], "time")
+            self.apriori_precision = xr.concat([self.apriori_precision,new_GESDISC_data.apriori_precision], "time")
             # if self.variable == "H2O" or self.variable == "O3":
             #     self.logq          = xr.concat([self.logq,new_GESDISC_data.logq], "time")
             #     self.dlogq         = xr.concat([self.dlogq,new_GESDISC_data.dlogq], "time")
@@ -218,7 +218,7 @@ class GESDISC_Wrapper(object):
     def get_means_bymonth(self):
 
         self.mm_values,self.mm_precision  = get_means_xr(self.values,self.precision)
-        # self.mm_ap_values,self.mm_ap_precision  = get_means_xr(self.apriori_values,self.apriori_precision)
+        self.mm_ap_values,self.mm_ap_precision  = get_means_xr(self.apriori_values,self.apriori_precision)
         # if self.variable == "H2O" or self.variable == "O3":
         #     self.mm_logq,_  = get_means_xr(self.logq,self.logq)
         #     self.mm_dlogq,_ = get_means_xr(self.dlogq,self.dlogq)
