@@ -91,24 +91,29 @@ class ClimatologyGrid(Profile):
                 self.lons            = self.latlons[:,1].reshape(self.n_lats,self.n_lons)
                 self.pressure        = temp_file['pressure'][:]
                 if precision:
-                    self.temp_precision  = np.abs(temp_file['mm_T_prec'][:])
+                    self.temp_precision  = temp_file['mm_T_prec'][:]
+                    self.temp_precision[ self.temp_precision < 0] = temp_file['mm_apriori_T_prec'][:][self.temp_precision < 0]
                 
-        except:
-            raise ClimatologyReadingError("Error in reading temperature climatology")
+        except Exception as e:
+            raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
             
         try:
             with Dataset(h2o_climatology,'r') as wv_file:
                 self.water_vapor     = wv_file['mm_H2O_values'][:] # kg/kg
                 if precision:
-                    self.wv_precision  = np.abs(wv_file['mm_H2O_prec'][:])/self.water_vapor # log(kg/kg)
-        except:
-            raise ClimatologyReadingError("Error in reading water vapor climatology")
+                    self.wv_precision  = wv_file['mm_H2O_prec'][:]/self.water_vapor # log(kg/kg)
+                    self.wv_precision[ self.wv_precision < 0] = (wv_file['mm_apriori_H2O_prec'][:]/self.water_vapor)[self.wv_precision < 0]
+
+        except Exception as e:
+            raise ClimatologyReadingError("Error in reading water vapor climatology: {}".format(e))
 
         try:  
             with Dataset(o3_climatology,'r') as ozone_file:
                 self.ozone     = np.abs(ozone_file['mm_O3_values'][:]) # kg/kg
                 if precision:
-                    self.ozone_precision  = np.abs(ozone_file['mm_O3_prec'][:])/self.ozone # log( kg/kg )
+                    self.ozone_precision  = ozone_file['mm_O3_prec'][:]/self.ozone # log( kg/kg )
+                    self.ozone_precision[ self.ozone_precision < 0] = (ozone_file['mm_apriori_H2O_prec'][:]/self.ozone)[self.ozone_precision < 0]
+
         except Exception as e:
             raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
 
