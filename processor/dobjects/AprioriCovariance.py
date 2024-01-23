@@ -118,7 +118,21 @@ class AprioriCovariance(object):
             #SaInv[-eigen - 1, -eigen - 1] = 1. / NewAprioriCovariance.EIGENVALUES_TCOV
             #for j in range(1, eigen + 1):
             #    SaInv[-j, -j] = 1. / self.emiss_cov[obs, eigen-j]
-            SaInv=np.linalg.pinv(Sa,rcond=1e-15)
+            
+            SaInv[self.n_levels*0: self.n_levels*1, self.n_levels*0: self.n_levels*1] = np.linalg.pinv(self.T[obs,:],rcond=1e-15)
+            SaInv[self.n_levels*1: self.n_levels*2, self.n_levels*1: self.n_levels*2] = np.linalg.pinv(self.q[obs,:],rcond=1e-15)
+            SaInv[self.n_levels*2: self.n_levels*3, self.n_levels*2: self.n_levels*3] = np.eye(self.n_levels, dtype=np.float64) * (1/self.co2_std)
+            SaInv[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = np.linalg.pinv(self.O3[obs,:],rcond=1e-15)
+      
+            #print("Sa O3: {}".format(self.O3[obs,:]));
+    
+            SaInv[self.n_levels*0: self.n_levels*1, self.n_levels*1: self.n_levels*2] = np.linalg.pinv(self.Tq[obs,:],rcond=1e-15)
+            SaInv[self.n_levels*1: self.n_levels*2, self.n_levels*0: self.n_levels*1] = SaInv[self.n_levels*0: self.n_levels*1, self.n_levels*1: self.n_levels*2].T
+            SaInv[-eigen - 1, -eigen - 1] = 1/AprioriCovariance.EIGENVALUES_TCOV
+            for j in range(1, eigen + 1):
+                SaInv[-j, -j] = 1/self.emiss_cov[obs, eigen - j]
+
+            # SaInv=np.linalg.pinv(Sa,rcond=1e-15)
 
         if __debug__:
             test = np.dot(Sa, SaInv)
