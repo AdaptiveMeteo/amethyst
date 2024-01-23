@@ -3,5 +3,5 @@ __pycache__
 *.nc
 */*.nc
 *.swp
-
+*.DS_Store
 *.save
