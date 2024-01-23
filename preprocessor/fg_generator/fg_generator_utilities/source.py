@@ -137,7 +137,4 @@ class SourceFile(object):
         return profile
     
     def get_closest_timestep(self, time):
-        if len(self.times) == 1:
-            return 0
-        else:
-            sysexit("WRF Time selection to be implemented!")
+        return np.argmin(self.times - time) 
