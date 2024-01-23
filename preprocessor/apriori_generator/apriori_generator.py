@@ -188,7 +188,6 @@ def main():
                 static_covariances = {}
                 for mol in ['T', 'q', 'T_q']:
                     static_covariances[mol] = source_file.groups[ATMGROUP].groups[COVGROUP].variables[mol][0,:,:]
-
             # Open the source file and check consistency with 
             # number of levels of the source apriori covariance matrix
             with Dataset(argv.source, 'r') as source_file:
@@ -338,7 +337,6 @@ def main():
         # Now, for each FOV, the closest precision is extracted from
         # the climatology grid
         for i in range(lats.size):
-            
             # Read Climatology Precision
             temp_precision, wv_precision, ozone_precision = climatology.get_precision(month, 
                                                                                       lons[i],
@@ -368,15 +366,16 @@ def main():
                         # as diagonal matrix using the read precision
                         reverse_top_covariance = np.diag(precision[::-1]**2)
                         rescaled_top_covariance  = scale_apriori_covariance( reverse_top_covariance, 
-                                                                                          np.log(climatology.pressure)[::-1],
-                                                                                          np.log(pressure_grid[i])[::-1], warning = False)[::-1,::-1]
+                                                                             np.log(climatology.pressure)[::-1],
+                                                                             np.log(pressure_grid[i])[::-1], warning = False)[::-1,::-1]
                         output_tables[mol][i, n_source_lev:,n_source_lev:] = rescaled_top_covariance
 
                         # Use the rescaled source apriori covariance for bottom levels (T and q)
-                        output_tables[mol][i, :n_source_lev,:n_source_lev] = scale_apriori_covariance( static_covariances[mol][::-1,::-1], 
-                                                                                         np.log(reverse_apriori_source_pressure),
-                                                                                         np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1] 
-                    
+                        matrix = scale_apriori_covariance( static_covariances[mol][::-1,::-1], 
+                                                           np.log(reverse_apriori_source_pressure),
+                                                           np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1] 
+                        output_tables[mol][i, :n_source_lev,:n_source_lev] = matrix
+                       
                 else:
                     # Otherwise just use the climatology precision
                     # Save Covariance Matrix as diagonal matrix using climatology precision

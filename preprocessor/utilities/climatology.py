@@ -22,6 +22,8 @@ from scipy.interpolate import interp1d
 import numpy as np
 from pandas import DatetimeIndex
 from supersmoother import SuperSmoother
+import warnings
+warnings.simplefilter("ignore")
 
 __author__     = [ 'Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>']
 __copyright__  = "Copyright 2023, Adaptive Meteo S.r.l."
@@ -112,7 +114,7 @@ class ClimatologyGrid(Profile):
                 self.ozone     = np.abs(ozone_file['mm_O3_values'][:]) # kg/kg
                 if precision:
                     self.ozone_precision  = ozone_file['mm_O3_prec'][:]/self.ozone # log( kg/kg )
-                    self.ozone_precision[ self.ozone_precision < 0] = (ozone_file['mm_apriori_H2O_prec'][:]/self.ozone)[self.ozone_precision < 0]
+                    self.ozone_precision[ self.ozone_precision < 0] = (ozone_file['mm_apriori_O3_prec'][:]/self.ozone)[self.ozone_precision < 0]
 
         except Exception as e:
             raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
@@ -396,7 +398,6 @@ class ClimatologyGrid(Profile):
                     log.debug('Looking for the position of the '
                               'observation {}'.format(obs))
 
-                    #print('preparing obs n',obs)
                     # Retrieve profile closest to the observation
                     p = self.get_obs_profile(obs_month, time, lon, lat, 
                                              pressure_grid = pressure_grid,

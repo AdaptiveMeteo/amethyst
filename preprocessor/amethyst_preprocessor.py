@@ -183,16 +183,16 @@ def launch_preprocessing(argv):
             
             cmd_cascade = [  
                              "python {}/preprocessor/fov_generator/cris/cloudmask/viirscris2cm.py {} {} "
-                                                           "--outfile {}/cloudmask.nc -v info "
+                                                           "--outfile {}/cloudmask.nc -v {} "
                                                            "--lonmin {} --lonmax {} --latmin {} "
-                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,
+                                                           "--latmax {}".format(AMETHYST_PATH,argv.gcrso, argv.scris,argv.output,argv.verbose,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
 
                              "python {}/preprocessor/fov_generator/cris/cris2observations.py {} {} {}/fov.nc "
-                                                           "-cmf {}/cloudmask.nc -cmt {} -v info -m {}/geo_indices.nc "
+                                                           "-cmf {}/cloudmask.nc -cmt {} -v {} -m {}/geo_indices.nc "
                                                            "--lonmin {} --lonmax {} --latmin {}  "
                                                            "--latmax {}".format(AMETHYST_PATH,argv.gcrso,argv.scris,argv.output,
-                                                                                argv.output,argv.cmt,argv.output,
+                                                                                argv.output,argv.cmt,argv.verbose,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                          ]
             cmd_cascade = []
@@ -211,10 +211,10 @@ def launch_preprocessing(argv):
 
             cmd_cascade = [  
                              "python {}/preprocessor/fov_generator/iasi/iasi2observations.py {} "
-                                                           "{}/fov.nc -cmt {} -v info "
+                                                           "{}/fov.nc -cmt {} -v {} "
                                                            "--lonmin {} --lonmax {} "
                                                            "--latmin {} --latmax {} ".format(AMETHYST_PATH,iasi_native_file,argv.output,
-                                                                                argv.cmt, argv.lonmin,argv.lonmax,argv.latmin,argv.latmax)
+                                                                                argv.cmt, argv.verbose, argv.lonmin,argv.lonmax,argv.latmin,argv.latmax)
                             ]          
 
             # IASI Logger Printouts
@@ -227,19 +227,20 @@ def launch_preprocessing(argv):
         cmd_cascade += [
 
             "python {}/preprocessor/fg_generator/fg_generator.py --source {} "
-                                          " {}/fov.nc {}/fg.nc -v info".format(AMETHYST_PATH,
+                                          " {}/fov.nc {}/fg.nc -v {}".format(AMETHYST_PATH,
                                                                                wrffile,
                                                                                argv.output,
-                                                                               argv.output),
+                                                                               argv.output,
+                                                                               argv.verbose),
 
             "python {}/preprocessor/apriori_generator/apriori_generator.py {}/fov.nc "
                                           " {}/apriori.nc -f {}/fg.nc --source {}    "
-                                          " --source_apriori {}  -v info".format(AMETHYST_PATH,
+                                          " --source_apriori {}  -v {}".format(AMETHYST_PATH,
                                                                                  argv.output,
                                                                                  argv.output,
                                                                                  argv.output,
                                                                                  wrffile,
-                                                                                 amethyst_config.preprocessor_vars['static_apriori'])
+                                                                                 amethyst_config.preprocessor_vars['static_apriori'], argv.verbose)
                         ]
         # Common Log cascade                                          
         logger_cascade += [ "Generating atmospheric first guess...",

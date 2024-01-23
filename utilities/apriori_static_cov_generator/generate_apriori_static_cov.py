@@ -429,7 +429,7 @@ with Dataset(area+'_apriori.nc', mode) as output_f:
                                             table_name,
                                             table_type,
                                             table_dims,
-                                            fill_value=0.,
+                                            fill_value=1e9,
                                             zlib=enable_cmp,
                                             chunksizes=chunks,
                                             complevel=cmp_level
