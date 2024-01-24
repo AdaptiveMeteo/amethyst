@@ -406,6 +406,7 @@ with Dataset(area+'_apriori.nc', mode) as output_f:
         nc_pressure[:] = np.ma.mean(all_pressures,axis=0)[:n_lev_cut]
     else:
         nc_pressure[:] = np.ma.mean(all_pressures,axis=0)
+    nc_pressure[0]    = 1100 # Fixed first level
     nc_pressure.units = 'hPa'
 
     #create a COVGROUP inside the atmospheric one

@@ -233,6 +233,9 @@ def launch_preprocessing(argv):
                                                                                argv.output,
                                                                                argv.verbose),
 
+            "python {}/preprocessor/fg_generator/fg_generator_utilities/emissivity2firstguess/emiss2firstguess.py {}/fov.nc"
+                                          " {}/fg.nc -v {}".format(AMETHYST_PATH,argv.output,argv.output,argv.verbose),
+
             "python {}/preprocessor/apriori_generator/apriori_generator.py {}/fov.nc "
                                           " {}/apriori.nc -f {}/fg.nc --source {}    "
                                           " --source_apriori {}  -v {}".format(AMETHYST_PATH,
@@ -242,15 +245,12 @@ def launch_preprocessing(argv):
                                                                                  wrffile,
                                                                                  amethyst_config.preprocessor_vars['static_apriori'], argv.verbose),
 
-            "python {}/preprocessor/fg_generator/fg_generator_utilities/emissivity2firstguess/emiss2firstguess.py {}/fov.nc"
-                                          " {}/fg.nc -v {}".format(AMETHYST_PATH,argv.output,argv.output,argv.verbose)
                         ]
 
         # Common Log cascade
         logger_cascade += [ "Generating atmospheric first guess...",
-                            "Generating surface first guess...",
-                            "Generating atmospheric first guess covariance..." ,
-                            "Generating surface first guess covariance..." ]
+                            "Generating surface first guess..." ,
+                            "Generating atmospheric first guess covariance..." ]
 
         # Execute command cascade
         for cmd, printout in zip(cmd_cascade,logger_cascade):

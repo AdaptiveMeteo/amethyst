@@ -59,12 +59,21 @@ def compute_LERP_jacobian(ref_grid, input_grid):
     """
     size_input = input_grid.size
     size_ref   = ref_grid.size
-    
-    # Raise error if the input grid falls 
+
+    ref_grid_min = ref_grid.min()
+    ref_grid_max = ref_grid.max()
+    input_grid_max = input_grid.max()
+    input_grid_min = input_grid.min()
+
+    # Raise an error if the input grid falls 
     # outside the reference data range
-    if ref_grid.min() > input_grid.min() or ref_grid.max() < input_grid.max():
-      raise StaticAprioriGridError('Input grid falls outside '
-                                   'the reference for the interpolation')
+    if ref_grid_min > input_grid_min or ref_grid_max < input_grid_max:
+      if np.sum(input_grid < ref_grid_min) > 1 or np.sum( input_grid > ref_grid_max ):
+
+         error_message = '\nReference grid bounds: ({:.2f}, {:.2f})\n'\
+                         'Input grid bounds:     ({:.2f}, {:.2f})'.format(ref_grid_max,ref_grid_min,input_grid_max,input_grid_min)
+         raise StaticAprioriGridError('Input grid falls outside '
+                                   'the reference for the interpolation. ' + error_message)
 
     # Init the Jacobian matrix
     jac = np.zeros((size_input, size_ref))

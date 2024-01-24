@@ -122,7 +122,8 @@ class GESDISC_Wrapper(object):
         
         unique_coordinates = np.unique((LATLONS[0].flatten().tolist(), LATLONS[1].flatten().tolist()), axis=1).T
         pressure_levels = x["HDFEOS"]["SWATHS"][tag]["Geolocation Fields"]["Pressure"][:]
-       
+        pressure_levels[0] = 1100 # Fix first level (hPa)
+
         date = datetime(year = year, month = 1, day = 1) + timedelta(days = nday-1)
         
         TIME = np.array([date])

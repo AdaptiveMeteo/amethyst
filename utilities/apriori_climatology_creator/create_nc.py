@@ -118,7 +118,7 @@ def create_nc_file(GESDISC_Wrapper,  workdir = "/."):
     values[:]          = GESDISC_Wrapper.values.values
     precision[:]         = GESDISC_Wrapper.precision.values
     mm_values[:]               = GESDISC_Wrapper.mm_values.values
-    mm_apriori_values[:]       = GESDISC_Wrapper.mm_apriori_values.values
+    mm_apriori_values[:]       = GESDISC_Wrapper.mm_ap_values.values
     mm_precision[:]    = GESDISC_Wrapper.mm_precision.values
     mm_apriori_precision[:]    = GESDISC_Wrapper.mm_ap_precision.values
        
