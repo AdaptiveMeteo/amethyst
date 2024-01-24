@@ -355,7 +355,7 @@ def main():
                         # Rescale Ozone Covariance for the ozone pressure grid
                         output_tables['O3'][i, :] = scale_apriori_covariance( ozone_covariance,
                                                                               np.log(climatology.pressure)[::-1],
-                                                                              np.log(reverse_ozone_pressure[i]), warning = False)[::-1,::-1]
+                                                                              np.log(reverse_ozone_pressure[i]))[::-1,::-1]
                     else:
                         # Fill Temperature and Water Vapor Apriori Covariance
                         
@@ -367,13 +367,13 @@ def main():
                         reverse_top_covariance = np.diag(precision[::-1]**2)
                         rescaled_top_covariance  = scale_apriori_covariance( reverse_top_covariance, 
                                                                              np.log(climatology.pressure)[::-1],
-                                                                             np.log(pressure_grid[i])[::-1], warning = False)[::-1,::-1]
+                                                                             np.log(pressure_grid[i])[::-1])[::-1,::-1]
                         output_tables[mol][i, n_source_lev:,n_source_lev:] = rescaled_top_covariance
 
                         # Use the rescaled source apriori covariance for bottom levels (T and q)
                         matrix = scale_apriori_covariance( static_covariances[mol][::-1,::-1], 
                                                            np.log(reverse_apriori_source_pressure),
-                                                           np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1] 
+                                                           np.log(reverse_fg_source_pressure[i]))[::-1,::-1] 
                         output_tables[mol][i, :n_source_lev,:n_source_lev] = matrix
                        
                 else:
@@ -382,14 +382,14 @@ def main():
                     reverse_top_covariance = np.diag(precision[::-1]**2)
                     output_tables[mol][i, :]  = scale_apriori_covariance( reverse_top_covariance, 
                                                                           np.log(climatology.pressure)[::-1],
-                                                                          np.log(pressure_grid[i]), warning = False)[::-1,::-1]
+                                                                          np.log(pressure_grid[i]))[::-1,::-1]
 
             if argv.source_apriori is not None:
                 # If the source apriori covariance is given 
                 # use it also for the Temperature-Water Vapor covariance
                 output_tables['T_q'][i, :n_source_lev, :n_source_lev] = scale_apriori_covariance( static_covariances['T_q'][::-1,::-1], 
                                                                                                   np.log(reverse_apriori_source_pressure), 
-                                                                                                  np.log(reverse_fg_source_pressure[i]), warning = False)[::-1,::-1]
+                                                                                                  np.log(reverse_fg_source_pressure[i]))[::-1,::-1]
 
         # Set variable units
         output_tables['T'].units  = 'K'

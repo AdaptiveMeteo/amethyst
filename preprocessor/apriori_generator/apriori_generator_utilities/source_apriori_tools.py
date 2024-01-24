@@ -18,7 +18,10 @@ if __name__ == '__main__':
 else:
     log = logging.getLogger(__name__)
 
-def compute_LERP_jacobian(ref_grid, input_grid, warning = True):
+class StaticAprioriGridError(object):
+    pass
+
+def compute_LERP_jacobian(ref_grid, input_grid):
     """
         This function compute the Linear Operator associated
         with the interpolation of the input grid (input_grid)
@@ -51,11 +54,11 @@ def compute_LERP_jacobian(ref_grid, input_grid, warning = True):
     size_input = input_grid.size
     size_ref   = ref_grid.size
     
-    # Warn if the input grid falls outside the reference data range
-    if warning:
-      if ref_grid.min() > input_grid.min() or ref_grid.max() < input_grid.max():
-        log.warn('Input array falls outside '
-                 'the reference grid for the interpolation')
+    # Raise error if the input grid falls 
+    # outside the reference data range
+    if ref_grid.min() > input_grid.min() or ref_grid.max() < input_grid.max():
+      raise StaticAprioriGridError('Input grid falls outside '
+                                   'the reference for the interpolation')
 
     # Init the Jacobian matrix
     jac = np.zeros((size_input, size_ref))
@@ -84,11 +87,11 @@ def compute_LERP_jacobian(ref_grid, input_grid, warning = True):
             
     return jac
 
-def scale_apriori_covariance(source_apriori, source_grid, fg_grid, J = None, warning = True):
+def scale_apriori_covariance(source_apriori, source_grid, fg_grid, J = None):
     
     if J is None:
         # Compute the Matrix associated with the linear interpolation
-        J = compute_LERP_jacobian(source_grid, fg_grid, warning = warning)
+        J = compute_LERP_jacobian(source_grid, fg_grid)
     # Return the rescaled apriori covariance
     return (J.dot(source_apriori)).dot(J.transpose())
     
