@@ -18,7 +18,13 @@ if __name__ == '__main__':
 else:
     log = logging.getLogger(__name__)
 
-class StaticAprioriGridError(object):
+class StaticAprioriGridError(Exception):
+    """
+    This error is raised when the input pressure grid exceeds the 
+    one contained in the static apriori source, used as reference
+    for the interpolation.
+    """
+
     pass
 
 def compute_LERP_jacobian(ref_grid, input_grid):
