@@ -88,7 +88,8 @@ class AprioriCovariance(object):
         Sa[self.n_levels*0: self.n_levels*1, self.n_levels*0: self.n_levels*1] = self.T[obs,:]
         Sa[self.n_levels*1: self.n_levels*2, self.n_levels*1: self.n_levels*2] = self.q[obs,:]
         Sa[self.n_levels*2: self.n_levels*3, self.n_levels*2: self.n_levels*3] = np.eye(self.n_levels, dtype=np.float64) * self.co2_std
-        Sa[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = self.O3[obs,:]
+        # PaoloS 12/04/2024: added perturbation of order 1e-6 to O3 covariance matrix
+        Sa[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = self.O3[obs,:] + np.eye(self.n_levels)*1e-6
   
         #print("Sa O3: {}".format(self.O3[obs,:]));
 
@@ -118,10 +119,11 @@ class AprioriCovariance(object):
             #SaInv[-eigen - 1, -eigen - 1] = 1. / NewAprioriCovariance.EIGENVALUES_TCOV
             #for j in range(1, eigen + 1):
             #    SaInv[-j, -j] = 1. / self.emiss_cov[obs, eigen-j]
-            
-            SaInv[: self.n_levels*2, : self.n_levels*2] = np.linalg.pinv(SaInv[: self.n_levels*2, : self.n_levels*2],rcond=1e-15)
+            SaInv[: self.n_levels*2, : self.n_levels*2] = np.linalg.inv(Sa[: self.n_levels*2, : self.n_levels*2])
+            #SaInv[: self.n_levels*2, : self.n_levels*2] = np.linalg.pinv(SaInv[: self.n_levels*2, : self.n_levels*2],rcond=1e-15)
             SaInv[self.n_levels*2: self.n_levels*3, self.n_levels*2: self.n_levels*3] = np.eye(self.n_levels, dtype=np.float64) * (1/self.co2_std)
-            SaInv[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = np.linalg.pinv(self.O3[obs,:],rcond=1e-15)      
+            #SaInv[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = np.linalg.inv(self.O3[obs,:])   
+            SaInv[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] = np.linalg.inv( Sa[self.n_levels*3: self.n_levels*4, self.n_levels*3: self.n_levels*4] )
             SaInv[-eigen - 1, -eigen - 1] = 1/AprioriCovariance.EIGENVALUES_TCOV
             for j in range(1, eigen + 1):
                 SaInv[-j, -j] = 1/self.emiss_cov[obs, eigen - j]
@@ -129,15 +131,17 @@ class AprioriCovariance(object):
             # SaInv=np.linalg.pinv(Sa,rcond=1e-15)
 
         if __debug__:
+            #np.savetxt('/home/mirto/amethyst_test_SaInv.txt',SaInv)
+            #np.savetxt('/home/mirto/amethyst_test_Sa.txt',Sa)
             test = np.dot(Sa, SaInv)
             test[np.abs(test) < 1e-4] = 0
-            #assert np.allclose(test, np.eye(size), rtol=1e-04,
-            #                   atol=1e-04)
+            assert np.allclose(test, np.eye(size), rtol=1e-04,
+                               atol=1e-04)
 
         selSa = Sa[self.varindx(obs), :][:, self.varindx(obs)]
         #PaoloA 29-03-2021
-        #selSaInv = SaInv[self.varindx(obs), :][:, self.varindx(obs)]
-        selSaInv = np.linalg.pinv(selSa,rcond=1e-15)
+        selSaInv = SaInv[self.varindx(obs), :][:, self.varindx(obs)]
+        #selSaInv = np.linalg.pinv(selSa,rcond=1e-15)
 
         if __debug__:
             test = np.dot(selSa, selSaInv)

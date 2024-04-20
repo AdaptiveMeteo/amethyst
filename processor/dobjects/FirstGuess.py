@@ -76,9 +76,9 @@ class FirstGuess(object):
         p[:] = self.df.groups['atmospheric_components'].variables['p'][obs,:]
 
         x0[0: self.levels] = self.df.groups['atmospheric_components'].variables['T'][obs,:]
-        x0[self.levels:self.levels*2]   = np.log(self.df.groups['atmospheric_components'].variables['q'][obs,:]/1000)
+        x0[self.levels:self.levels*2]   = np.log(self.df.groups['atmospheric_components'].variables['q'][obs,:])
         x0[self.levels*2:self.levels*3] = self.co2
-        x0[self.levels*3:self.levels*4] = np.log(self.df.groups['atmospheric_components'].variables['O3'][obs,:]/1000)
+        x0[self.levels*3:self.levels*4] = np.log(self.df.groups['atmospheric_components'].variables['O3'][obs,:])
         x0[self.levels*4] = self.df.groups['atmospheric_components'].variables['skT'][obs]
         x0[self.levels*4 + 1:self.levels*4 + 1 + self.eigenvalues(obs)] = 0
         

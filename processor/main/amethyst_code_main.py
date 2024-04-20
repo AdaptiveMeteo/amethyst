@@ -108,11 +108,11 @@ class core(object):
         self.gamma = 0.0
         
         # Debug
-        # self.debug_counter = 0
-        # print('Se iteration n.',self.debug_counter)
-        # print(self.obs_err)
-        # print('SeInv iteration n.',self.debug_counter)
-        # print(obserr.inv_obs_err)
+        self.debug_counter = 0
+        print('Se iteration n.',self.debug_counter)
+        print(self.obs_err)
+        print('SeInv iteration n.',self.debug_counter)
+        print(obserr.inv_obs_err)
         
 
 
@@ -142,13 +142,15 @@ class core(object):
 
         # self.debug_counter +=1
         # print('K iteration n.',self.debug_counter)
-        # print(fm.K)
-        # print('A iteration n.',self.debug_counter)
-        # print(A)
-        # print('R iteration n.',self.debug_counter)
-        # print(self.cx.R)
-        # print('F iteration n.',self.debug_counter)
-        # print(fm.F)
+        #print(fm.K)
+        #print('A iteration n.',self.debug_counter)
+        #print(A)
+        print('x0')
+        print(self.apriori.x0)
+        print('R iteration n.',self.debug_counter)
+        print(self.cx.R)
+        print('F iteration n.',self.debug_counter)
+        print(fm.F)
         
 
         # Use iterative LU decomposition to determine the solution
@@ -318,7 +320,6 @@ class core(object):
             L.log('OBS ' + str(obs) + ': New Gamma = ' + repr(self.gamma), 4, False)
             L.log('OBS ' + str(obs) + ': Distance  = ' + repr(abs(self.state.d2)), 4, False)
             L.log('OBS ' + str(obs) + ': Wanted    = ' + repr(converge), 4, False)
-
             if (abs(self.state.d2) < converge):
                 # If convergence criterium is met, set gamma to 0 and
                 # run one more iteration
@@ -332,6 +333,7 @@ class core(object):
                 fm.compute_forward(xhat)
                 self.state.fm = fm
                 self.yobs_minus_yhat = fm.compute_residuals()
+                print(self.yobs_minus_yhat)
                 fm.K = fm.K[:, jj]
                 self.state.xhat = xhat[jj]
                 self.state.xhat_pre = xhat_pre[jj]

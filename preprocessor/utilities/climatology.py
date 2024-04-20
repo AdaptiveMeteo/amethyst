@@ -95,7 +95,7 @@ class ClimatologyGrid(Profile):
                 if precision:
                     self.temp_precision  = temp_file['mm_T_prec'][:]
                     self.temp_precision[ self.temp_precision < 0] = temp_file['mm_apriori_T_prec'][:][self.temp_precision < 0]
-                
+                    
         except Exception as e:
             raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
             
@@ -114,8 +114,11 @@ class ClimatologyGrid(Profile):
                 self.ozone     = np.abs(ozone_file['mm_O3_values'][:]) # kg/kg
                 if precision:
                     self.ozone_precision  = ozone_file['mm_O3_prec'][:]/self.ozone # log( kg/kg )
+                    print(np.max(ozone_file['mm_O3_prec'][:]), np.min(self.ozone))
+                    #self.ozone_precision  = ozone_file['mm_O3_prec'][:] # log( kg/kg )
                     self.ozone_precision[ self.ozone_precision < 0] = (ozone_file['mm_apriori_O3_prec'][:]/self.ozone)[self.ozone_precision < 0]
 
+                    
         except Exception as e:
             raise ClimatologyReadingError("Error in reading temperature climatology: {}".format(e))
 

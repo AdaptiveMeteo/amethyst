@@ -78,13 +78,11 @@ def get_means(masked_values,masked_precision,filt):
     v_mean, sum_of_weights  = np.ma.average(v,weights = weights, axis = 0, returned = True)
 
     # Precision as max daily precision
-    p_mean   = np.ma.max(p**2, axis = 0).data
+    #p_mean   = np.ma.max(p**2, axis = 0).data
 
     # Precision as sqrt of the summed weights
-    #p_mean   = 1/sum_of_weights
+    p_mean   = 1/sum_of_weights
 
-    # First version
-    #p_mean  = np.ma.mean(p,axis = 0).data + v_std
     return v_mean, np.ma.sqrt(p_mean)
 
 def get_means_xr(xr_values,xr_precision):

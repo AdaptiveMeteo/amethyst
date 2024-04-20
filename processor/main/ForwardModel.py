@@ -116,11 +116,17 @@ class ForwardModel(object):
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
 
+        # Debug
+        for k,v in indata.items():
+              print(k, v)
+              print()
+
         # Call the selected forward model (OSS)
         self.model.compute(indata, self.outdata)
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
-
+        print('F in ForwardModel.py')
+        print(self.F)
         SEflag  = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0
         Tflag   = np.size(np.where(Jvar == 0)) > 0
