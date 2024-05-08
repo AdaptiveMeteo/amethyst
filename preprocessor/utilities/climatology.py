@@ -114,7 +114,6 @@ class ClimatologyGrid(Profile):
                 self.ozone     = np.abs(ozone_file['mm_O3_values'][:]) # kg/kg
                 if precision:
                     self.ozone_precision  = ozone_file['mm_O3_prec'][:]/self.ozone # log( kg/kg )
-                    print(np.max(ozone_file['mm_O3_prec'][:]), np.min(self.ozone))
                     #self.ozone_precision  = ozone_file['mm_O3_prec'][:] # log( kg/kg )
                     self.ozone_precision[ self.ozone_precision < 0] = (ozone_file['mm_apriori_O3_prec'][:]/self.ozone)[self.ozone_precision < 0]
 
@@ -255,9 +254,8 @@ class ClimatologyGrid(Profile):
                 climatology_top       = np.min(pressure_grid)
                 log_top_pressure_grid = np.linspace( np.log(climatology_top),
                                                      np.log(source_top),
-                                                     n_climatology_levels )[::-1]
+                                                     n_climatology_levels + 1)[::-1][1:]
                 top_pressure_grid   = np.exp(log_top_pressure_grid)
-
 
                 # Retrieve climatology profile for the levels avove the source
                 climatology_profile =  Profile(temperature = temp_interp(  log_top_pressure_grid[::-1] )[::-1],
@@ -267,6 +265,11 @@ class ClimatologyGrid(Profile):
 
                 # Merge all profiles
                 merged_pressure    = np.concatenate((source_profile.pressure_levels, top_pressure_grid))
+                 
+                # Avoid non monotonic grid pressure: fix pressure at the cut
+                if not np.all(merged_pressure[1:] <= merged_pressure[:-1] ):
+                            merged_pressure[source_profile.pressure_levels.size] -= 0.5
+
                 merged_temperature = np.concatenate((source_profile.temperature, 
                                                      climatology_profile.temperature))
                 merged_water_vapor = np.concatenate((source_profile.water_vapour, 

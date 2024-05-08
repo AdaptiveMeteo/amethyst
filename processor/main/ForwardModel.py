@@ -117,10 +117,15 @@ class ForwardModel(object):
         indata['lat']       = self.cx.fov_latitude
 
         # Debug
-        for k,v in indata.items():
-              print(k, v)
-              print()
-
+        #for k,v in indata.items():
+        #      print(k, v)
+        #      print()
+        import pickle
+        import os
+        if not os.path.isfile('/home/mirto/amethyst_indata.pkl'):
+           with open('/home/mirto/amethyst_indata.pkl', 'wb') as handle:
+                pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                print('Saved')
         # Call the selected forward model (OSS)
         self.model.compute(indata, self.outdata)
         # Subselect channels which are used in the inversion

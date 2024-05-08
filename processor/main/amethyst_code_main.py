@@ -108,11 +108,11 @@ class core(object):
         self.gamma = 0.0
         
         # Debug
-        self.debug_counter = 0
-        print('Se iteration n.',self.debug_counter)
-        print(self.obs_err)
-        print('SeInv iteration n.',self.debug_counter)
-        print(obserr.inv_obs_err)
+        #self.debug_counter = 0
+        #print('Se iteration n.',self.debug_counter)
+        #print(self.obs_err)
+        #print('SeInv iteration n.',self.debug_counter)
+        #print(obserr.inv_obs_err)
         
 
 
@@ -145,12 +145,12 @@ class core(object):
         #print(fm.K)
         #print('A iteration n.',self.debug_counter)
         #print(A)
-        print('x0')
-        print(self.apriori.x0)
-        print('R iteration n.',self.debug_counter)
-        print(self.cx.R)
-        print('F iteration n.',self.debug_counter)
-        print(fm.F)
+        #print('x0')
+        #print(self.apriori.x0)
+        #print('R iteration n.',self.debug_counter)
+        #print(self.cx.R)
+        #print('F iteration n.',self.debug_counter)
+        #print(fm.F)
         
 
         # Use iterative LU decomposition to determine the solution
@@ -333,7 +333,7 @@ class core(object):
                 fm.compute_forward(xhat)
                 self.state.fm = fm
                 self.yobs_minus_yhat = fm.compute_residuals()
-                print(self.yobs_minus_yhat)
+                #print(self.yobs_minus_yhat)
                 fm.K = fm.K[:, jj]
                 self.state.xhat = xhat[jj]
                 self.state.xhat_pre = xhat_pre[jj]
@@ -342,6 +342,7 @@ class core(object):
                 xhat[jj] = self.state.xhat
                 [self.cx.sfgrd, self.cx.emrf] = emiss.get(obs,
                                                           xhat[ems:eme])
+
                 fm.compute_forward(xhat)
 
                 # Subselect only retrieved state vector variables

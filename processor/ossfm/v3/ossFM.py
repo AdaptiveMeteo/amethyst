@@ -62,7 +62,6 @@ class ossFM(object):
         vwvn = hitran.get('vwvn')
         self.oss.set_solar_irradiance(vwvn, solar.get(vwvn))
             
-        print( hitran.get('fixDMR'), hitran.get('wvptab'), hitran.get('dflt'), hitran.get('molProf'))
         self.oss.set_hitran_absorption_coefficients(hitran.get('kfix'),
                                                     hitran.get('kh2o'), 
                                                     hitran.get('dkh2o'),
