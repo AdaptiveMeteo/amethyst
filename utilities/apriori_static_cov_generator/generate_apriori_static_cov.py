@@ -3,10 +3,7 @@ import numpy as np
 #from numpy.random import Generator, PCG64
 import numpy.matlib
 import glob, os
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import logging
-from matplotlib import cm
 import xarray as xr
 
 __author__    = "Paolo Antonelli and Paolo Scaccia"
@@ -351,7 +348,7 @@ print('Determinant C(C_T_q): {}'.format(det))
 print('Reading Ozone Covariance')
 ozone_static_covariance = '/home/mirto/amethyst/ancillary/atmosphere/static_ozone.nc'
 #ozone_static_covariance = '/work/cris/mirto_lsr/fixed/ozone.nc'
-with Dataset('/work/cris/mirto_lsr/fixed/ozone.nc','r') as ozone_f:
+with Dataset(ozone_static_covariance,'r') as ozone_f:
     ozone=ozone_f.variables['ozone'][:]
     #ozone_f.close()
 
@@ -361,7 +358,7 @@ enable_cmp = False
 cmp_level = 4
 
 
-os.chdir("/home/oper")
+os.chdir("/home/adaptive")
 with Dataset(area+'_apriori.nc', mode) as output_f:
 
     output_f.set_auto_mask(False)
