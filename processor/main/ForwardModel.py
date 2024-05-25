@@ -116,22 +116,35 @@ class ForwardModel(object):
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
 
+        import pickle
+        import os
+        just_saved = False
+        if not os.path.isfile('/home/mirto/amethyst_indata_first.pkl'):
+           with open('/home/mirto/amethyst_indata_first.pkl', 'wb') as handle:
+                  pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                  print('Saved')
+                  just_saved = True
+
         # Debug
         #for k,v in indata.items():
         #      print(k, v)
         #      print()
-        import pickle
-        import os
-        if not os.path.isfile('/home/mirto/amethyst_indata.pkl'):
-           with open('/home/mirto/amethyst_indata.pkl', 'wb') as handle:
-                pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                print('Saved')
         # Call the selected forward model (OSS)
         self.model.compute(indata, self.outdata)
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
-        print('F in ForwardModel.py')
-        print(self.F)
+        if not np.all( ~np.isnan(self.F)):
+             with open('/home/mirto/amethyst_indata_fail.pkl', 'wb') as handle:
+                  pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                  print('Saved 3')
+        elif not just_saved:
+          if not os.path.isfile('/home/mirto/amethyst_indata_second.pkl'):
+              with open('/home/mirto/amethyst_indata_second.pkl', 'wb') as handle:
+                  pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                  print('Saved 2')
+
+        #print('F in ForwardModel.py')
+        #print(self.F)
         SEflag  = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0
         Tflag   = np.size(np.where(Jvar == 0)) > 0
