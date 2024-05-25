@@ -349,6 +349,8 @@ print('Determinant C(C_T_q): {}'.format(det))
 #print(np.diag(C_T_q))
 
 print('Reading Ozone Covariance')
+ozone_static_covariance = '/home/mirto/amethyst/ancillary/atmosphere/static_ozone.nc'
+#ozone_static_covariance = '/work/cris/mirto_lsr/fixed/ozone.nc'
 with Dataset('/work/cris/mirto_lsr/fixed/ozone.nc','r') as ozone_f:
     ozone=ozone_f.variables['ozone'][:]
     #ozone_f.close()
