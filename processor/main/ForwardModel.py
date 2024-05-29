@@ -16,7 +16,8 @@ xdim is a vector of dimensions for each of parameters of the solution
 # pylint: disable=E0611
 
 import numpy as np
-
+import pickle
+import os
 
 class NotConvergentIteration(Exception):
     """
@@ -30,7 +31,7 @@ class ForwardModel(object):
     """
     Forward Model Class
     """
-    def __init__(self, control):
+    def __init__(self, control, debug_file = None):
         """
         Initializes the class. Any relevanty parameter is in the
         control object.
@@ -64,7 +65,11 @@ class ForwardModel(object):
         self.wnK = None
         self.K = None
         self.F = None
-    
+        self.debug_file = debug_file
+
+        if self.debug_file: 
+            self.counter = 0
+
     def compute_forward(self, xhat):
         """
         Define Input to radiance calculator
@@ -116,35 +121,30 @@ class ForwardModel(object):
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
 
-        import pickle
-        import os
         just_saved = False
-        if not os.path.isfile('/home/mirto/amethyst_indata_first.pkl'):
-           with open('/home/mirto/amethyst_indata_first.pkl', 'wb') as handle:
-                  pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                  print('Saved')
-                  just_saved = True
+        
+        # Debug: save Input Data
+        if self.debug_file:
+            self.counter += 1
+            debug_path = self.debug_file.replace(os.path.basename(self.debug_file),'')
+            fm_debug_file = debug_path + 'f/amethyst_fm_indata_{self.counter}.pkl'
+            with open(fm_debug_file, 'wb') as handle:
+                   pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                   print('Saved FM input data in ', fm_debug_file )
 
-        # Debug
-        #for k,v in indata.items():
-        #      print(k, v)
-        #      print()
-        # Call the selected forward model (OSS)
         self.model.compute(indata, self.outdata)
+        
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
-        if not np.all( ~np.isnan(self.F)):
-             with open('/home/mirto/amethyst_indata_fail.pkl', 'wb') as handle:
-                  pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                  print('Saved 3')
-        elif not just_saved:
-          if not os.path.isfile('/home/mirto/amethyst_indata_second.pkl'):
-              with open('/home/mirto/amethyst_indata_second.pkl', 'wb') as handle:
-                  pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                  print('Saved 2')
+        
+        # Debug: save Radiances
+        if self.debug_file:
+            fm_debug_file = debug_path + 'f/amethyst_fm_outdata_{self.counter}.pkl'
+            if not os.path.isfile( fm_debug_file ):
+                with open(fm_debug_file, 'wb') as handle:
+                       pickle.dump(self.F, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                       print('Saved FM output data in ', fm_debug_file )
 
-        #print('F in ForwardModel.py')
-        #print(self.F)
         SEflag  = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0
         Tflag   = np.size(np.where(Jvar == 0)) > 0

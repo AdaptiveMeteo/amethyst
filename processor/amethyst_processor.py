@@ -52,6 +52,33 @@ class logger():
             if self.__file_log == sys.stdout:
                 sys.stdout.flush()
             self.output_str = ""
+            
+    def debug(self, variable, dimension, label, file_debug = None, dtype='f8'):
+        from netCDF4 import Dataset
+        
+        if self.__file_debug == None and file_debug is None:
+                sys.exit("Specify netcdf debug file!")
+
+        ncfile = Dataset(self.__file_debug,"a") if path.isfile(self.__file_debug) \
+            else Dataset(self.__file_debug,"w")
+            
+        if 'numpy.ndarray' in repr(type(variable)):
+            shape = variable.shape
+            for idim,dim in enumerate(dimension):
+                if dim not in list(ncfile.dimensions):
+                    ncfile.createDimension(dim, variable.shape[idim])
+
+        if label not in list(ncfile.variables):
+            if dimension != 'scalar':
+                v=ncfile.createVariable(label, dtype, dimension )
+                v[:] = variable
+            else:
+                if 'scalar' not in list(ncfile.dimensions):
+                    ncfile.createDimension('scalar',1)
+                v=ncfile.createVariable(label, dtype, ( 'scalar',) )
+                v[:]=variable
+            self.log('Saved debug variable {} '.format(label), self.__verbose_level)
+            ncfile.close()
 
     def close(self):
         if self.__file_log != sys.stdout and self.__file_log != sys.stderr:
@@ -221,7 +248,7 @@ if __name__ == '__main__':
 
     # Parse arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--debug', default='None',
+    parser.add_argument('-d', '--debug', default=None,
                         help="Define which debug variables must be saved")
     parser.add_argument('--debug_file', default=None,
                         help="Define netcdf debug file")

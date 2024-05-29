@@ -93,7 +93,7 @@ class core(object):
     """
     This class is the core of the inversion system
     """
-    def __init__(self, forward_model, obserr):
+    def __init__(self, forward_model, obserr, debugger = None):
         """ Load configuration parameters and Input data for retrieval """
         self.cx = amethyst_core_config(forward_model)
         self.obs_err = obserr.obs_err
@@ -104,17 +104,13 @@ class core(object):
         self.yobs_minus_yhat = None
         self.mspo = np.NAN
         self.fm = None
+
         # Default Marquardt-Levemberg parameter
         self.gamma = 0.0
-        
-        # Debug
-        #self.debug_counter = 0
-        #print('Se iteration n.',self.debug_counter)
-        #print(self.obs_err)
-        #print('SeInv iteration n.',self.debug_counter)
-        #print(obserr.inv_obs_err)
-        
 
+        # Debug        
+        self.debugger = debugger
+        self.debug_counter = 0
 
     def compute_chi_square(self, profile):
         """ Compute X^2 from retrieval residuals """
@@ -221,7 +217,7 @@ class core(object):
         xhat_pre = np.copy(self.apriori.xa)
         self.cx.emiss = emiss
 
-        fm = ForwardModel(self.cx)
+        fm = ForwardModel(self.cx, debug_file = None if not self.debugger else self.debugger.__debug_file)
         self.fm = fm
 
         ems = fg.xdim[0]+fg.xdim[1]+fg.xdim[2]+fg.xdim[3]+fg.xdim[4]
@@ -239,8 +235,6 @@ class core(object):
         self.state.Sa_ret = self.apriori.Sa
         self.state.SaInv_ret = self.apriori.SaInv
         self.state.xa = self.apriori.xa[jj]
-
-
 
         while (Iteration < self.cx.Iteration_limit):
             #

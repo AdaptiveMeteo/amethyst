@@ -16,8 +16,8 @@ class FirstGuess(object):
     EIGENVALUES_SEA=amethyst_config.processor_vars['eigenforsea']
     CO2 = amethyst_config.processor_vars['constant_co2']['value']
     
-    def __init__(self, datafile, co2=CO2, eigen_land=EIGENVALUES_LAND, eigen_sea=EIGENVALUES_SEA, var_selection=None):
-
+    def __init__(self, datafile, co2=CO2, eigen_land=EIGENVALUES_LAND, 
+                 eigen_sea=EIGENVALUES_SEA, var_selection = None):
         """
         Initialize the FirstGuess object
         """
