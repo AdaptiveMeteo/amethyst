@@ -321,7 +321,7 @@ if __name__ == '__main__':
     # also can be preloaded.
     L.log('Creating an inverter... ', 1, end='')
     oss = ossFM(asolar, ahitran)
-    inverter = core( oss, obs_err, logger = L)
+    inverter = core( oss, obs_err, debugger = debugger)
     inverter_time=time.time()
     L.log('Done in ' +str(inverter_time-oss_time)+' seconds', 1)
     # <-----

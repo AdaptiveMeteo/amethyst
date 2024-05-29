@@ -89,7 +89,7 @@ class core(object):
     """
     This class is the core of the inversion system
     """
-    def __init__(self, forward_model, obserr, logger = None):
+    def __init__(self, forward_model, obserr, debugger = None):
         """ Load configuration parameters and Input data for retrieval """
         self.cx = amethyst_core_config(forward_model)
         self.obs_err = obserr.obs_err
@@ -105,8 +105,7 @@ class core(object):
         self.gamma = 0.0
 
         # Debug        
-        self.logger = logger
-        self.debugger = logger.debug if logger else None
+        self.debugger = debugger
         self.debug_counter = 0
 
     def compute_chi_square(self, profile):
