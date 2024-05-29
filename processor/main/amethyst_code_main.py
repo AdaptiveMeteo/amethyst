@@ -30,10 +30,6 @@ class amethyst_state(object):
         self.d2 = None
         self.fm = None
         self.yobs_minus_yhat = None
-        #PaoloA 12112018
-        #self.jacobian - None
-        #self.residuals = None
-        #self.fgresiduals = None
 
 class amethyst_core_config(object):
     """ Utility class to keep in one place all needed by Forward Model"""
@@ -164,26 +160,32 @@ class core(object):
         # Debugger call
         if self.debugger:
             # Save variables if a debugger is given in the init
-            self.debugger_counter += 1
-            if self.debugger_counter == 1:
+            self.debug_counter += 1
+            if self.debug_counter == 1:
                 debug_variables = [ (np.linalg.det(self.obs_err), 'scalar', 'obs_err_determinant'),
                                    (np.linalg.cond(self.obs_err),'scalar','obs_err_cond_number') ,
                                    (np.linalg.matrix_rank(self.obs_err),'scalar','obs_err_rank'),
-                                   (np.linalg.det(A), 'scalar','A_determinant_{}'.format(self.debugger_counter)),
-                                   (np.linalg.cond(A),'scalar' ,'A_cond_number_{}'.format(self.debugger_counter) ),
-                                   (np.linalg.matrix_rank(A),'scalar', 'A_rank_{}'.format(self.debugger_counter)  ),
-                                   (np.linalg.det(KtSeInvK),'scalar' ,'KtSeInvK_determinant_{}'.format(self.debugger_counter) ),
-                                   (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debugger_counter) ),
-                                   (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debugger_counter) )]
+                                   (np.linalg.cond(A),'scalar' ,'A_cond_number_{}'.format(self.debug_counter) ),
+                                   (np.linalg.matrix_rank(A),'scalar', 'A_rank_{}'.format(self.debug_counter)  ),
+                                   (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debug_counter) ),
+                                   (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debug_counter) )
+                                  ]
 
+                try:
+                    debug_variables.append(    (np.linalg.det(A), 'scalar','A_determinant_{}'.format(self.debug_counter)) )
+                except:
+                    print("DEBUG: Overflow error in computing ", 'A_determinant_{}'.format(self.debug_counter) )
+                    self.debugger( np.nan, 'scalar',  'A_determinant_{}'.format(self.debug_counter) )
+
+                try:
+                    debug_variables.append( (np.linalg.det(KtSeInvK),'scalar' ,'KtSeInvK_determinant_{}'.format(self.debug_counter) ) )
+                except:
+                    print("DEBUG: Overflow error in computing ", 'KtSeInvK_determinant_{}'.format(self.debug_counter) )
+                    self.debugger( np.nan, 'scalar',  'KtSeInvK_determinant_{}'.format(self.debug_counter) )
+
+                # Write all debug variables
                 for variable, vartype, varname in debug_variables:
-                     try:
-                         self.debugger(variable, vartype, varname)
-                     except:
-                         print("DEBUG: Overflow error in computing ",varname)
-                         self.debugger( np.nan, 
-                                       'scalar', 
-                                       varname )
+                     self.debugger(variable, vartype, varname)
 
 
     def invert(self, fov, fg, apriori, emiss, obs, log, profile=None):
