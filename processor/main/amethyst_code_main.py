@@ -110,6 +110,7 @@ class core(object):
 
         # Debug        
         self.logger = logger
+        self.debugger = logger.debug
         self.debug_counter = 0
 
     def compute_chi_square(self, profile):
