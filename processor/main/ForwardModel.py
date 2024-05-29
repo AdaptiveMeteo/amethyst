@@ -31,7 +31,7 @@ class ForwardModel(object):
     """
     Forward Model Class
     """
-    def __init__(self, control, debug_file = None):
+    def __init__(self, control, debugger = None):
         """
         Initializes the class. Any relevanty parameter is in the
         control object.
@@ -65,9 +65,8 @@ class ForwardModel(object):
         self.wnK = None
         self.K = None
         self.F = None
-        self.debug_file = debug_file
-        if self.debug_file: 
-            self.counter = 0
+        self.debugger = debugger
+        self.debug_counter = 0
 
     def compute_forward(self, xhat):
         """
@@ -119,8 +118,6 @@ class ForwardModel(object):
         indata['azangle']   = self.cx.Solar_azimuth_angle
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
-
-        just_saved = False
         
         # Debug: save Input Data
         if self.debug_file:
@@ -135,14 +132,6 @@ class ForwardModel(object):
         
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
-        
-        # Debug: save Radiances
-        if self.debug_file:
-            fm_debug_file = debug_path + '/amethyst_fm_outdata_{}.pkl'.format(self.counter)
-            if not os.path.isfile( fm_debug_file ):
-                with open(fm_debug_file, 'wb') as handle:
-                       pickle.dump(self.F, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                       print('DEBUG: Saved FM output data in ', fm_debug_file )
 
         SEflag  = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0
@@ -203,6 +192,20 @@ class ForwardModel(object):
             #print('SE\n',jac[:, self.ems:self.eme],jac[:, self.ems:self.eme].shape)
         self.K = np.ascontiguousarray(jac)
         self.wnK = self.wnF[ii]
+
+        # Debug: save Radiances
+        if self.debugger:
+            self.debug_counter += 1
+            self.debugger( self.outdata['y'][:], 
+                          ('selchannels',), 
+                          'FM_Radiance_{}'.format(self.debug_counter)  )
+            if self.debug_counter == 1:
+                self.debugger( self.wnF,
+                              ('selchannels',), 
+                              'FM_Wavenumbers'  )
+                self.debugger( ii,
+                              ('sub_selchannels',), 
+                              'FM_Indices' )
 
     def compute_residuals(self):
         """
