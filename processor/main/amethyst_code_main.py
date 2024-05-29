@@ -134,20 +134,7 @@ class core(object):
         A = (KtSeInvK + (1.0+self.gamma)*self.state.SaInv_ret)
         dx = (self.state.xhat - self.state.xa)
         d = (np.dot(KtSeInv, self.yobs_minus_yhat) -
-             np.dot(self.state.SaInv_ret, dx))
-
-        # self.debug_counter +=1
-        # print('K iteration n.',self.debug_counter)
-        #print(fm.K)
-        #print('A iteration n.',self.debug_counter)
-        #print(A)
-        #print('x0')
-        #print(self.apriori.x0)
-        #print('R iteration n.',self.debug_counter)
-        #print(self.cx.R)
-        #print('F iteration n.',self.debug_counter)
-        #print(fm.F)
-        
+             np.dot(self.state.SaInv_ret, dx))      
 
         # Use iterative LU decomposition to determine the solution
         # First iteration
@@ -158,10 +145,12 @@ class core(object):
                                          "NaN in the A matrix!")
         y = solve(L, d)
         x = solve(U, y)
+        
         # Second iteration
         r = d - np.dot(A, x)
         dz  = solve(L, r)
         ddx = solve(U, dz)
+        
         # Solution
         totx = x + ddx
         self.state.xhat_new = self.state.xhat + totx
@@ -170,10 +159,31 @@ class core(object):
         self.state.d2 = np.dot(totx.T, d)
         if profile.prlinalg is not None:
             profile.prlinalg.disable()
-        # print('xhat\n',self.state.xhat_new)
-        # print('xtot\n',totx)
-        
-        # print('end update')
+
+        # Debugger call
+        if self.debugger:
+            # Save variables if a debugger is given in the init
+            self.debugger_counter += 1
+            if self.debugger_counter == 1:
+                debug_variables = [ (np.linalg.det(self.obs_err), 'scalar', 'obs_err_determinant'),
+                                   (np.linalg.cond(self.obs_err),'scalar','obs_err_cond_number') ,
+                                   (np.linalg.matrix_rank(self.obs_err),'scalar','obs_err_rank'),
+                                   (np.linalg.det(A), 'scalar','A_determinant_{}'.format(self.debugger_counter)),
+                                   (np.linalg.cond(A),'scalar' ,'A_cond_number_{}'.format(self.debugger_counter) ),
+                                   (np.linalg.matrix_rank(A),'scalar', 'A_rank_{}'.format(self.debugger_counter)  ),
+                                   (np.linalg.det(KtSeInvK),'scalar' ,'KtSeInvK_determinant_{}'.format(self.debugger_counter) ),
+                                   (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debugger_counter) ),
+                                   (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debugger_counter) )]
+
+                for variable, vartype, varname in debug_variables:
+                     try:
+                         self.debugger(variable, vartype, varname)
+                     except:
+                         print("DEBUG: Overflow error in computing ",varname)
+                         self.debugger( np.nan, 
+                                       'scalar', 
+                                       varname )
+
 
     def invert(self, fov, fg, apriori, emiss, obs, log, profile=None):
         """ Invert the measurement to get physical sounding profile """

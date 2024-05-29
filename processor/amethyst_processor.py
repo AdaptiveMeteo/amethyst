@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 
 import argparse
-from os import path, listdir
+from os import path, listdir, system
 import sys
 import time
 
@@ -82,7 +82,7 @@ class logger():
                     ncfile.createDimension('scalar',1)
                 v=ncfile.createVariable(label, dtype, ( 'scalar',) )
                 v[:]=variable
-            self.log('Saved debug variable {} '.format(label), self.__verbose_level)
+            self.log('DEBUG: Saved debug variable {} '.format(label), self.__verbose_level)
             ncfile.close()
 
     def close(self):
