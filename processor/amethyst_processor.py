@@ -347,7 +347,8 @@ if __name__ == '__main__':
                            eigen_sea, 
                            co2, 
                            amethyst_config.processor_vars,
-                           inverter.cx.variable_selection]
+                           inverter.cx.variable_selection,
+                           debugger]
                      )
     reader.start()
     reader_time=time.time()

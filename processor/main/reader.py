@@ -8,7 +8,7 @@ from dobjects.Emissivity          import Emissivity, emissivity_model
 from main.amethyst_code_transform import transform
 
 
-def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2, config_vars, var_selection_flags):
+def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2, config_vars, var_selection_flags, debugger):
 
     # Read data from disc
     start_read_time = time.time()
