@@ -106,7 +106,7 @@ class core(object):
 
         # Debug        
         self.logger = logger
-        self.debugger = logger.debug
+        self.debugger = logger.debug if logger else None
         self.debug_counter = 0
 
     def compute_chi_square(self, profile):
@@ -229,7 +229,7 @@ class core(object):
         # (same as apriori.X0)
         xhat_pre = np.copy(self.apriori.xa)
         self.cx.emiss = emiss
-        fm = ForwardModel(self.cx, debug_file = None if not self.logger else self.logger.file_debug)
+        fm = ForwardModel(self.cx, debugger = self.debugger )
         self.fm = fm
 
         ems = fg.xdim[0]+fg.xdim[1]+fg.xdim[2]+fg.xdim[3]+fg.xdim[4]
