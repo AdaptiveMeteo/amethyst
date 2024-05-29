@@ -48,7 +48,7 @@ class ProgressBar(object):
             sys.stdout.buffer.write(bar_string.encode('UTF-8'))
         else:
             print(bar_string, end='')
-        print('  {:.2f}%     '.format(percentage), end = '')
+        print('  {:.2f}%     \n'.format(percentage), end = '')
         sys.stdout.flush()
     
 

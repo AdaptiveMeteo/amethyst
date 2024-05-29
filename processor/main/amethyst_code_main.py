@@ -93,7 +93,7 @@ class core(object):
     """
     This class is the core of the inversion system
     """
-    def __init__(self, forward_model, obserr, debugger = None):
+    def __init__(self, forward_model, obserr, logger = None):
         """ Load configuration parameters and Input data for retrieval """
         self.cx = amethyst_core_config(forward_model)
         self.obs_err = obserr.obs_err
@@ -109,7 +109,7 @@ class core(object):
         self.gamma = 0.0
 
         # Debug        
-        self.debugger = debugger
+        self.logger = logger
         self.debug_counter = 0
 
     def compute_chi_square(self, profile):
@@ -216,8 +216,7 @@ class core(object):
         # (same as apriori.X0)
         xhat_pre = np.copy(self.apriori.xa)
         self.cx.emiss = emiss
-
-        fm = ForwardModel(self.cx, debug_file = None if not self.debugger else self.debugger.__debug_file)
+        fm = ForwardModel(self.cx, debug_file = None if not self.logger else self.logger.file_debug)
         self.fm = fm
 
         ems = fg.xdim[0]+fg.xdim[1]+fg.xdim[2]+fg.xdim[3]+fg.xdim[4]

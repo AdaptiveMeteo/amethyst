@@ -66,7 +66,6 @@ class ForwardModel(object):
         self.K = None
         self.F = None
         self.debug_file = debug_file
-
         if self.debug_file: 
             self.counter = 0
 
@@ -127,10 +126,10 @@ class ForwardModel(object):
         if self.debug_file:
             self.counter += 1
             debug_path = self.debug_file.replace(os.path.basename(self.debug_file),'')
-            fm_debug_file = debug_path + 'f/amethyst_fm_indata_{self.counter}.pkl'
+            fm_debug_file = debug_path + "/amethyst_fm_indata_{}.pkl".format(self.counter)
             with open(fm_debug_file, 'wb') as handle:
                    pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                   print('Saved FM input data in ', fm_debug_file )
+                   print('DEBUG: Saved FM input data in ', fm_debug_file )
 
         self.model.compute(indata, self.outdata)
         
@@ -139,11 +138,11 @@ class ForwardModel(object):
         
         # Debug: save Radiances
         if self.debug_file:
-            fm_debug_file = debug_path + 'f/amethyst_fm_outdata_{self.counter}.pkl'
+            fm_debug_file = debug_path + '/amethyst_fm_outdata_{}.pkl'.format(self.counter)
             if not os.path.isfile( fm_debug_file ):
                 with open(fm_debug_file, 'wb') as handle:
                        pickle.dump(self.F, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                       print('Saved FM output data in ', fm_debug_file )
+                       print('DEBUG: Saved FM output data in ', fm_debug_file )
 
         SEflag  = np.size(np.where(Jvar == -2)) > 0
         SKTflag = np.size(np.where(Jvar == -1)) > 0

@@ -38,10 +38,15 @@ else:
 
 
 class logger():
-    def __init__(self, verbose_level, file_log=sys.stdout):
+    def __init__(self, verbose_level, file_log=sys.stdout, file_debug = None):
         self.__verbose_level = int(verbose_level)
         self.output_str = ""
         self.__file_log = file_log
+        self.file_debug = None if file_debug is None else file_debug
+        if file_debug != None:
+            if path.isfile(self.file_debug):
+                self.log("Replaced old debug file {}".format(self.file_debug),self.__verbose_level)
+                system("rm {}".format(self.file_debug))
 
     def log(self, txt_val, verbose_val, print_now=True, end='\n'):
         if verbose_val <= self.__verbose_level:
@@ -56,11 +61,11 @@ class logger():
     def debug(self, variable, dimension, label, file_debug = None, dtype='f8'):
         from netCDF4 import Dataset
         
-        if self.__file_debug == None and file_debug is None:
+        if self.file_debug == None and file_debug is None:
                 sys.exit("Specify netcdf debug file!")
 
-        ncfile = Dataset(self.__file_debug,"a") if path.isfile(self.__file_debug) \
-            else Dataset(self.__file_debug,"w")
+        ncfile = Dataset(self.file_debug,"a") if path.isfile(self.file_debug) \
+            else Dataset(self.file_debug,"w")
             
         if 'numpy.ndarray' in repr(type(variable)):
             shape = variable.shape
@@ -277,11 +282,10 @@ if __name__ == '__main__':
     PROCESSES_NUMBER = parser.parse_args().processes
     STARTOBS         = parser.parse_args().startobs
     VERBOSE          = parser.parse_args().verbose
-    if DBG_FILE != None:
+    if DBG_FILE:
         if NUMOBS == 1: 
               L = logger(VERBOSE, LOG_FILE,file_debug=DBG_FILE)
               debugger = L.debug
-
         else:
               sys.exit("Debug file alowed only with one observation")
     else:
@@ -317,7 +321,7 @@ if __name__ == '__main__':
     # also can be preloaded.
     L.log('Creating an inverter... ', 1, end='')
     oss = ossFM(asolar, ahitran)
-    inverter = core( oss, obs_err )
+    inverter = core( oss, obs_err, logger = L)
     inverter_time=time.time()
     L.log('Done in ' +str(inverter_time-oss_time)+' seconds', 1)
     # <-----
