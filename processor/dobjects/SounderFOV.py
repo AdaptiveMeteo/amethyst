@@ -17,7 +17,7 @@ def FOVCount(datafile):
 
 class SounderFOV(object):
 
-    def __init__(self, conf_vars):
+    def __init__(self, conf_vars, debugger = None):
         """
         Initialize the masured data file
         """
@@ -37,7 +37,9 @@ class SounderFOV(object):
         self.selchannels = len(self.indx)
         self.wnR = self.df.variables['Wavenumbers'][:]
         self.wnR = self.wnR[self.indx]
-
+        
+        self.debugger = debugger
+        
     def __del__(self):
         self.df.close()
 
@@ -54,6 +56,18 @@ class SounderFOV(object):
 
         Rad = self.df.variables['Radiance'][obs, Ellipsis]
         Rad = Rad[self.indx]
+
+        # Debugger call
+        if self.debugger != None:
+            self.debugger( self.df.variables['Radiance'][obs, Ellipsis], 
+                          ('selchannels',), 
+                          'Sounder_FOV_Radiance'  )
+            self.debugger( self.df.variables['Wavenumbers'][:],
+                          ('selchannels',), 
+                          'Sounder_FOV_Wavenumbers'  )
+            self.debugger( self.indx,
+                          ('sub_selchannels',), 
+                          'Sounder_FOV_Indices' )
 
         return [Latitude, Longitude, None, FOVangle, Solar_zenith_angle, Solar_azimuth_angle, np.copy(self.wnR), Rad]
 

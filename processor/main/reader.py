@@ -13,7 +13,7 @@ def reader_f(to_compute, obserr, obsnum, L, eigenland, eigensea, co2, config_var
     # Read data from disc
     start_read_time = time.time()
 
-    fov = SounderFOV( config_vars ) 
+    fov = SounderFOV( config_vars, debugger = debugger ) 
     fov_time = time.time()
     L.log('\n   SounderFov opened in ' +str(fov_time - start_read_time)+' seconds', 4)
 
