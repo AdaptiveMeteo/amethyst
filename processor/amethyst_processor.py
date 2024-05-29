@@ -82,7 +82,7 @@ class logger():
                     ncfile.createDimension('scalar',1)
                 v=ncfile.createVariable(label, dtype, ( 'scalar',) )
                 v[:]=variable
-            self.log('\nDEBUG: Saved debug variable {} '.format(label), self.__verbose_level)
+            self.log('DEBUG: Saved debug variable {} '.format(label), self.__verbose_level)
             ncfile.close()
 
     def close(self):

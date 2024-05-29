@@ -119,15 +119,6 @@ class ForwardModel(object):
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
         
-        # Debug: save Input Data
-        if self.debug_file:
-            self.counter += 1
-            debug_path = self.debug_file.replace(os.path.basename(self.debug_file),'')
-            fm_debug_file = debug_path + "/amethyst_fm_indata_{}.pkl".format(self.counter)
-            with open(fm_debug_file, 'wb') as handle:
-                   pickle.dump(indata, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                   print('DEBUG: Saved FM input data in ', fm_debug_file )
-
         self.model.compute(indata, self.outdata)
         
         # Subselect channels which are used in the inversion
@@ -199,7 +190,20 @@ class ForwardModel(object):
             self.debugger( self.outdata['y'][:], 
                           ('selchannels',), 
                           'FM_Radiance_{}'.format(self.debug_counter)  )
+            self.debugger( indata['h2o'][:], 
+                          ('n_level',), 
+                          'FM_xhat_h2o_{}'.format(self.debug_counter)  )
+            self.debugger( indata['o3'][:], 
+                          ('n_level',), 
+                          'FM_xhat_o3_{}'.format(self.debug_counter)  )
+            self.debugger( indata['temp'][:], 
+                          ('n_level',), 
+                          'FM_xhat_temp_{}'.format(self.debug_counter)  )
+
             if self.debug_counter == 1:
+                self.debugger( indata['pressure'][:], 
+                               ('n_level',), 
+                               'pressure' )
                 self.debugger( self.wnF,
                               ('selchannels',), 
                               'FM_Wavenumbers'  )
