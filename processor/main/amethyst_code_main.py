@@ -160,31 +160,31 @@ class core(object):
         if self.debugger:
             # Save variables if a debugger is given in the init
             self.debug_counter += 1
-            if self.debug_counter == 1:
-                debug_variables = [ (np.linalg.det(self.obs_err), 'scalar', 'obs_err_determinant'),
-                                   (np.linalg.cond(self.obs_err),'scalar','obs_err_cond_number') ,
-                                   (np.linalg.matrix_rank(self.obs_err),'scalar','obs_err_rank'),
-                                   (np.linalg.cond(A),'scalar' ,'A_cond_number_{}'.format(self.debug_counter) ),
-                                   (np.linalg.matrix_rank(A),'scalar', 'A_rank_{}'.format(self.debug_counter)  ),
-                                   (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debug_counter) ),
-                                   (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debug_counter) )
-                                  ]
+            debug_variables = [ (np.linalg.det(self.obs_err), 'scalar', 'obs_err_determinant'),
+                               (np.linalg.cond(self.obs_err),'scalar','obs_err_cond_number') ,
+                               (np.linalg.matrix_rank(self.obs_err),'scalar','obs_err_rank'),
+                               (np.linalg.cond(A),'scalar' ,'A_cond_number_{}'.format(self.debug_counter) ),
+                               (np.linalg.matrix_rank(A),'scalar', 'A_rank_{}'.format(self.debug_counter)  ),
+                               (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debug_counter) ),
+                               (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debug_counter), ),
+                               (A.flatten(), 'A_dim_x_A_dim','A_{}'.format(self.debug_counter) ),
+                              ]
 
-                try:
-                    debug_variables.append(    (np.linalg.det(A), 'scalar','A_determinant_{}'.format(self.debug_counter)) )
-                except:
-                    print("DEBUG: Overflow error in computing ", 'A_determinant_{}'.format(self.debug_counter) )
-                    self.debugger( np.nan, 'scalar',  'A_determinant_{}'.format(self.debug_counter) )
+            try:
+                debug_variables.append(    (np.linalg.det(A), 'scalar','A_determinant_{}'.format(self.debug_counter)) )
+            except:
+                print("DEBUG: Overflow error in computing ", 'A_determinant_{}'.format(self.debug_counter) )
+                self.debugger( np.nan, 'scalar',  'A_determinant_{}'.format(self.debug_counter) )
 
-                try:
-                    debug_variables.append( (np.linalg.det(KtSeInvK),'scalar' ,'KtSeInvK_determinant_{}'.format(self.debug_counter) ) )
-                except:
-                    print("DEBUG: Overflow error in computing ", 'KtSeInvK_determinant_{}'.format(self.debug_counter) )
-                    self.debugger( np.nan, 'scalar',  'KtSeInvK_determinant_{}'.format(self.debug_counter) )
+            try:
+                debug_variables.append( (np.linalg.det(KtSeInvK),'scalar' ,'KtSeInvK_determinant_{}'.format(self.debug_counter) ) )
+            except:
+                print("DEBUG: Overflow error in computing ", 'KtSeInvK_determinant_{}'.format(self.debug_counter) )
+                self.debugger( np.nan, 'scalar',  'KtSeInvK_determinant_{}'.format(self.debug_counter) )
 
-                # Write all debug variables
-                for variable, vartype, varname in debug_variables:
-                     self.debugger(variable, vartype, varname)
+            # Write all debug variables
+            for variable, vartype, varname in debug_variables:
+                 self.debugger(variable, vartype, varname)
 
 
     def invert(self, fov, fg, apriori, emiss, obs, log, profile=None):
