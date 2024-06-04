@@ -355,7 +355,7 @@ def main():
                         # Rescale Ozone Covariance for the ozone pressure grid
                         output_tables['O3'][i, :] = scale_apriori_covariance( ozone_covariance,
                                                                               np.log(climatology.pressure)[::-1],
-                                                                              np.log(reverse_ozone_pressure[i]))[::-1,::-1]
+                                                                              np.log(reverse_ozone_pressure[i]))[::-1,::-1]/3000.
                     else:
                         # Fill Temperature and Water Vapor Apriori Covariance
                         

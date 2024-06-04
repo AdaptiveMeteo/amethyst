@@ -167,7 +167,8 @@ class core(object):
                                (np.linalg.matrix_rank(A),'scalar', 'A_rank_{}'.format(self.debug_counter)  ),
                                (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debug_counter) ),
                                (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debug_counter), ),
-                               (A.flatten(), 'A_dim_x_A_dim','A_{}'.format(self.debug_counter) ),
+                               (A, ('A_dim','A_dim'),'A_{}'.format(self.debug_counter) ),
+                               (totx, ('A_dim',),'deltax_{}'.format(self.debug_counter) ),
                               ]
 
             try:
