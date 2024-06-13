@@ -396,11 +396,8 @@ def main():
         output_tables['q'].units  = 'log(kg/kg)'
         output_tables['O3'].units = 'log(kg/kg)'
 
-
     LOG.info('Execution complete')
     return 0
-
-
 
 if __name__ == '__main__':
     sysexit(main())
