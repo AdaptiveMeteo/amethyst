@@ -191,7 +191,6 @@ class ClimatologyGrid(Profile):
 
         # Get closest climatology grid cell
         indx = self.get_closest_cell(lon,lat)
-        
         if pressure_grid is None and source_data is None:
             # Case with no pressure grid in input: just read the profile
             return Profile(temperature = self.temperature[indx,month,:],

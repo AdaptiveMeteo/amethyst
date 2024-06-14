@@ -351,7 +351,7 @@ def main():
                     if mol == 'O3':
                         # Fill Ozone Apriori Covariance
                         # Define ozone covariance matrix
-                        ozone_covariance = np.diag(ozone_precision[::-1]**2)
+                        ozone_covariance = np.diag(ozone_precision[::-1]**2)/3000
                         # Rescale Ozone Covariance for the ozone pressure grid
                         output_tables['O3'][i, :] = scale_apriori_covariance( ozone_covariance,
                                                                               np.log(climatology.pressure)[::-1],

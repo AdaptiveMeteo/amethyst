@@ -273,7 +273,7 @@ def plot_monthly_profile(data,lat1,lon1):
 #     plot_monthly_profile(Temperature, lat1, lon1)
 def main():
     #path     = "/home/avalletti/MIRTO/GESDISC/data/"
-    path = "/home/mirto/wrkdir/GESDISC_data/old_data/"
+    path = "/home/mirto/wrkdir/GESDISC_data/original_data/"
     outpath = "/home/mirto/wrkdir/GESDISC_data/"
 
     Temperature = read_all_GESDISC_files(path, "Temperature")
