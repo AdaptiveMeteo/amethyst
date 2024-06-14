@@ -14,8 +14,10 @@ from netCDF4  import Dataset
 from scipy.interpolate import interp1d
 
 URL = { 
-       "arctic"  : "https://gml.noaa.gov/aftp/data/ozwv/Ozonesonde/South%20Pole,%20Antartica/100%20Meter%20Average%20Files/",
-       "pacific" : "https://gml.noaa.gov/aftp/data/ozwv/Ozonesonde/4_Satellite%20Comparison/Hilo,%20Hawaii/Homogenized/"
+       "arctic"  : [ "https://gml.noaa.gov/aftp/data/ozwv/Ozonesonde/2_Field%20Projects/Barrow,%20AK/100%20m%20Average%20File/",
+                     "https://gml.noaa.gov/aftp/data/ozwv/Ozonesonde/2_Field%20Projects/Fairbanks,%20AK/100%20m%20Average%20Files/" ],
+       
+       "pacific" : ["https://gml.noaa.gov/aftp/data/ozwv/Ozonesonde/4_Satellite%20Comparison/Hilo,%20Hawaii/Homogenized/"]
        }
 
 parser = ArgumentParser()
@@ -34,11 +36,13 @@ else:
     with Dataset(argv.pressure_file,'r') as external_source:
         pressure_grid = np.array(external_source["atmospheric_components"]["p"][:])
         if any(pressure_grid[1:] - pressure_grid[:-1] > 0): sys.exit("Pressure grid should be monotonically increasing")
-        
+
+out_df = pd.DataFrame( {'pressure' : pressure_grid})
+
 print("CREATION OF OZONE STATIC COVARIANCE\n")
 print("Region:         ",argv.region)
 print("Outdir:         ",argv.outdir)
-print("URL:            ",URL[argv.region])
+print("URL:            ","\n                 ".join(URL[argv.region]))
 print("Pressure from:  ",argv.pressure_file)
 print("Keep CSV:       ",argv.keep_csv)
 print()
@@ -50,63 +54,74 @@ if not os.path.isdir(OUTDIR) and argv.keep_csv:
     print("Created folder ",OUTDIR)
     
 # Parse URL list for the given region
-df = pd.read_html(URL[argv.region])[0]
-
-# Init Progress bar
-bar = Bar("Downloading profiles: ",max=df.index.size)
-out_df = pd.DataFrame( {'pressure' : pressure_grid})
-
-# Iterate on URL 
-for i,row in df.iterrows():
-
-
-    try:
-        # Parse URL for date info
-        info = row["Name"].split('_')
-        year,month,day,hour = info[1:5]
-        hour = hour.split('.')[0]    
-    except:
-        continue
+for isite, site in enumerate(URL[argv.region]):
+    print(f"Scanning site {isite}...")
+    df = pd.read_html(site)[0]
+    
+    # Init Progress bar
+    bar = Bar("Downloading profiles: ",max=df.index.size)
+    
+    # Iterate on URL 
+    for i,row in df.iterrows():
+    
+        try:
+            # Parse URL for date info
+            info = row["Name"].split('_')
+            year,month,day,hour = info[1:5]
+            hour = hour.split('.')[0]    
+        except:
+            continue
+            
+        # Download Data
+        try:
+            data = np.loadtxt(site + row["Name"],skiprows=29)
+            O3_ppmv      = data[:,8]
+            pressure_hPa = data[:,1]
+        except:
+            continue
         
-    # Download Data
-    data = np.loadtxt(URL["arctic"] + row["Name"],skiprows=29)
-    O3_ppmv      = data[:,8]
-    pressure_hPa = data[:,1]
+        # Filter but data
+        O3_ppmv[O3_ppmv > 90] = np.nan
+        pressure_hPa[O3_ppmv > 90] = np.nan
+        O3_ppmv = np.ma.masked_invalid(O3_ppmv)
+        O3_kgkg      = O3_ppmv * 1.6571e-6
+        pressure_hPa = np.ma.masked_invalid(pressure_hPa)
+        
+        # Drop Nan
+        common_mask = np.logical_and( ~ O3_kgkg.mask, ~ pressure_hPa.mask)
+        O3_kgkg = np.array(O3_kgkg[common_mask ]    )
+        pressure_hPa = np.array(pressure_hPa[common_mask])
     
-    # Filter but data
-    O3_ppmv[O3_ppmv > 90] = np.nan
-    pressure_hPa[O3_ppmv > 90] = np.nan
-    O3_ppmv = np.ma.masked_invalid(O3_ppmv)
-    pressure_hPa = np.ma.masked_invalid(pressure_hPa)
+        # Keep single profiles if specified
+        if argv.keep_csv:
+            local_df = pd.DataFrame( {'O3 [kgkg]':O3_kgkg,'P [hPa]':pressure_hPa})
+            local_df = local_df.dropna()
+            outname = f"{OUTDIR}/O3_{year}_{month}_{day}_{hour}_site{isite}.csv"
+            local_df.to_csv(outname)
+            del(local_df)
     
-    # Drop Nan
-    common_mask = np.logical_and( ~ O3_ppmv.mask, ~ pressure_hPa.mask)
-    O3_ppmv = np.array(O3_ppmv[common_mask ]    )
-    pressure_hPa = np.array(pressure_hPa[common_mask])
-
-    # Keep single profiles if specified
-    if argv.keep_csv:
-        local_df = pd.DataFrame( {'O3':O3_ppmv,'P':pressure_hPa})
-        local_df = local_df.dropna()
-        outname = f"{OUTDIR}/O3_{year}_{month}_{day}_{hour}.csv"
-        local_df.to_csv(outname)
-        del(local_df)
-
-    # Interpolate profiles
-    f = interp1d(
-                    np.log(pressure_hPa),
-                    O3_ppmv[::-1],
-                    kind='linear',
-                    fill_value=np.nan,
-                    bounds_error = False
-                )
-    new_ozone = f(np.log(pressure_grid))
-
-    # Update 
-    out_df.insert(0,f"{year}_{month}_{day}_{hour}",new_ozone)
+        # Interpolate profiles
+        f = interp1d(
+                        np.log(pressure_hPa),
+                        O3_kgkg,
+                        kind='linear',
+                        fill_value=np.nan,
+                        bounds_error = False
+                    )
+        new_ozone = f(np.log(pressure_grid))
     
-    # Update Progress Bar
-    bar.next()
+        # Update 
+        label = f"{year}_{month}_{day}_{hour}_site{isite}"
+        while label not in out_df:
+            try:
+                out_df.insert(0,label,new_ozone)
+            except ValueError:
+                label += "_1" 
+        
+        # Update Progress Bar
+        bar.next()
+    print()
+print("Tot profiles: ",len(out_df.columns)-1)
 print()
 
 if argv.keep_csv:
@@ -116,7 +131,8 @@ if argv.keep_csv:
     print("All profiles saved in ",outfile)
 
 profiles_matrix = out_df.drop(columns=['pressure']).to_numpy()
-covariance = np.ma.cov(profiles_matrix)
+profiles_matrix = np.ma.masked_invalid(profiles_matrix)
+covariance = np.ma.cov( np.log(profiles_matrix))
 
 results_nc = f"{OUTDIR}/ozone_static_apriori.nc"
 with Dataset(results_nc,"w") as outfile:
@@ -130,7 +146,7 @@ with Dataset(results_nc,"w") as outfile:
 print("Results saved in ", results_nc)
 print("Done!")
     
-if os.isdir("./gml.noaa.gov"):
+if os.path.isdir("./gml.noaa.gov"):
     os.system("rm -r gml.noaa.gov")
     print("Removed cache dir ./gml.noaa.gov")
     
