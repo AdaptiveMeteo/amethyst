@@ -184,9 +184,10 @@ def main():
                 reverse_fg_source_pressure = np.copy(pressure_grid[:,:n_source_lev])[:,::-1]
                 reverse_ozone_pressure     = np.copy(pressure_grid)[:,::-1]
                 pressure_grid              = pressure_grid[:,n_source_lev:] # new climatology levels
+
                 # Read Source Static Covariances
                 static_covariances = {}
-                for mol in ['T', 'q', 'T_q']:
+                for mol in ['T', 'q', 'T_q','O3']:
                     static_covariances[mol] = source_file.groups[ATMGROUP].groups[COVGROUP].variables[mol][0,:,:]
             # Open the source file and check consistency with 
             # number of levels of the source apriori covariance matrix
