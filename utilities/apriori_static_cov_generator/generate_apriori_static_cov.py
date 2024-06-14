@@ -258,7 +258,6 @@ sidx = np.ma.notmasked_edges(std_dlogwv)
 ext_m_dlogwv = mean_dlogwv[midx[-1]]
 ext_s_dlogwv = std_dlogwv[midx[-1]]
 
-
 #Fill mean and std missing values above last level of rawinsonde for LOGQ
 mean_dlogwv[midx[1]]=ext_m_dlogwv*2.0
 std_dlogwv[sidx[1]]=ext_s_dlogwv*2.0

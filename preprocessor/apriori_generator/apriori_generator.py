@@ -344,20 +344,7 @@ def main():
             
             for precision, mol in zip([temp_precision, wv_precision, ozone_precision],mols):
                 if argv.source_apriori is not None:
-                    # If a source static apriori is given, 
-                    # merge the climatology covariance with the
-                    # reprojected source apriori covariance
                     
-                    if mol == 'O3':
-                        # Fill Ozone Apriori Covariance
-                        # Define ozone covariance matrix
-                        ozone_covariance = np.diag(ozone_precision[::-1]**2)
-                        # Rescale Ozone Covariance for the ozone pressure grid
-                        output_tables['O3'][i, :] = scale_apriori_covariance( ozone_covariance,
-                                                                              np.log(climatology.pressure)[::-1],
-                                                                              np.log(reverse_ozone_pressure[i]))[::-1,::-1]
-                    else:
-                        # Fill Temperature and Water Vapor Apriori Covariance
                         
                         # Init matrix
                         output_tables[mol][i,:,:] = np.zeros( (nlevs, nlevs) )
@@ -396,11 +383,8 @@ def main():
         output_tables['q'].units  = 'log(kg/kg)'
         output_tables['O3'].units = 'log(kg/kg)'
 
-
     LOG.info('Execution complete')
     return 0
-
-
 
 if __name__ == '__main__':
     sysexit(main())

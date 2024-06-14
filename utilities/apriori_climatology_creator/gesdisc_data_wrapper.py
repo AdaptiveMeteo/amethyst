@@ -89,7 +89,6 @@ def get_means_xr(xr_values,xr_precision):
     monthly_mean_values = xr_values.groupby("time.month").mean(dim="time")
     monthly_mean_precision = xr_precision.groupby("time.month").mean(dim="time")
     monthly_std_values  = xr_values.groupby("time.month").std(dim="time")
-    
     p_mean  = monthly_mean_precision + monthly_std_values
     return monthly_mean_values, p_mean
 
@@ -103,7 +102,6 @@ def create_DataArray(data, coords,time,pressure):
             "pressure": pressure
         }
     )
-    
     return values
 
 class GESDISC_Wrapper(object):
@@ -163,9 +161,9 @@ class GESDISC_Wrapper(object):
             v_mean,p_mean     = get_means(values,precision,filt)
             apv_mean,app_mean = get_means(apriori_values,apriori_precision,filt)
             
-            organized_values[i, time_idx, :] = v_mean
-            organized_precision[i, time_idx, :] = p_mean
-            organized_apriori_values[i, time_idx, :] = apv_mean
+            organized_values[i, time_idx, :]           = v_mean
+            organized_precision[i, time_idx, :]        = p_mean
+            organized_apriori_values[i, time_idx, :]   = apv_mean
             organized_apriori_precision[i,time_idx, :] = app_mean
             
             done_yet.append(i)
