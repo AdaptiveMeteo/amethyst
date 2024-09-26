@@ -295,8 +295,12 @@ class ClimatologyGrid(Profile):
                    return np.concatenate(( x[:cut - n_points:] ,
                                            sm.predict(merged_pressure[cut - n_points:cut + n_points ]),
                                            x[cut + n_points:] ))
-                smoothed_temperature = smooth(merged_temperature, cut = source_profile.n_of_levels)
-                smoothed_water_vapor = smooth(merged_water_vapor, cut = source_profile.n_of_levels)
+
+                #smoothed_temperature = smooth(merged_temperature, cut = source_profile.n_of_levels)
+                #smoothed_water_vapor = smooth(merged_water_vapor, cut = source_profile.n_of_levels)
+                smoothed_temperature = merged_temperature
+                smoothed_water_vapor = merged_water_vapor
+
                 return Profile(temperature = smoothed_temperature,
                                water_vapor = smoothed_water_vapor,
                                ozone       = merged_ozone,

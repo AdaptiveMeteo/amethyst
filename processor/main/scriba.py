@@ -72,45 +72,45 @@ def scriba_f(to_write, stop_now, root_file, obsnum, nlev, nem, nselstate,
         v_tp2 = 'f8'
         dims = ('obsnum','levels')
         f_v = 1.0E20
-        nco  =  rootgrp.createVariable('obs', 'i4', dims[0], -1)
+        nco  =  rootgrp.createVariable('obs', "i4", dims[0], fill_value = -1)
         if output_vars['pressure']:
-            ncp  =  rootgrp.createVariable('p',   v_tp, dims,    f_v)
+            ncp  =  rootgrp.createVariable('p',   v_tp, dims,    fill_value = f_v)
         if 'temperature' in output_vars:
-            nct  =  rootgrp.createVariable('t',   v_tp2, dims,    f_v)
+            nct  =  rootgrp.createVariable('t',   v_tp2, dims,    fill_value = f_v)
         if output_vars['water_vapor']:
-            ncq  =  rootgrp.createVariable('q',   v_tp2, dims,    f_v)
+            ncq  =  rootgrp.createVariable('q',   v_tp2, dims,    fill_value = f_v)
         if output_vars["ozone"]:
-            nco3  = rootgrp.createVariable('o3',  v_tp, dims,    f_v)
+            nco3  = rootgrp.createVariable('o3',  v_tp, dims,    fill_value = f_v)
         if output_vars['surface_temperature']:
-            ncskt = rootgrp.createVariable('skt', v_tp, dims[0], f_v)
+            ncskt = rootgrp.createVariable('skt', v_tp, dims[0], fill_value = f_v)
         if output_vars['d2']:
-            ncd2  = rootgrp.createVariable('d2',  v_tp, dims[0], f_v)
+            ncd2  = rootgrp.createVariable('d2',  v_tp, dims[0], fill_value = f_v)
         if output_vars['surface_emissivity_coefficients']:
             ncems = rootgrp.createVariable('ems_coeff', v_tp,
-                                           ('obsnum','coefficients'), f_v)
+                                           ('obsnum','coefficients'), fill_value = f_v)
         if output_vars['jacobian']:
             jacobian = rootgrp.createVariable('jacobian', v_tp,
-                            ('obsnum', 'selchannels', 'numselstatevar'), f_v)
+                            ('obsnum', 'selchannels', 'numselstatevar'), fill_value = f_v)
         if output_vars['residuals']:
             residuals = rootgrp.createVariable('residuals', v_tp, 
-                                               ('obsnum', 'selchannels'), f_v)
+                                               ('obsnum', 'selchannels'), fill_value = f_v)
         #PaoloA 12112018
         if output_vars['fg_residuals']:
             fgresiduals = rootgrp.createVariable('fgresiduals', v_tp, 
-                                               ('obsnum', 'selchannels'), f_v)
+                                               ('obsnum', 'selchannels'), fill_value = f_v)
         if output_vars['da_r']:
             DA_R  = rootgrp.createVariable('DA_R', 'i2', dims[0], 0)
         if output_vars['transformed_retrievals']:
-            DA_Yret=rootgrp.createVariable('DA_Yret', v_tp2, ('obsnum', 'mnel'), f_v)
+            DA_Yret=rootgrp.createVariable('DA_Yret', v_tp2, ('obsnum', 'mnel'), fill_value = f_v)
         if output_vars['assimilation_operator']:
             DA_Hret=rootgrp.createVariable('DA_Hret', v_tp2, 
-                                           ('obsnum', 'mnel', 'twice_levels'), f_v)
+                                           ('obsnum', 'mnel', 'twice_levels'), fill_value = f_v)
         #PaoloA
         if output_vars['sn_eigenvalues']:
-            DA_Lambda  = rootgrp.createVariable('DA_Lambda', v_tp2, ('obsnum', 'mnel'), f_v)
+            DA_Lambda  = rootgrp.createVariable('DA_Lambda', v_tp2, ('obsnum', 'mnel'), fill_value = f_v)
         if output_vars['sa']:
-            Sa_ret = rootgrp.createVariable('Sa_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), f_v)
-            SaInv_ret = rootgrp.createVariable('SaInv_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), f_v)
+            Sa_ret = rootgrp.createVariable('Sa_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), fill_value = f_v)
+            SaInv_ret = rootgrp.createVariable('SaInv_ret',  v_tp2, ('obsnum', 'numselstatevar', 'numselstatevar'), fill_value = f_v)
 
         rootgrp.sync()
 

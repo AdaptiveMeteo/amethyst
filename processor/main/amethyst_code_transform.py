@@ -71,7 +71,7 @@ class transform(object):
         #Sa[0:nlev_sps, 0:nlev_sps] = Sa[0:nlev_sps, 0:nlev_sps]
         #Sa[nlev_sps:2*nlev_sps] = Sa[nlev_sps:nlev_sps+nlev, nlev_sps:nlev_sps+nlev]
 
-        # Generate square root and inverse square root of covariance matrix
+        # Generate square root 		and inverse square root of covariance matrix
         # using singular value decomposition to avoid complex numbers
         SaU, SaD, SaVT = svd(Sa)
 

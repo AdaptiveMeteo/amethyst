@@ -28,7 +28,7 @@ class FirstGuess(object):
         self.levels = len(self.df.groups['atmospheric_components'].dimensions['number_of_atmospheric_levels'])
         self.on_land = np.array(
             self.df.groups['surface_components'].variables['LandOrWater'][:],
-            dtype=np.bool,
+            dtype=np.bool_,
         )
         
         # Use all variables if there is no selection

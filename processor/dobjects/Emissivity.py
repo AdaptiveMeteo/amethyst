@@ -21,7 +21,8 @@ Note:
 """
 from __future__ import print_function, division
 
-from numpy import array, bool, dot, exp, ones, zeros, interp,seterr
+from numpy import array, dot, exp, ones, zeros, interp,seterr
+from numpy import bool_ as bool
 from netCDF4 import Dataset
 
 seterr(all='warn', over='raise')

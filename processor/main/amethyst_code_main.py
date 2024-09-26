@@ -139,13 +139,13 @@ class core(object):
         except ValueError:
             raise NotConvergentIteration("Found an inf or a " 
                                          "NaN in the A matrix!")
-        y = solve(L, d)
-        x = solve(U, y)
+        y = solve(L, d.data)
+        x = solve(U, y.data)
         
         # Second iteration
         r = d - np.dot(A, x)
-        dz  = solve(L, r)
-        ddx = solve(U, dz)
+        dz  = solve(L, r.data)
+        ddx = solve(U, dz.data)
         
         # Solution
         totx = x + ddx
@@ -168,6 +168,8 @@ class core(object):
                                (np.linalg.cond(KtSeInvK),'scalar','KtSeInvK_cond_number_{}'.format(self.debug_counter) ),
                                (np.linalg.matrix_rank(KtSeInvK),'scalar', 'KtSeInvK_rank_{}'.format(self.debug_counter), ),
                                (A, ('A_dim','A_dim'),'A_{}'.format(self.debug_counter) ),
+                               (self.state.Sa_ret, ('A_dim','A_dim'), 'Sa'  ),
+                               (self.state.SaInv_ret, ('A_dim','A_dim'), 'SaInv'  ),
                                (totx, ('A_dim',),'deltax_{}'.format(self.debug_counter) ),
                               ]
 

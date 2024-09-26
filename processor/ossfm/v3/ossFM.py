@@ -12,14 +12,14 @@ from numpy import array, transpose, zeros, int32, float32
 import sys
 from ossfm.v3.ossir import oss_ir
 
-
+"""
 if  __name__ == '__main__':
     if __package__ is None:
         raise ImportError('The file "ossFM.py" is embedded into the'
                           ' ossFM_files package.\n To lauch it, use:\n'
                           '"python -m ossFM_files.ossFM" from the main'
                           ' directory of this project.')
-        
+"""     
 
 class ossFM(object):
     """Use HITRAN precomputed tables to compute oss forward model (ir)"""
