@@ -1,0 +1,13 @@
+Metadata-Version: 1.1
+Name: piasi_reader
+Version: 0.9.7
+Summary: A library to read the native IASI L1C files
+Home-page: UNKNOWN
+Author: Stefano Piani
+Author-email: stefano.piani@exact-lab.it
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
