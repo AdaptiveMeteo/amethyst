@@ -195,7 +195,7 @@ def launch_preprocessing(argv):
                                                                                 argv.output,argv.cmt,argv.verbose,argv.output,
                                                                                 argv.lonmin,argv.lonmax,argv.latmin,argv.latmax),
                          ]
-            cmd_cascade = []
+
             # CrIS Logger Printouts
             logger_cascade = ["Generating CloudMask for CrIS...",
                               "Generating CrIS observations..."]

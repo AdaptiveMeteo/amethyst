@@ -47,7 +47,6 @@ class ObservationError(object):
         """
         Initialize the ObservationError object
         """
-
         with Dataset(data_filename, mode='r') as df:
             if indx is None:
                  self.__obs_err = array(df.variables['obs_err'][:])

@@ -51,14 +51,15 @@ common_vars = {
 preprocessor_vars = {
                   "basedir"          : "/mnt/satellite/amethyst_test_data",
                   "iasidir"          : "/mnt/satellite/amethyst_test_data/iasi/20220808_134754",
-                  "gcrso"            : "/mnt/satellite/amethyst_test_data/iasi/",
-                  "scris"            : "/mnt/satellite/amethyst_test_data/iasi",
-                  "l1dir"            : "/mnt/satellite/amethyst_test_data/iasi",
+                  "gcrso"            : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
+                  "scris"            : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
+                  "l1dir"            : "/mnt/satellite/amethyst_test_data/cris/",
                   "static_apriori"   : AMETHYST_PATH + "/ancillary/atmosphere/arctic_apriori.nc",
                   "iasi_cmt"         : 5,
                   "cris_cmt"         : .95,
                   "first_guess"      : { 
                                           "top_pressure"             : 0.005,
+                                          #"top_pressure"             : 15,
                                           "bottom_pressure"          : 1000,
                                           "surface_pressure"         : 1013,
                                           "min_water_vapor"          : 0.003,
@@ -83,7 +84,7 @@ processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
                 "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/iasi_obserr.nc",
-                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList_862.dat",
+                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/iasi_chList.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients_oss_v3.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",
                 "fg_file"         : common_vars['wrkdir'] + "/fg.nc",

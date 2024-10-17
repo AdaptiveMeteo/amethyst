@@ -178,7 +178,7 @@ class VIIRS_Wrapper(object):
                                                              
         self.cloudmask = np.ma.masked_where(self.cloudmask == -128,self.cloudmask,copy=False).astype(int)
         if type(self.cloudmask.mask) == np.bool_:
-                  self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool)
+                  self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool_)
 
     def read_cm_cloudmask(self,path):
         """
@@ -227,7 +227,7 @@ class VIIRS_Wrapper(object):
                 # Mask invalid values
                 self.cloudmask = np.ma.masked_where(self.cloudmask == -128,self.cloudmask)
                 if type(self.cloudmask.mask) == np.bool_:
-                              self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool)
+                              self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool_)
 
 
         elif 'JRR' in path:
@@ -245,7 +245,7 @@ class VIIRS_Wrapper(object):
                 self.cloudmask = np.ma.masked_where(self.cloudmask==-128,self.cloudmask)
                 self.CMQ       = np.ma.masked_where(self.CMQ != 0 , self.CMQ)
                 if type(self.cloudmask.mask) == np.bool_:
-                         self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool)
+                         self.cloudmask.mask = np.zeros_like(self.cloudmask,dtype=np.bool_)
         else:
             raise ValueError("Unknown Cloud Mask file")
                             

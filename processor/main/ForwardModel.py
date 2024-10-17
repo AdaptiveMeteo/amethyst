@@ -16,7 +16,6 @@ xdim is a vector of dimensions for each of parameters of the solution
 # pylint: disable=E0611
 
 import numpy as np
-import pickle
 import os
 
 class NotConvergentIteration(Exception):
@@ -84,7 +83,7 @@ class ForwardModel(object):
         Compute the jacobian K using the selected model
         """
         # convert from log(vmr in ppv) to vmr in ppmv
-
+        print('INNERMOST-->',xhat[:81])
         try:
             vmr = np.exp(xhat[self.wvs:self.wve])
         except FloatingPointError:
@@ -104,6 +103,7 @@ class ForwardModel(object):
         indata['psf']       =  self.cx.surfacePressure_mb
         # State vector Temperature is in [K]
         indata['temp']      = np.flipud(xhat[self.tds:self.tde])
+
         # State vector Water vapor is in log(q) where q is in [Kg/Kg]
         indata['h2o']       = np.flipud(vmr)
         # State vector CO2 is in ppmv
@@ -119,6 +119,11 @@ class ForwardModel(object):
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
         
+        import pickle
+        with open('/home/mirto/wrkdir/amethyst_test/debug/indata.pickle','wb') as ofile:
+               pickle.dump(indata, ofile)
+               print("Saved file indata.pickle")
+
         self.model.compute(indata, self.outdata)
         
         # Subselect channels which are used in the inversion

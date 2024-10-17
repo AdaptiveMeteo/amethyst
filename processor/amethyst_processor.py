@@ -133,6 +133,7 @@ def invert_process( nlev, proc_num, to_compute, to_write,
                 profile.prall.enable( )
             try:
                 time_invert=time.time()
+                print('OUTSIDE-->',fg.state_vector(obs)[1][:81])
                 solution = inverter.invert(fov, fg, apriori, aemiss,
                                            obs, log=L, profile=profile)
                 L.log('Elapsed Time in the inverter for OBS '+str(obs)+' : '+

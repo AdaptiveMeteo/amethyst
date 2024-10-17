@@ -192,6 +192,7 @@ class core(object):
 
     def invert(self, fov, fg, apriori, emiss, obs, log, profile=None):
         """ Invert the measurement to get physical sounding profile """
+        print("INSIDE-->",fg.state_vector(obs)[1][:81] )
         L = log
         if self.cx.retrievalFixGammaZero == 0:
             # Marquardt-Levemberg parameter
@@ -207,7 +208,6 @@ class core(object):
 
         [self.cx.fov_latitude, self.cx.fov_longitude, self.cx.fov_time,
          self.cx.FOVangle, self.cx.Solar_zenith_angle, self.cx.Solar_azimuth_angle, self.cx.wnR, self.cx.R] = fov.fov(obs)
-
         [self.cx.p, self.apriori.x0, self.apriori.xa] = fg.state_vector(obs)
         self.cx.pressure_grid = self.cx.p[0:self.cx.xdim[0]]
         self.cx.surfacePressure_mb = self.cx.pressure_grid[0]
@@ -222,6 +222,7 @@ class core(object):
 
         # Assign values for the state vector
         xhat = np.copy(self.apriori.x0)
+        print("INSIDE2--->",xhat[:81])
 
         # Iteration of the Newton-Gauss method to find the zero of the first
         # derivative of the Gaussian PDF
@@ -258,6 +259,7 @@ class core(object):
                 [self.cx.sfgrd, self.cx.emrf] = emiss.get(obs, xhat[ems:eme])
             except FloatingPointError:
                 raise NotConvergentIteration("Can not get emissivity: overflow!")
+ 
             fm.compute_forward(xhat)
 
             self.state.fm = fm
@@ -341,7 +343,7 @@ class core(object):
                 fm.compute_forward(xhat)
                 self.state.fm = fm
                 self.yobs_minus_yhat = fm.compute_residuals()
-                #print(self.yobs_minus_yhat)
+
                 fm.K = fm.K[:, jj]
                 self.state.xhat = xhat[jj]
                 self.state.xhat_pre = xhat_pre[jj]
