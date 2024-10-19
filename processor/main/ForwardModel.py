@@ -83,7 +83,6 @@ class ForwardModel(object):
         Compute the jacobian K using the selected model
         """
         # convert from log(vmr in ppv) to vmr in ppmv
-        print('INNERMOST-->',xhat[:81])
         try:
             vmr = np.exp(xhat[self.wvs:self.wve])
         except FloatingPointError:
@@ -119,11 +118,6 @@ class ForwardModel(object):
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
         
-        import pickle
-        with open('/home/mirto/wrkdir/amethyst_test/debug/indata.pickle','wb') as ofile:
-               pickle.dump(indata, ofile)
-               print("Saved file indata.pickle")
-
         self.model.compute(indata, self.outdata)
         
         # Subselect channels which are used in the inversion

@@ -192,7 +192,6 @@ class core(object):
 
     def invert(self, fov, fg, apriori, emiss, obs, log, profile=None):
         """ Invert the measurement to get physical sounding profile """
-        print("INSIDE-->",fg.state_vector(obs)[1][:81] )
         L = log
         if self.cx.retrievalFixGammaZero == 0:
             # Marquardt-Levemberg parameter
@@ -222,7 +221,6 @@ class core(object):
 
         # Assign values for the state vector
         xhat = np.copy(self.apriori.x0)
-        print("INSIDE2--->",xhat[:81])
 
         # Iteration of the Newton-Gauss method to find the zero of the first
         # derivative of the Gaussian PDF
