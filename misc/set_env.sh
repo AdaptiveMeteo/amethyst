@@ -11,12 +11,12 @@ mkdir -p $ETC_DIR"/activate.d"
 mkdir -p $ETC_DIR"/deactivate.d"
 
 # Edit activation script
-echo  "export OLD_PYTHONPATH=$PYTHONPATH" > $ETC_DIR"/activate.d/env_vars_2.sh"
-echo  "export PYTHONPATH=$PYTHONPATH:"/home/mirto/amethyst >> $ETC_DIR"/activate.d/env_vars_2.sh"
+echo  "export OLD_PYTHONPATH=$PYTHONPATH" > $ETC_DIR"/activate.d/env_vars.sh"
+echo  "export PYTHONPATH=$PYTHONPATH:"/home/mirto/amethyst >> $ETC_DIR"/activate.d/env_vars.sh"
 
 # Edit deactivation script
-echo  "export PYTHONPATH=$OLD_PYTHONPATH" > $ETC_DIR"/deactivate.d/env_vars_2.sh"
-echo  "export OLD_PYTHONPATH=''" >> $ETC_DIR"/deactivate.d/env_vars_2.sh"
+echo  "export PYTHONPATH=$OLD_PYTHONPATH" > $ETC_DIR"/deactivate.d/env_vars.sh"
+echo  "export OLD_PYTHONPATH=''" >> $ETC_DIR"/deactivate.d/env_vars.sh"
 
 echo "Done"
 
