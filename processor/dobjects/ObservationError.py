@@ -54,9 +54,11 @@ class ObservationError(object):
                  U = array(df.variables['obs_err_U'][:])
                  D = array(df.variables['obs_err_D'][:])
             else:
-                 self.__obs_err = array(df.variables['obs_err'][indx,indx])
-                 self.__inv_obs_err = array(df.variables['inv_obs_err'][indx,indx])
-                 U = array(df.variables['obs_err_U'][indx,indx])
+                 self.__obs_err = array(df.variables['obs_err'][:])[indx[:,None],indx]
+
+                 self.__inv_obs_err = array(df.variables['inv_obs_err'][:])[indx[:,None],indx]
+
+                 U = array(df.variables['obs_err_U'][:])[indx[:,None],indx]
                  D = array(df.variables['obs_err_D'][indx])
 
             V = U.T

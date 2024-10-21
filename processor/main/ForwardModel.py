@@ -119,7 +119,7 @@ class ForwardModel(object):
         indata['lat']       = self.cx.fov_latitude
         
         self.model.compute(indata, self.outdata)
-        
+
         # Subselect channels which are used in the inversion
         self.F = self.outdata['y'][ii]
 
