@@ -8,7 +8,7 @@ Wrapper for calling the oss_ir_r4 Fortran90 module.
 # pylint: disable=C0325
 # pylint: disable=E0611
 
-from numpy import array, transpose, zeros, int32, float32
+from numpy import array, transpose, zeros, int32, float32, float64, asarray, abs
 import sys
 from ossfm.v3.ossir import oss_ir
 
@@ -122,6 +122,15 @@ class ossFM(object):
         obslevel  = indata['obslevel']
         lat       = indata['lat']
 
+        sfgrd     = asarray(indata['sfgrd'], dtype=float64)
+        emref     = asarray(indata['emrf'], dtype=float64)
+        obsangle  = asarray(indata['obsang'], dtype=float64)
+        solzenith = asarray(indata['solzenith'], dtype=float64)
+        azangle   = asarray(indata['azangle'], dtype=float64)
+        obslevel  = asarray(indata['obslevel'], dtype=float64)
+        lat       = asarray(indata['lat'], dtype=float64)
+
+
         if 'y' not in outdata.keys():
             nparg = len(xg)
             outdata['y'] = zeros(self.nchan, float32)
@@ -130,11 +139,15 @@ class ossFM(object):
                                        float32, order='F')
             outdata['paxkemrf'] = zeros((2, self.nchan),
                                        float32, order='F')
-        self.oss.ossdrv_ir(xg, sfgrd,emref,obsangle,solzenith,azangle,obslevel, 
-                           outdata['y'], outdata['xkt'],outdata['xkemrf'],outdata['paxkemrf'],lat,
-                           zsurf = 0.0,
-                           puser = indata['pressure'],
-                           dbg=dbg)
+
+        if any( abs(xg) > 1e4):
+            sys.exit(f"Bad Input at {lat} degree N")
+        else:
+            self.oss.ossdrv_ir(xg, sfgrd,emref,obsangle,solzenith,azangle,obslevel, 
+                               outdata['y'], outdata['xkt'],outdata['xkemrf'],outdata['paxkemrf'],lat,
+                               zsurf = 0.0,
+                               puser = indata['pressure'],
+                               dbg=dbg)
 
    # ossdrv_it template from new ossFM:
    #

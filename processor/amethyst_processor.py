@@ -29,6 +29,8 @@ from main.reader               import reader_f
 from main.scriba               import scriba_f, ProgressBar
 import cProfile, pstats
 import amethyst_config
+import multiprocessing
+
 if amethyst_config.common_vars["fm_version"] == 2:
     OSS_PATH = "ossfm/v2/"
     from ossfm.v2.ossFM import ossFM
@@ -335,7 +337,7 @@ if __name__ == '__main__':
     #create a reader
     L.log('Creating a data reader... ', 1, end='')
 
-    to_compute = Queue(20)
+    to_compute = Queue(PROCESSES_NUMBER*2)
     reader_is_alive = Queue()
     
     reader = Process(target=reader_f,
@@ -411,6 +413,10 @@ if __name__ == '__main__':
             if len(dead_processes) > 0  and to_compute.empty():
                 print(str(n_dead_processes) +
                       " processes have crashed", file=sys.stderr)
+                # Terminate all dead processes
+                for p in dead_processes:
+                    p.terminate()  # Ensure crashed processes are terminated
+                    print(f"Process {p.pid} has been terminated.", file=sys.stderr)
                 process_list = [(i, p) for (i, p) in process_list if p.is_alive()]
                 print("Now there are " + str(len(process_list)) +
                       " processes running", file=sys.stderr)
@@ -428,8 +434,8 @@ if __name__ == '__main__':
             if process_log != "":
                 L.log(log_data.get(), 2)
 
-    for i,p in process_list:
-        p.join()
+        for i,p in process_list:
+             p.join()
 
     strange_error = False
     if not to_compute.empty():

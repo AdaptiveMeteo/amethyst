@@ -27,7 +27,7 @@ AMETHYST_PATH = os.path.dirname(__file__)
 
 ### COMMON
 common_vars = {
-                  "instrument" : "iasi",
+                  "instrument" : "cris",
                   "fm_version" : 3,
                   "levels"     : 81,
                   "wrfdir"     : "/mnt/satellite/amethyst_test_data/wrf",
@@ -83,8 +83,8 @@ preprocessor_vars["rundir"] = {
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
-                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/iasi_obserr.nc",
-                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/iasi_chList.dat",
+                "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/cris_obserr.nc",
+                "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients_oss_v3.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",
                 "fg_file"         : common_vars['wrkdir'] + "/fg.nc",
@@ -121,7 +121,7 @@ processor_vars = {
                 "minimum_fraction_rate_change"    : 0.03,
                 
                 # Transformed Retrieval
-                "tr_chan_list"   : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList_862_tr.dat",
+                "tr_chan_list"   : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList_tr.dat",
                 
                 # Amethyst Output
                 "output_file"  : "amethyst_output.nc",
