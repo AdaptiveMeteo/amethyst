@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from data_reader.read_netcdf import netCDFReader
+from utilities.data_reader.read_netcdf import netCDFReader
 import glob
 import logging
 import os , sys
@@ -23,7 +23,7 @@ else:
     LOGGER = logging.getLogger(__name__)
 
 
-def mirto_plot_validation_profiles(x1,x2,x3,y,var,sup_title_str=None):
+def plot_validation_profiles(x1,x2,x3,y,var,sup_title_str=None):
 
    fig, ax = plt.subplots(1,2)
    fig.set_size_inches(16.5, 10.5)
@@ -52,7 +52,7 @@ def mirto_plot_validation_profiles(x1,x2,x3,y,var,sup_title_str=None):
    ax[0].set_title(title_str, pad = 12, fontsize = 14)
    ax[0].set_ylim(ylim)
    
-   lgnd = ax[0].legend(['wrf fg', 'mirto ret', 'sonde'], loc='upper right', shadow=True)
+   lgnd = ax[0].legend(['wrf fg', 'amethyst ret', 'sonde'], loc='upper right', shadow=True)
    ax[0].grid(True)
    ax[0].set(yscale = 'log')
 
@@ -62,9 +62,9 @@ def mirto_plot_validation_profiles(x1,x2,x3,y,var,sup_title_str=None):
    ax[1].plot(d1, y, 'b+', d2, y, 'ro', linestyle='solid')
    ax[1].set(xlabel = xlabel_str_1, ylabel = ylabel_str)
    ax[1].set_title(title_str, pad = 12, fontsize = 14)
-   lgnd = ax[0].legend(['wrf fg', 'mirto ret', 'sonde'], loc='upper right', shadow=True)
+   lgnd = ax[0].legend(['wrf fg', 'amethyst ret', 'sonde'], loc='upper right', shadow=True)
    ax[1].set_ylim(ylim)
-   lgnd = ax[1].legend(['wrf fg - sonde', 'mirto ret - sonde'], loc='upper right', shadow=True)
+   lgnd = ax[1].legend(['wrf fg - sonde', 'amethyst ret - sonde'], loc='upper right', shadow=True)
    ax[1].grid(True)
    ax[1].set(yscale = 'log')
    fig.suptitle(sup_title_str, fontsize = 14)
@@ -445,13 +445,13 @@ def main():
     
           a = netCDFReader(file)
     
-          title_str = os.path.basename(file).replace('_MIRTO_validation.nc','').replace('_',' ')
+          title_str = os.path.basename(file).replace('_amethyst_validation.nc','').replace('_',' ')
     
           y = a.pressure
           x1 = a.prior_temp
           x2 = a.post_temp
           x3 = a.sonde_temp
-          mirto_plot_validation_profiles(x1,x2,x3,y,'T',title_str) 
+          plot_validation_profiles(x1,x2,x3,y,'T',title_str) 
           
           ofile = file.replace(os.path.basename(file),'T_'+os.path.basename(file).replace('nc',argv.format)) 
           plt.savefig(ofile, transparent = True)
@@ -461,7 +461,7 @@ def main():
           x1 = a.prior_rh
           x2 = a.post_rh
           x3 = a.sonde_rh
-          mirto_plot_validation_profiles(x1,x2,x3,y,'RH',title_str,rms=rms_rh)
+          plot_validation_profiles(x1,x2,x3,y,'RH',title_str,rms=rms_rh)
     
           ofile = file.replace(os.path.basename(file),'RH_'+os.path.basename(file).replace('nc',argv.format))
           plt.savefig(ofile, transparent = True)
@@ -472,7 +472,7 @@ def main():
           x2 = a.post_water_vapour
           x3 = a.sonde_water_vapour
     
-          mirto_plot_validation_profiles(x1,x2,x3,y,'WV',title_str)
+          plot_validation_profiles(x1,x2,x3,y,'WV',title_str)
     
           ofile = file.replace(os.path.basename(file),'WV_'+os.path.basename(file).replace('nc',argv.format))
           plt.savefig(ofile, transparent = True)    
@@ -539,12 +539,7 @@ def main():
            plt.savefig(ofile, transparent = True)
            print("Saved file {}".format(ofile))
            plt.close()
-           """
-           from atmos.mirto_atmos_tools import mr2rh
-           x1 = mr2rh(data.wrf_levels*1e-2,
-                      data.temp,
-                      data.water_vapour)[0]
-           """
+
            x1 = data.rh
            x2 = data.sonde_rh
            #Paolo

@@ -2,14 +2,14 @@ import sys
 import numpy as np
 import logging
 from datetime import datetime, timedelta
-from atmos.atmos_tools import interpolate_pressure_grid
-from data_reader.input_reader import InputData
-from validation.read_stations_list import stations_list
-from validation.download_wyoming_sondes import download_sondes
+from utilities.atmos.atmos_tools import interpolate_pressure_grid
+from utilities.data_reader.input_reader import InputData
+from read_stations_list import stations_list
+from download_wyoming_sondes import download_sondes
 import getopt,os
-from geometry.earth_geometry import haversine, point_in_polygon
+from utilities.geometry.earth_geometry import haversine, point_in_polygon
+from utilities.data_reader.read_netcdf import netCDFReader
 from argparse import ArgumentParser
-from data_reader.read_netcdf import netCDFReader
 
 __author__ = "Paolo Scaccia, Paolo Antonelli and Stefano Piani"
 __copyright__ = "Copyright 2017, AdaptiveMeteo S.r.l."

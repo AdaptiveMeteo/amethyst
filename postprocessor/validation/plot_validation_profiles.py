@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from read_netcdf import netCDFReader
+from utilities.data_reader.read_netcdf import netCDFReader
 import glob
 import logging
 import os , sys
@@ -33,19 +33,19 @@ def mirto_plot_validation_profiles(x1,x2,x3,y,var,sup_title_str=None):
       xlabel_str_1 = 'Delta Air Temperature [K]'
       ylabel_str = 'p [hPa]'
       title_str =  'Temperature'
-      ylim = [1000, 0.1]
+      ylim = [1014, 0.1]
    elif var in 'RH':
       xlabel_str_0 = 'Air Relative Humidity [%]'
       xlabel_str_1 = 'Delta Air Relative Humidity [%]'
       ylabel_str = 'p [hPa]'
       title_str =  'Relative Humidity'
-      ylim = [1000, 200]
+      ylim = [1014, 200]
    elif var in 'WV':
       xlabel_str_0 = 'Air Water Vapor MR [g/kg]'
       xlabel_str_1 = 'Delta Air Water Vapor MR [g/kg]'
       ylabel_str = 'p [hPa]'
       title_str =  'Water Vapor MR'
-      ylim = [1000, 200]
+      ylim = [1014, 200]
    
    ax[0].plot(x1, y, 'b+', x2, y, 'ro', x3, y,'gx', linestyle='solid')
    ax[0].set(xlabel = xlabel_str_0, ylabel = ylabel_str)
@@ -82,48 +82,42 @@ def plot_wrf_validation_profiles(x1,x2,y,var,sup_title_str=None,rms=None,plot_mo
       xlabel_str_1 = 'Delta Air Temperature [K]'
       ylabel_str = 'p [hPa]'
       title_str =  'Temperature'
-      ylim = [1000, 40]
-      xlim = [-6,6]
+      ylim = [1014, 40]
+      xlim = [-3,3]
    elif var in 'RH':
       xlabel_str_0 = 'Air Relative Humidity [%]'
       xlabel_str_1 = 'Delta Air Relative Humidity [%]'
       ylabel_str = 'p [hPa]'
       title_str =  'Relative Humidity'
-      ylim = [1000, 200]
-      xlim = [-50,50]
+      ylim = [1014, 200]
+      xlim = [-30,30]
 
    elif var in 'WV':
       xlabel_str_0 = 'Air Water Vapor MR [g/kg]'
       xlabel_str_1 = 'Delta Air Water Vapor MR [g/kg]'
       ylabel_str = 'p [hPa]'
       title_str =  'Water Vapor MR'
-      ylim = [1000, 200]
+      ylim = [1014, 200]
       xlim = [-3,3]
       
-   ygrid = np.arange(100,1100,100)
-   print(ygrid)
+   ygrid = np.arange(100,1100,100)      
+
    if plot_mode == 'aggregated':   
        x1_mean = x1.mean(axis=0)
        x2_mean = x2.mean(axis=0)
        x1_std = x1.std(axis=0)
        x2_std = x2.std(axis=0)
-       second_color = 'red'
+       second_color = 'black'
 
    else:
        x1_mean = x1.reshape(x1.size)
        x2_mean = x2.reshape(x2.size)
        second_color = 'black'
-   ax[0].plot(x1_mean, y,'tab:blue',label = r'$ \mu $'+' WRF {}'.format(var),  
+   ax[0].plot(x1_mean, y,'b+',label = 'WRF ' + var,  
               linestyle='solid', marker='+')
 
    ax[0].plot(x2_mean, y,second_color,
-              label = r'$ \mu $' +' Sonde {}'.format(var), linestyle = 'solid',marker='+')
-
-   if var == 'RH':
-            ax[0].set_xlim(0,100)
-            ax[0].set_xticks(np.arange(0,110,10))
-   elif var == 'WV':
-            ax[0].set_xlim(0,9)
+              label = 'Sonde ' + var, linestyle = 'solid',marker='+')
 
    if plot_mode == 'aggregated':          
        ax[0].fill_betweenx(y, x1_mean - x1_std, x1_mean +x1_std,color='tab:blue',alpha=0.3,label=r'$ \mu \pm \sigma $' + '  (WRF)') 
@@ -134,7 +128,6 @@ def plot_wrf_validation_profiles(x1,x2,y,var,sup_title_str=None,rms=None,plot_mo
    ax[0].set(xlabel = xlabel_str_0, ylabel = ylabel_str)
    ax[0].set_title(title_str, pad = 12, fontsize = 14)
    ax[0].set_ylim(ylim)
-
    lgnd = ax[0].legend(loc='upper right', shadow=True,prop={'size':20})
    ax[0].grid(True,which='both')
    ax[0].grid(True,which='both',c='grey',ls='--',alpha=0.5)
@@ -177,7 +170,9 @@ def plot_wrf_validation_profiles(x1,x2,y,var,sup_title_str=None,rms=None,plot_mo
        
    return fig
 
-def plot_wrf_comparison_profile_diff(ctrl_dif,oper_dif,foper_dif,y,var,sup_title_str=None):
+#PaoloA 31Aug2022
+#def plot_wrf_comparison_profile_diff(ctrl_dif,oper_dif,foper_dif,y,var,sup_title_str=None):
+def plot_wrf_comparison_profile_diff(oper_dif,foper_dif,y,var,sup_title_str=None):
 
    fig, ax = plt.subplots(1,1)
    fig.set_size_inches(16.5, 10.5)
@@ -187,41 +182,45 @@ def plot_wrf_comparison_profile_diff(ctrl_dif,oper_dif,foper_dif,y,var,sup_title
       xlabel_str_1 = 'Delta Air Temperature [K]'
       ylabel_str = 'p [hPa]'
       title_str =  'Temperature'
-      ylim = [1000, 40]
-      xlim = [-5,5]
-      xgrid = np.arange(-5,6,1)
+      ylim = [1014, 40]
+      xlim = [-3,3]
+      xgrid = np.arange(-3,4,1)
 
    elif var in 'RH':
       xlabel_str_0 = 'Air Relative Humidity [%]'
       xlabel_str_1 = 'Delta Air Relative Humidity [%]'
       ylabel_str = 'p [hPa]'
       title_str =  'Relative Humidity'
-      ylim = [1000, 200]
-      xlim = [-50,50]
-      xgrid = np.arange(-50,60,10)
+      ylim = [1014, 200]
+      xlim = [-30,30]
+      xgrid = np.arange(-30,40,10)
 
    elif var in 'WV':
       xlabel_str_0 = 'Air Water Vapor MR [g/kg]'
       xlabel_str_1 = 'Delta Air Water Vapor MR [g/kg]'
       ylabel_str = 'p [hPa]'
       title_str =  'Water Vapor MR'
-      ylim = [1000, 200]
-      xlim = [-5,5]
+      ylim = [1014, 200]
+      xlim = [-3,3]
       xgrid = np.arange(-3,4,1)
    ygrid = np.arange(100,1100,100)      
 
+   #PaoloA 31Aug2022
    # Plot CNTRL Diff
-   ctrl_std  = ctrl_dif.std(axis=0)
-   ctrl_mean = ctrl_dif.mean(axis=0)
-   ax.plot(ctrl_mean, y,'black',label = 'CNTRL - MW',  
-                       linestyle='solid')
+   #ctrl_std  = ctrl_dif.std(axis=0)
+   #ctrl_mean = ctrl_dif.mean(axis=0)
+   #ax.plot(ctrl_mean, y,'black',label = 'CNTRL - MW',  
+   #                    linestyle='solid')
+
    #ax.fill_betweenx(y, ctrl_mean-ctrl_std , ctrl_mean+ctrl_std,
    #                    color='grey',alpha=0.5,label=r'$ \mu \pm \sigma $')
    
    # Plot OPER Diff
    oper_std  = oper_dif.std(axis=0)
    oper_mean = oper_dif.mean(axis=0)
-   ax.plot(oper_mean, y,'blue',label = 'CNTRL - TR',  
+   #PaoloA 31Aug2022
+   #ax.plot(oper_mean, y,'blue',label = 'CNTRL - TR',  
+   ax.plot(oper_mean, y,'blue',label = 'CONV - TR',  
                        linestyle='solid')
    #ax.fill_betweenx(y, oper_mean-oper_std , oper_mean+oper_std,
    #                   color='tab:blue',alpha=0.5,label=r'$ \mu \pm \sigma $')
@@ -229,7 +228,9 @@ def plot_wrf_comparison_profile_diff(ctrl_dif,oper_dif,foper_dif,y,var,sup_title
    # Plot F-OPER Diff
    foper_std  = foper_dif.std(axis=0)
    foper_mean = foper_dif.mean(axis=0)
-   ax.plot(foper_mean, y,'red',label = 'CNTRL - (TR+MW)',  
+   #PaoloA 31Aug2022
+   #ax.plot(foper_mean, y,'red',label = 'CNTRL - (TR+MW)',  
+   ax.plot(foper_mean, y,'red',label = 'CONV - (TR+MW)',  
                        linestyle='solid')
    #ax.fill_betweenx(y, foper_mean-foper_std , foper_mean+foper_std,
    #                    color='salmon',alpha=0.5,label=r'$ \mu \pm \sigma $')
@@ -257,7 +258,9 @@ def plot_wrf_comparison_profile_diff(ctrl_dif,oper_dif,foper_dif,y,var,sup_title
        
    return fig
 
-def plot_wrf_comparison_profiles(conv,mw,oper,foper,y,var,sup_title_str=None):
+#PaoloA 31Aug2022
+#def plot_wrf_comparison_profiles(conv,mw,oper,foper,y,var,sup_title_str=None):
+def plot_wrf_comparison_profiles(conv,oper,foper,y,var,sup_title_str=None):
 
    fig, ax = plt.subplots(1,1)
    fig.set_size_inches(16.5, 10.5)
@@ -267,7 +270,7 @@ def plot_wrf_comparison_profiles(conv,mw,oper,foper,y,var,sup_title_str=None):
       xlabel_str_1 = 'Delta Air Temperature [K]'
       ylabel_str = 'p [hPa]'
       title_str =  'Temperature'
-      ylim = [1000, 40]
+      ylim = [1014, 40]
       xlim = [0,3]
       xgrid = np.arange(-3,4,1)
 
@@ -276,8 +279,8 @@ def plot_wrf_comparison_profiles(conv,mw,oper,foper,y,var,sup_title_str=None):
       xlabel_str_1 = 'Delta Air Relative Humidity [%]'
       ylabel_str = 'p [hPa]'
       title_str =  'Relative Humidity'
-      ylim = [1000, 200]
-      xlim = [0,100]
+      ylim = [1014, 200]
+      xlim = [0,30]
       xgrid = np.arange(-30,40,10)
 
    elif var in 'WV':
@@ -285,8 +288,8 @@ def plot_wrf_comparison_profiles(conv,mw,oper,foper,y,var,sup_title_str=None):
       xlabel_str_1 = 'Delta Air Water Vapor MR [g/kg]'
       ylabel_str = 'p [hPa]'
       title_str =  'Water Vapor MR'
-      ylim = [1000, 200]
-      xlim = [0,9]
+      ylim = [1014, 200]
+      xlim = [0,3]
       xgrid = np.arange(-3,4,1)
    ygrid = np.arange(100,1100,100)
 
@@ -298,11 +301,14 @@ def plot_wrf_comparison_profiles(conv,mw,oper,foper,y,var,sup_title_str=None):
    #ax.fill_betweenx(y, ctrl_mean-ctrl_std , ctrl_mean+ctrl_std,
    #                    color='grey',alpha=0.5,label=r'$ \mu \pm \sigma $')
 
-   # Plot MW  
-   mw_std  = mw.std(axis=0)
-   mw_mean = mw.mean(axis=0)
-   ax.plot(mw_mean, y,'cyan',label = 'CONV+MW',
-                       linestyle='solid')
+   # Plot MW , 
+   #PaoloA 31Aug2022
+   #mw_std  = mw.std(axis=0)
+   #mw_mean = mw.mean(axis=0)
+   #ax.plot(mw_mean, y,'cyan',label = 'CONV+MW',
+   #                    linestyle='solid')
+
+
    #ax.fill_betweenx(y, ctrl_mean-ctrl_std , ctrl_mean+ctrl_std,
    #                    color='grey',alpha=0.5,label=r'$ \mu \pm \sigma $')
 
@@ -435,10 +441,12 @@ def main():
            forecast_hour = '+{}H'.format(argv.forecast_hour)
        else:
            forecast_hour = '_all_forecasts_'  
-           
+       
+       print('Path: {}'.format(argv.input))
        ncfiles = [ argv.input+'/'+file for file in os.listdir(argv.input) if '.nc' in file \
                                                                        and filetype in file \
                                                                        and forecast_hour in file]
+       print('Ncfiles: {}'.format(ncfiles))
            
        if len(ncfiles) == 0:
            print("No {} file found in {}".format(argv.filetype,argv.input))
@@ -467,12 +475,7 @@ def main():
            plt.savefig(ofile, transparent = True)
            print("Saved file {}".format(ofile))
            plt.close()
-           """
-           from atmos.mirto_atmos_tools import mr2rh
-           x1 = mr2rh(data.wrf_levels*1e-2,
-                      data.temp,
-                      data.water_vapour)[0]
-           """
+
            x1 = data.rh
            x2 = data.sonde_rh
            rms_rh = data.rms_profile_rh
@@ -506,7 +509,9 @@ def main():
            
            # Read all aggregated files
            nc_files = []
-           for path in [argv.wrf_control_dir, argv.wrf_oper_dir, argv.wrf_foper_dir,argv.wrf_conv_dir]:
+           #PaoloA 31Aug2022
+           #for path in [argv.wrf_control_dir, argv.wrf_oper_dir, argv.wrf_foper_dir,argv.wrf_conv_dir]:
+           for path in [argv.wrf_oper_dir, argv.wrf_foper_dir,argv.wrf_conv_dir]:
                         file = [ path+'/'+file for file in os.listdir(path) \
                                                          if '.nc' in file \
                                                          and filetype in file \
@@ -518,61 +523,72 @@ def main():
                             print("Reading ",file[0],'...')
                             nc_files.append(netCDFReader(file[0]))
                        
-           control, oper, foper, conv = nc_files
+           #PaoloA 31Aug2022
+           #control, oper, foper, conv = nc_files
+           oper, foper, conv = nc_files
+           print('NCfiles: {}'.format(nc_files))
            
-           common_forecasts = np.intersect1d(control.ID, 
-                                             np.intersect1d(oper.ID,
-                                                            np.intersect1d(foper.ID,conv.ID)
-                                                            )
+           #PaoloA 31Aug2022
+           #common_forecasts = np.intersect1d(control.ID, 
+           #                                  np.intersect1d(oper.ID,
+           #                                                 np.intersect1d(foper.ID,conv.ID)
+           common_forecasts = np.intersect1d(oper.ID, 
+                                             np.intersect1d(foper.ID,conv.ID)
                                              )
            if len(common_forecasts) == 0:
                sys.exit('No common forecast!')
            else:
                print("!!!  Found {} common forecasts   !!!".format(len(common_forecasts)))
            
-           control_indx = []
+           #PaoloA 31Aug2022
+           #control_indx = []
            oper_indx = []
            foper_indx = []
            conv_indx = []
            
            for common_id in common_forecasts:
-               control_indx.append(np.where(control.ID == common_id)[0][0])
+               #PaoloA 31Aug2022
+               #control_indx.append(np.where(control.ID == common_id)[0][0])
                oper_indx.append(np.where(oper.ID == common_id)[0][0])
-               foper_indx.append(np.where(foper.ID == common_id )[0][0])
+               foper_indx.append(np.where(foper.ID == common_id)[0][0])
                conv_indx.append(np.where(conv.ID == common_id)[0][0])
-           control_indx=np.array(control_indx)
+           #PaoloA 31Aug2022
+           #control_indx=np.array(control_indx)
            oper_indx=np.array(oper_indx)
            foper_indx=np.array(foper_indx)
            conv_indx=np.array(conv_indx)
 
            y = conv.sonde_levels.mean(axis=0)
            title = os.path.basename(file[0]).replace('Validation',
-                                                     'Validation_RMS_Comparison_').replace('aggregated.nc',
+                                                     'Validation_MAE_Comparison_').replace('aggregated.nc',
                                                                                            '').replace('_',
                                                                                                        ' ')
            title += ' ( {} cases) '.format(conv.n_cicles)
            
            for var in ['temp','rh','water_vapour']:
                rms_string = 'rms_profile_'+var
-               ctrl_rms_dif  = conv.__dict__[rms_string][conv_indx,:] - control.__dict__[rms_string][control_indx,:]
+               #PaoloA 31Aug2022
+               #ctrl_rms_dif  = conv.__dict__[rms_string][conv_indx,:] - control.__dict__[rms_string][control_indx,:]
                oper_rms_dif  = conv.__dict__[rms_string][conv_indx,:] - oper.__dict__[rms_string][oper_indx,:]
                foper_rms_dif = conv.__dict__[rms_string][conv_indx,:]  - foper.__dict__[rms_string][foper_indx,:]
 
                conv_rms  = conv.__dict__[rms_string][conv_indx,:]
-               mw_rms  =  control.__dict__[rms_string][control_indx,:]
+               #PaoloA 31Aug2022
+               #mw_rms  =  control.__dict__[rms_string][control_indx,:]
                oper_rms  = oper.__dict__[rms_string][oper_indx,:]
                foper_rms = foper.__dict__[rms_string][foper_indx,:]
 
                var_name = {'temp':'T','rh':'RH','water_vapour':'WV'}.get(var)
                
-               plot_wrf_comparison_profile_diff(ctrl_rms_dif,
-                                            oper_rms_dif,
+               #PaoloA 31Aug2022
+               #plot_wrf_comparison_profile_diff(ctrl_rms_dif,
+               plot_wrf_comparison_profile_diff(oper_rms_dif,
                                             foper_rms_dif,
                                             y,
                                             var_name,
                                             sup_title_str = title)
                
-               ofile = argv.outdir +'/' + os.path.basename(file[0]).replace('Validation','Validation_RMS_Comparison_'+var_name).replace('aggregated.nc','.png')
+               ofile = argv.outdir +'/' + os.path.basename(file[0]).replace('Validation','Validation_MAE_Comparison_'+var_name).replace('_aggregated.nc','.png')
                if '+-1' in ofile:
                    ofile = ofile.replace('forecast+-1H','all_forecasts')
                    
@@ -580,15 +596,16 @@ def main():
                print("Saved file ",ofile)
 
 
+               #PaoloA 31Aug2022
                plot_wrf_comparison_profiles(conv_rms,
-                                            mw_rms,
+               #                             mw_rms,
                                             oper_rms,
                                             foper_rms,
                                             y,
                                             var_name,
                                             sup_title_str = title)
 
-               ofile = argv.outdir +'/' + os.path.basename(file[0]).replace('Validation','Validation_Single_RMS_Comparison_'+var_name).replace('aggregated.nc','.png')
+               ofile = argv.outdir +'/' + os.path.basename(file[0]).replace('Validation','Validation_Single_MAE_Comparison_'+var_name).replace('_aggregated.nc','.png')
                if '+-1' in ofile:
                    ofile = ofile.replace('forecast+-1H','all_forecasts')
 

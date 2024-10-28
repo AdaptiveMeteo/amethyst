@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 
 sys.path.append('/home/amethyst/amethyst/postprocessor')
-from atmos.atmos_tools import interpolate_pressure_grid
+from utilities.atmos.atmos_tools import interpolate_pressure_grid
 
 __author__ = "Paolo Scaccia, Paolo Antonelli and Stefano Piani"
 __copyright__ = "Copyright 2017, AdaptiveMeteo S.r.l."
@@ -124,8 +124,8 @@ def validate_retrieval_multi_station(retrievals, stations, dists, sonde_dates, w
     return
 
 def SPS_Validation(retrieval,sonde,station,dists,min_index,workdir):
-    from atmos.atmos_tools import interpolate_pressure_grid
-    from atmos.mirto_atmos_tools import mr2rh
+    from utilities.atmos.atmos_tools import interpolate_pressure_grid
+    from utilities.atmos.mirto_atmos_tools import mr2rh
     
     prior = ValidationDataset(retrieval.profiles[0].temperature[min_index],
                               mr2rh(retrieval.profiles[0].pressure[min_index],
@@ -309,8 +309,8 @@ def MIRTO_Validation(retrieval,sonde,station,dists,indices,workdir):
     return
 
 def MIRTO_MultiStation_Validation(retrievals,stations,dists,sonde_dates,workdir):
-    from atmos.atmos_tools import interpolate_pressure_grid
-    from validation.download_wyoming_sondes import download_sondes
+    from utilities.atmos.atmos_tools import interpolate_pressure_grid
+    from download_wyoming_sondes import download_sondes
         
         
     # Save output stations used to create netcdf files
