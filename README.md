@@ -1,13 +1,13 @@
 # AMETHYST
 
-AMETHYST is a satellite atmospheric retrieval system for hyperspectral infrared observations. It uses a variational 1D retrieval algorithm coupled with an Optimal Spectral Sampling (OSS) forward model to invert observations from instruments such as CRIS and IASI into atmospheric temperature, humidity, and trace gas profiles.
+AMETHYST is the evolution of the proprietary Mirto retrieval system for hyperspectral infrared observations. Mirto used an Optimal Spectral Sampling (OSS) forward model; AMETHYST 1.0 uses RTTOV for radiative transfer, and AMETHYST 2.0 is planned to transition to Helios-RT.
 
 ## Overview
 
 The AMETHYST pipeline is organized into four main components:
 
 - `preprocessor/`: prepares input fields such as first guess, a priori state, and field-of-view data from model output
-- `processor/`: executes the core inversion engine, including the 1DVar algorithm and OSS radiative transfer
+- `processor/`: executes the core inversion engine, including the 1DVar algorithm and radiative transfer (RTTOV in AMETHYST 1.0, with Helios-RT planned for AMETHYST 2.0)
 - `postprocessor/`: validates retrievals, produces diagnostic plots, and compares results with reference data
 - `ancillary/`: contains static data, instrument definitions, climatologies, and forward model coefficients
 - `utilities/`: helper tools, IASI reader support, atmospheric utilities, and observation error generation
@@ -18,7 +18,7 @@ The AMETHYST pipeline is organized into four main components:
 - `processor/amethyst_processor.py`: main processor orchestrator, handles multiprocessing and inversion workflow
 - `processor/main/amethyst_code_main.py`: core retrieval logic and 1DVar inversion
 - `processor/main/ForwardModel.py`: forward model interface used by the inversion core
-- `processor/ossfm/v3/`: current OSS forward model implementation (Fortran + f2py wrapper)
+- `processor/ossfm/v3/`: legacy OSS forward model implementation retained for reference; AMETHYST 1.0 uses RTTOV and AMETHYST 2.0 will use Helios-RT
 - `postprocessor/POSTPROCESSOR_MERGE.md`: documentation for the merged postprocessor and atmospheric utilities
 - `processor/ossfm/FORWARD_MODEL_AGENT.md`: forward model development guide
 - `ancillary/instrument/INSTRUMENT_CONFIG_AGENT.md`: instrument configuration guide
@@ -27,7 +27,7 @@ The AMETHYST pipeline is organized into four main components:
 
 AMETHYST ingests satellite radiances and ancillary model data, then performs atmospheric retrievals using a variational method. The project combines:
 
-- physics-based radiative transfer through OSS
+- physics-based radiative transfer via RTTOV in AMETHYST 1.0, with a planned transition to Helios-RT in AMETHYST 2.0
 - inversion of temperature, moisture, and trace gas state variables
 - instrument-dependent channel selection and observation error handling
 - multiprocessing to scale retrievals across many profiles
