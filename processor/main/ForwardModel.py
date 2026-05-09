@@ -117,7 +117,7 @@ class ForwardModel(object):
         indata['azangle']   = self.cx.Solar_azimuth_angle
         indata['obslevel']  = self.cx.oss_obslevel
         indata['lat']       = self.cx.fov_latitude
-        
+
         self.model.compute(indata, self.outdata)
 
         # Subselect channels which are used in the inversion

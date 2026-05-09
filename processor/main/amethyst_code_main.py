@@ -137,7 +137,7 @@ class core(object):
         try:
             [L, U] = lu(A, permute_l=True)
         except ValueError:
-            raise NotConvergentIteration("Found an inf or a " 
+            raise NotConvergentIteration("Found an inf or a "
                                          "NaN in the A matrix!")
         y = solve(L, d.data)
         x = solve(U, y.data)

@@ -77,16 +77,13 @@ class FirstGuess(object):
 
         x0[0: self.levels] = self.df.groups['atmospheric_components'].variables['T'][obs,:]
 
-        #PaoloA 03Oct 2024
-        # Get the 'q' values
+        # fg.nc stores q in g/kg; state vector needs log(kg/kg) for OSS model
         q_values = self.df.groups['atmospheric_components'].variables['q'][obs, :]
-        # Clip the values to ensure they are at least 0.000003
-        q_clipped = np.clip(q_values, 0.000003, None)  # Clip values below 0.000003
-        # Apply the logarithm to the clipped values
-        x0[self.levels:self.levels*2] = np.log(q_clipped)
+        q_kgkg = np.clip(q_values * 1e-3, 1e-9, None)  # g/kg → kg/kg, clip at 1e-9 kg/kg
+        x0[self.levels:self.levels*2] = np.log(q_kgkg)
 
         x0[self.levels*2:self.levels*3] = self.co2
-        x0[self.levels*3:self.levels*4] = np.log(self.df.groups['atmospheric_components'].variables['O3'][obs,:])
+        x0[self.levels*3:self.levels*4] = self.df.groups['atmospheric_components'].variables['O3'][obs,:]
         x0[self.levels*4] = self.df.groups['atmospheric_components'].variables['skT'][obs]
         x0[self.levels*4 + 1:self.levels*4 + 1 + self.eigenvalues(obs)] = 0
         

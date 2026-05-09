@@ -7,6 +7,9 @@ from os import path, listdir, system
 import sys
 import time
 
+# Repository root directory
+ROOT_DIR = path.abspath(path.join(path.dirname(__file__), '..'))
+
 # Get python major version
 py_version = int(sys.version_info[0])
 
@@ -32,11 +35,11 @@ import amethyst_config
 import multiprocessing
 
 if amethyst_config.common_vars["fm_version"] == 2:
-    OSS_PATH = "ossfm/v2/"
-    from ossfm.v2.ossFM import ossFM
+    OSS_PATH = path.join(ROOT_DIR, "processor", "ossfm", "v2")
+    from processor.ossfm.v2.ossFM import ossFM
 else:
-    OSS_PATH = "ossfm/v3/"
-    from ossfm.v3.ossFM import ossFM
+    OSS_PATH = path.join(ROOT_DIR, "processor", "ossfm", "v3")
+    from processor.ossfm.v3.ossFM import ossFM
 
 
 class logger():
