@@ -6,12 +6,24 @@ import argparse
 from os import path, listdir, system
 import sys
 import time
+import importlib
 
 # Repository root directory
 ROOT_DIR = path.abspath(path.join(path.dirname(__file__), '..'))
 
 # Get python major version
 py_version = int(sys.version_info[0])
+
+# Pre-scan sys.argv for --config BEFORE importing any project modules,
+# so that all submodules that do 'import amethyst_config' pick up the
+# correct config (e.g. amethyst_config_iasi) via sys.modules.
+_config_mod = 'amethyst_config'
+for _i, _arg in enumerate(sys.argv):
+    if _arg == '--config' and _i + 1 < len(sys.argv):
+        _config_mod = sys.argv[_i + 1]
+        break
+amethyst_config = importlib.import_module(_config_mod)
+sys.modules['amethyst_config'] = amethyst_config  # expose as the canonical name
 
 # Parallel libraries
 from multiprocessing import Process, Queue # @UnresolvedImport
@@ -31,7 +43,6 @@ from main.amethyst_code_main   import core
 from main.reader               import reader_f
 from main.scriba               import scriba_f, ProgressBar
 import cProfile, pstats
-import amethyst_config
 import multiprocessing
 
 if amethyst_config.common_vars["fm_version"] == 2:
@@ -258,6 +269,8 @@ if __name__ == '__main__':
 
     # Parse arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default='amethyst_config',
+                        help="Config module name (default: amethyst_config)")
     parser.add_argument('-d', '--debug', default=None,
                         help="Define which debug variables must be saved")
     parser.add_argument('--debug_file', default=None,

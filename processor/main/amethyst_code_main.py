@@ -39,15 +39,16 @@ class amethyst_core_config(object):
         self.surfacePressure_mb = amethyst_config.processor_vars["constant_pressure"]
         self.observationAltitude_km = amethyst_config.processor_vars["observation_altitude"]["value"]
         self.observationPressure_mb = amethyst_config.processor_vars["observation_pressure"]["value"]
-        self.EstimateK = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=int)
+        max_iter = amethyst_config.processor_vars.get("max_iterations", 11)
+        self.EstimateK = np.ones(max_iter, dtype=int)
         self.Jvar = np.array(amethyst_config.processor_vars["selected_state_vector_variables"])
-        
+
         SKTflag = np.size(np.where(self.Jvar == -1)) > 0
         Tflag = np.size(np.where(self.Jvar == 0)) > 0
         WVflag = np.size(np.where(self.Jvar == 1)) > 0
         CO2flag = np.size(np.where(self.Jvar == 2)) > 0
         O3flag = np.size(np.where(self.Jvar == 3)) > 0
-        
+
         self.variable_selection = [ SKTflag, Tflag, WVflag, CO2flag, O3flag ]
 
         self.Iteration_limit = sum(self.EstimateK)
