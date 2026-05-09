@@ -12,7 +12,7 @@ dependencies:
   - c-ares=1.18.1
   - ca-certificates=2024.8.30
   - cftime=1.6.2
-  - curl=7.26.0
+  - curl
   - gcc=14.1.0
   - gcc_impl_linux-64=14.1.0
   - gfortran=14.1.0

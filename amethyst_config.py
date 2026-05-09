@@ -30,7 +30,7 @@ common_vars = {
                   "instrument" : "cris",
                   "fm_version" : 3,
                   "levels"     : 81,
-                  "wrfdir"     : "/mnt/satellite/amethyst_test_data/wrf",
+                  "wrfdir"     : "/mnt/miwa/ann/amethyst/test_data/wrf",
                   "wrkdir"     : "/dev/shm/amethyst_test/",
                   
                   # Arctic
@@ -49,11 +49,11 @@ common_vars = {
 
 #### PRE-PROCESSOR
 preprocessor_vars = {
-                  "basedir"          : "/mnt/satellite/amethyst_test_data",
-                  "iasidir"          : "/mnt/satellite/amethyst_test_data/iasi/20220808_134754",
-                  "gcrso"            : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
-                  "scris"            : "/mnt/satellite/amethyst_test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
-                  "l1dir"            : "/mnt/satellite/amethyst_test_data/cris/",
+                  "basedir"          : "/mnt/miwa/ann/amethyst/test_data",
+                  "iasidir"          : "/mnt/miwa/ann/amethyst/test_data/iasi/20220808_134754",
+                  "gcrso"            : "/mnt/miwa/ann/amethyst/test_data/cris/20220820_104410/GCRSO_j01_d20220820_t1046239_e1058057_b24631_c20221011034338465526_cspp_dev.h5",
+                  "scris"            : "/mnt/miwa/ann/amethyst/test_data/cris/20220820_104410/SCRIF_j01_d20220820_t1046239_e1058057_b24631_c20221011034338607949_cspp_dev.h5",
+                  "l1dir"            : "/mnt/miwa/ann/amethyst/test_data/cris/",
                   "static_apriori"   : AMETHYST_PATH + "/ancillary/atmosphere/arctic_apriori.nc",
                   "iasi_cmt"         : 5,
                   "cris_cmt"         : .95,
@@ -83,9 +83,12 @@ preprocessor_vars["rundir"] = {
 processor_vars = {
                 # Instrument
                 "instrument"      : common_vars["instrument"],
+                #"noise_file"      : AMETHYST_PATH + "/ancillary/instrument/iasi_obserr.nc",
                 "noise_file"      : AMETHYST_PATH + "/ancillary/instrument/cris_obserr.nc",
                 "instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/cris_FSR_chList.dat",
+                #"instr_chan_list" : AMETHYST_PATH + "/ancillary/instrument/iasi_chList.dat",
                 "od_file"         : AMETHYST_PATH + "/ancillary/forward_model/cris_coefficients_oss_v3.nc",
+                #"od_file"         : AMETHYST_PATH + "/ancillary/forward_model/iasi_coefficients.nc",
                 "fov_file"        : common_vars['wrkdir'] + "/fov.nc",
                 "fg_file"         : common_vars['wrkdir'] + "/fg.nc",
                 "apriori_file"    : common_vars['wrkdir'] + "/apriori.nc",
