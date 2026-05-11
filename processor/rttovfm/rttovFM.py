@@ -66,6 +66,7 @@ class rttovFM(object):
         rttov.Options.CO2Data        = True
         rttov.Options.O3Data         = True
         rttov.Options.StoreRad       = True
+        rttov.Options.ADKBT          = False   # K-matrix in radiance units (not BT)
         rttov.Options.VerboseWrapper = False
         rttov.Options.Verbose        = False   # suppress coefficient-limit warnings
         rttov.Options.ApplyRegLimits = True    # clamp profiles to valid coef range
@@ -191,20 +192,6 @@ class rttovFM(object):
         # --- Radiances ------------------------------------------------
         outdata['y'] = y0
 
-        # --- BT→Radiance Jacobian correction --------------------------
-        # pyrttov runK() always returns dBT_c/dx (brightness-temperature
-        # Jacobians in K/K) regardless of StoreRad.  AMETHYST uses
-        # radiances, so multiply every Jacobian by dRad_c/dBT_c, the
-        # per-channel Planck derivative evaluated at the forward-model
-        # radiance y0[c].  This factor is ~1.48 at the 900 cm⁻¹ window
-        # (large surface contribution) and ~1.0 at the 700 cm⁻¹ CO2 band.
-        _c1 = 1.191042953e-5   # mW/(m²·sr·cm⁻⁴) for RTTOV radiance units
-        _c2 = 1.4387752        # cm·K
-        _BT = _c2 * self.cwvn / np.log1p(_c1 * self.cwvn**3 / np.maximum(y0, 1e-30))
-        _u  = _c2 * self.cwvn / np.maximum(_BT, 1.0)
-        _eu = np.exp(np.clip(_u, 0.0, 500.0))
-        planck_deriv = y0 * _u * _eu / ((_eu - 1.0) * np.maximum(_BT, 1.0))
-
         # --- Jacobians in OSS xkt layout ------------------------------
         # Row layout: 0:nlev=T, nlev=SKT, nlev+1=psf(unused),
         #             nlev+2:2n+2=WV, 2n+2:3n+2=CO2, 3n+2:4n+2=O3
@@ -213,7 +200,7 @@ class rttovFM(object):
         # T: TK[0] shape (nchan, nlev) in pyrttov
         xkt[0:nlev, :] = TK.T if TK.shape == (self.nchan, nlev) else TK
 
-        # SKT: K-matrix SkinK (index 0 = temperature component)
+        # SKT: SkinK index 0 = temperature component; in radiance units (ADKBT=False)
         if _SKK is not None:
             xkt[nlev, :] = np.array(_SKK[0, 0, :, 0], dtype=np.float64)
 
@@ -244,17 +231,13 @@ class rttovFM(object):
             O3K0 = O3K0.T if O3K0.shape == (self.nchan, nlev) else O3K0
             xkt[3 * nlev + 2:4 * nlev + 2, :] = O3K0 * (Md / Mo) * 1e6 * o3_scale[:, None]
 
-        # Apply BT→Rad correction to all atmospheric and surface Jacobians.
-        xkt *= planck_deriv[np.newaxis, :]
         outdata['xkt'] = xkt
 
         # --- Surface emissivity Jacobians ----------------------------
         if 'paxkemrf' not in outdata or outdata['paxkemrf'].shape[1] != self.nchan:
             outdata['paxkemrf'] = np.zeros((2, self.nchan), dtype=np.float64)
         if _SEK is not None:
-            outdata['paxkemrf'][0, :] = (
-                np.array(_SEK[0, 0, :], dtype=np.float64) * planck_deriv
-            )
+            outdata['paxkemrf'][0, :] = np.array(_SEK[0, 0, :], dtype=np.float64)
 
         # Placeholder kept for API compatibility with ossFM
         if 'xkemrf' not in outdata:
