@@ -14,16 +14,34 @@ ROOT_DIR = path.abspath(path.join(path.dirname(__file__), '..'))
 # Get python major version
 py_version = int(sys.version_info[0])
 
+# Ensure the repo root is on sys.path so config modules (amethyst_config*.py)
+# living there are importable regardless of where the script is invoked from.
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 # Pre-scan sys.argv for --config BEFORE importing any project modules,
 # so that all submodules that do 'import amethyst_config' pick up the
 # correct config (e.g. amethyst_config_iasi) via sys.modules.
 _config_mod = 'amethyst_config'
 for _i, _arg in enumerate(sys.argv):
     if _arg == '--config' and _i + 1 < len(sys.argv):
-        _config_mod = sys.argv[_i + 1]
+        _config_mod = sys.argv[_i + 1].removesuffix('.py')
         break
 amethyst_config = importlib.import_module(_config_mod)
 sys.modules['amethyst_config'] = amethyst_config  # expose as the canonical name
+
+# If RTTOV is the FM engine, preload its NetCDF libraries BEFORE any project
+# module (which would otherwise pull in the amethyst env's older libnetcdf).
+# This must happen here, before the dobjects / main imports below.
+if amethyst_config.processor_vars.get('fm_engine') == 'rttov':
+    _rttov_lib = amethyst_config.processor_vars.get('rttov_lib_path')
+    if _rttov_lib:
+        import ctypes
+        for _lib in ['libnetcdf.so.19', 'libnetcdff.so.7']:
+            try:
+                ctypes.CDLL(_rttov_lib + '/' + _lib, mode=ctypes.RTLD_GLOBAL)
+            except OSError:
+                pass  # library not found at that path — ignore and continue
 
 # Parallel libraries
 from multiprocessing import Process, Queue # @UnresolvedImport
@@ -45,7 +63,12 @@ from main.scriba               import scriba_f, ProgressBar
 import cProfile, pstats
 import multiprocessing
 
-if amethyst_config.common_vars["fm_version"] == 2:
+_FM_ENGINE = amethyst_config.processor_vars.get('fm_engine', 'oss')
+
+if _FM_ENGINE == 'rttov':
+    OSS_PATH = None   # not used for RTTOV
+    from processor.rttovfm.rttovFM import rttovFM
+elif amethyst_config.common_vars["fm_version"] == 2:
     OSS_PATH = path.join(ROOT_DIR, "processor", "ossfm", "v2")
     from processor.ossfm.v2.ossFM import ossFM
 else:
@@ -173,7 +196,7 @@ def invert_process( nlev, proc_num, to_compute, to_write,
                 if 'residuals' in output_vars:
                     output['residuals'] = solution.residuals
                 #PaoloA 12112018
-                if 'fgresiduals' in output_vars:                   
+                if 'fg_residuals' in output_vars and output_vars['fg_residuals']:
                     output['fgresiduals'] = solution.fgresiduals
                 #PaoloA
                 if 'Sa'  in output_vars:
@@ -289,9 +312,10 @@ if __name__ == '__main__':
                         help="Define the level of verbosity")
     DBG_FILE = parser.parse_args().debug_file
 
-    # Check wether FM is compiled
-    if len([ x for x in listdir(OSS_PATH) if 'cpython' in x])==0:
-        sys.exit("Compile forward model in {}".format(OSS_PATH))
+    # Check whether OSS FM is compiled (not applicable for RTTOV)
+    if _FM_ENGINE != 'rttov':
+        if len([x for x in listdir(OSS_PATH) if 'cpython' in x]) == 0:
+            sys.exit("Compile forward model in {}".format(OSS_PATH))
 
     # INPUT 4 FUNCTION
     LOG_FILE         = read_log_file(parser.parse_args().log_file)
@@ -314,32 +338,38 @@ if __name__ == '__main__':
     start_process = time.time()
     
     #
-    # OSS init input
+    # Forward model + observation error initialisation
     #
-    L.log('Reading OSS init input... ', 1, end='')
+    L.log('Initialising forward model... ', 1, end='')
 
     workingDir  = amethyst_config.common_vars['wrkdir']
     co2         = amethyst_config.processor_vars['constant_co2']["value"]
     eigen_land  = amethyst_config.processor_vars['eigenforland']
     eigen_sea   = amethyst_config.processor_vars['eigenforsea']
 
-    asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
-    ahitran = Hitran(amethyst_config.processor_vars["od_file"])
-    obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"], indx_file = amethyst_config.processor_vars["instr_chan_list"])
-    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file"], 
-                                   amethyst_config.processor_vars["instr_chan_list"], 
+    obs_err = create_obs_err(amethyst_config.processor_vars["noise_file"],
+                             indx_file=amethyst_config.processor_vars["instr_chan_list"])
+    obs_err_tr = create_obs_err_tr(amethyst_config.processor_vars["noise_file"],
+                                   amethyst_config.processor_vars["instr_chan_list"],
                                    amethyst_config.processor_vars["tr_chan_list"])
 
-    oss_time=time.time()
+    if _FM_ENGINE == 'rttov':
+        pv = amethyst_config.processor_vars
+        oss = rttovFM(coef_file  = pv['rttov_coef_file'],
+                      rttov_path = pv['rttov_path'],
+                      surftype   = pv.get('rttov_surftype', 1),
+                      nthreads   = 1,
+                      lib_path   = pv.get('rttov_lib_path', None))
+    else:
+        asolar  = Solar(amethyst_config.processor_vars["constant_solar_irradiance_file"])
+        ahitran = Hitran(amethyst_config.processor_vars["od_file"])
+        oss = ossFM(asolar, ahitran)
 
-    L.log('Done in ' +str(oss_time-start_process)+' seconds', 1)
+    oss_time = time.time()
+    L.log('Done in ' + str(oss_time - start_process) + ' seconds', 1)
 
-    # This part of code must be repeated for each input profile in data
-    # directory. Must find a way to have names here. Probably the errors
-    # also can be preloaded.
     L.log('Creating an inverter... ', 1, end='')
-    oss = ossFM(asolar, ahitran)
-    inverter = core( oss, obs_err, debugger = debugger)
+    inverter = core(oss, obs_err, debugger=debugger)
     inverter_time=time.time()
     L.log('Done in ' +str(inverter_time-oss_time)+' seconds', 1)
     # <-----
