@@ -57,10 +57,6 @@ class amethyst_core_config(object):
         self.MFRC                  = amethyst_config.processor_vars["minimum_fraction_rate_change"]
         self.MLGIF                 = amethyst_config.processor_vars["ml_gamma_increase_factor"]
         self.MLGDF                 = amethyst_config.processor_vars["ml_gamma_decrease_factor"]
-        # Minimum γ floor: non-zero for forward models with known K errors
-        # (e.g. RTTOV near-surface WV aliasing).  Read from the model object
-        # so OSS (which has no gamma_min attribute) is never affected.
-        self.gamma_min             = getattr(model, 'gamma_min', 0.0)
         self.xdim = None
         self.indx = None
         self.state_var_indx = None
@@ -227,17 +223,6 @@ class core(object):
         # Assign values for the state vector
         xhat = np.copy(self.apriori.x0)
 
-        # For RTTOV: fix NearSurface Q2m to the first-guess surface WV so that
-        # retrieval iterations do not inadvertently change Q2m when they update
-        # the surface profile level, which would inflate the level-0 WV Jacobian.
-        if hasattr(self.cx.model, 'nearsurface_q2m_ppmv'):
-            import numpy as _np
-            _Md = 28.966; _Mw = 18.016
-            _q0_surf_kgkg = float(_np.exp(xhat[self.cx.xdim[0]]))  # state-vector level 0
-            self.cx.model.nearsurface_q2m_ppmv = float(
-                _np.clip(_q0_surf_kgkg * (_Md / _Mw) * 1e6, 1e-3, 500000.0)
-            )
-
         # Iteration of the Newton-Gauss method to find the zero of the first
         # derivative of the Gaussian PDF
         Iteration = 0
@@ -328,8 +313,7 @@ class core(object):
 
                 if (self.mspo <= ref_norm):
                     if self.cx.retrievalFixGammaZero == 0:
-                        self.gamma = max(self.gamma / self.cx.MLGDF,
-                                         self.cx.gamma_min)
+                        self.gamma = self.gamma / self.cx.MLGDF
                     xxdel = (100.0 * (ref_norm - self.mspo) / self.mspo)
                     L.log('OBS ' + str(obs) + ': MIRTO residuals decreased by ' +
                           repr(xxdel)+'%', 4, False)
@@ -346,15 +330,13 @@ class core(object):
             L.log('OBS ' + str(obs) + ': Distance  = ' + repr(abs(self.state.d2)), 4, False)
             L.log('OBS ' + str(obs) + ': Wanted    = ' + repr(converge), 4, False)
             if (abs(self.state.d2) < converge):
-                # If convergence criterium is met, drop gamma to the floor
-                # (0 for OSS / standard; gamma_min for RTTOV with aliased K).
+                # If convergence criterium is met, set gamma to 0 and
+                # run one more iteration
                 if self.cx.retrievalFixGammaZero == 0:
-                    self.gamma = self.cx.gamma_min
+                    self.gamma = 0.0
                 if update_xhat:
                     xhat_pre[jj] = self.state.xhat
                     xhat[jj] = self.state.xhat_new
-                _wvs = self.cx.xdim[0]; _wve = _wvs + self.cx.xdim[1]
-                np.clip(xhat[_wvs:_wve], -25.0, -1.0, out=xhat[_wvs:_wve])
                 [self.cx.sfgrd, self.cx.emrf] = emiss.get(obs,
                                                           xhat[ems:eme])
                 fm.compute_forward(xhat)
@@ -367,7 +349,6 @@ class core(object):
                 self.compute_chi_square(profile)
                 self.update_solution(fm, profile)
                 xhat[jj] = self.state.xhat
-                np.clip(xhat[_wvs:_wve], -25.0, -1.0, out=xhat[_wvs:_wve])
                 [self.cx.sfgrd, self.cx.emrf] = emiss.get(obs,
                                                           xhat[ems:eme])
 
@@ -394,8 +375,6 @@ class core(object):
                     if update_xhat:
                         xhat_pre[jj] = self.state.xhat
                         xhat[jj] = self.state.xhat_new
-                        _wvs = self.cx.xdim[0]; _wve = _wvs + self.cx.xdim[1]
-                        np.clip(xhat[_wvs:_wve], -25.0, -1.0, out=xhat[_wvs:_wve])
                 else:
                     #traceback.print_stack()
                     raise NotConvergentIteration("Limit of Iterations reached for "
