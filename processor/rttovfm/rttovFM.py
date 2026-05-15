@@ -51,6 +51,15 @@ class rttovFM(object):
         lib_path : str, optional
             Extra directory prepended to LD_LIBRARY_PATH before importing
             pyrttov (needed when RTTOV was compiled in a different conda env).
+
+        After construction you may set::
+            rttov_fm.nearsurface_q2m_ppmv = <float>   # fix Q2m (ppmv_dry)
+        to decouple NearSurface Q2m from the profile surface level.
+        When None (default) Q2m tracks h2o_ppmv[-1], which causes a 2.5×
+        Jacobian inflation at the surface level because perturbing
+        xhat[wvs+0] simultaneously changes both the profile and Q2m.
+        Set this to the first-guess surface WV (in ppmv_dry) so that Q2m
+        is a fixed boundary condition, not part of the retrieval state.
         """
         import os, sys
         if lib_path:
@@ -69,7 +78,7 @@ class rttovFM(object):
         rttov.Options.ADKBT          = False   # K-matrix in radiance units (not BT)
         rttov.Options.VerboseWrapper = False
         rttov.Options.Verbose        = False   # suppress coefficient-limit warnings
-        rttov.Options.ApplyRegLimits = True    # clamp profiles to valid coef range
+        rttov.Options.ApplyRegLimits = False   # let RTTOV extrapolate; K is w.r.t. actual profile
         rttov.Options.CheckProfiles  = False   # disable hard-stop on unphysical values
         rttov.Options.Nthreads       = nthreads
         rttov.loadInst()   # load all channels
@@ -79,6 +88,17 @@ class rttovFM(object):
         self.nchan      = len(self.cwvn)
         self._surftype  = surftype
         self._nsurfaces = 1
+        self.nearsurface_q2m_ppmv = None  # see __init__ docstring
+        # Minimum Levenberg-Marquardt γ floor applied by amethyst_code_main.
+        # RTTOV's near-surface WV Jacobians are aliased when multiple user
+        # levels fall in the same coefficient layer (section 7.4.1, RTTOV v14
+        # User Guide).  A non-zero floor keeps extra regularisation throughout
+        # the retrieval, preventing large near-surface WV updates driven by
+        # the aliased K.  Set externally (e.g. gamma_min = 5.0) before calling
+        # the retrieval; 0.0 (default) means no floor is imposed.
+        self.gamma_min = 0.0
+        # Coefficient pressure levels (top-first, increasing pressure).
+        self._coef_p = np.array(rttov.RefPressures, dtype=np.float64)
 
     # ------------------------------------------------------------------
     def compute(self, indata, outdata, dbg=False):
@@ -155,12 +175,17 @@ class rttovFM(object):
                                    dtype=np.float64)
         myProf.SurfType = np.array([[[self._surftype, 0]]], dtype=np.int32)
 
-        # 2-metre variables: use lowest model level as proxy.
-        # NearSurface q2m must match the gas unit (ppmv_dry).
+        # 2-metre variables.  NearSurface q2m must match the gas unit (ppmv_dry).
+        # If nearsurface_q2m_ppmv is set, use that fixed reference value so that
+        # Q2m does not change when the profile surface level is perturbed during
+        # retrieval iterations.  Leaving it None (default) couples Q2m to the
+        # profile surface level, inflating the level-0 WV Jacobian by ~2.5×.
+        if self.nearsurface_q2m_ppmv is not None:
+            _q2m = float(self.nearsurface_q2m_ppmv)
+        else:
+            _q2m = float(h2o_ppmv[-1])
         myProf.NearSurface = np.array(
-            [[[float(temp[-1]),
-               float(h2o_ppmv[-1]),
-               0., 0., 100000.]]],
+            [[[float(temp[-1]), _q2m, 0., 0., 100000.]]],
             dtype=np.float64
         )
 
