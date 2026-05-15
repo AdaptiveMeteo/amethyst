@@ -74,6 +74,7 @@ class FirstGuess(object):
         xa=x0
 
         p[:] = self.df.groups['atmospheric_components'].variables['p'][obs,:]
+        self._sp = float(self.df.groups['atmospheric_components'].variables['sp'][obs])
 
         x0[0: self.levels] = self.df.groups['atmospheric_components'].variables['T'][obs,:]
 
@@ -87,7 +88,7 @@ class FirstGuess(object):
         x0[self.levels*4] = self.df.groups['atmospheric_components'].variables['skT'][obs]
         x0[self.levels*4 + 1:self.levels*4 + 1 + self.eigenvalues(obs)] = 0
         
-        return [p, x0, xa]
+        return [p, x0, xa, self._sp]
 
 
 class firstguess(object):
@@ -102,7 +103,7 @@ class firstguess(object):
         """
         self.xdim = fguess.xdim(obs)
         self.varindx = fguess.varindx(obs)
-        [self.p, self.x0, self.xa] = fguess.state_vector(obs)
+        [self.p, self.x0, self.xa, self.sp] = fguess.state_vector(obs)
         self.obs = obs
 
     def state_vector(self, obs):
@@ -112,5 +113,5 @@ class firstguess(object):
         if obs != self.obs:
             raise IndexError('Object initilized with obs='+repr(self.obs)+
                              ' but obs='+repr(obs)+' requested !')
-        return [self.p, self.x0, self.xa]
+        return [self.p, self.x0, self.xa, self.sp]
 

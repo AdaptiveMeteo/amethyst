@@ -158,7 +158,7 @@ class rttovFM(object):
         # 2-metre variables: use lowest model level as proxy.
         # NearSurface q2m must match the gas unit (ppmv_dry).
         myProf.NearSurface = np.array(
-            [[[float(temp[-1]),
+            [[[float(temp_clip[-1]),
                float(h2o_ppmv[-1]),
                0., 0., 100000.]]],
             dtype=np.float64

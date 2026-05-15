@@ -15,6 +15,42 @@ import sys
 import amethyst_config
 import traceback
 
+
+def _build_interp_matrix(p_old, p_new):
+    """Log-pressure interpolation matrix W (n x n) mapping p_old → p_new.
+
+    Both arrays are surface-first (p[0] is highest pressure, p[-1] is TOA).
+    x_new = W @ x_old.  Interior levels use linear interpolation in
+    log-pressure; the surface level uses linear extrapolation from the two
+    deepest old levels; the TOA level uses nearest-neighbor.
+    """
+    n = len(p_old)
+    assert len(p_new) == n
+    lp = np.log(np.asarray(p_old, dtype=np.float64))   # decreasing
+    lq = np.log(np.asarray(p_new, dtype=np.float64))   # decreasing
+    W = np.zeros((n, n), dtype=np.float64)
+    # Work on -log(p) so arrays are ascending, making searchsorted straightforward.
+    neg_lp = -lp   # ascending
+    for i in range(n):
+        neg_lq_i = -lq[i]
+        j = np.searchsorted(neg_lp, neg_lq_i, side='left') - 1
+        # j < 0  → new level is deeper than all old (higher pressure): extrapolate
+        # j >= n-1 → new level is above all old (lower pressure): nearest-neighbour
+        if j < 0:
+            # linear extrapolation below p_old[0] using levels 0 and 1
+            denom = lp[1] - lp[0]   # < 0 (lp decreasing)
+            w = (lq[i] - lp[0]) / denom   # w < 0 (lq[i] > lp[0])
+            W[i, 0] = 1.0 - w
+            W[i, 1] = w
+        elif j >= n - 1:
+            W[i, -1] = 1.0
+        else:
+            denom = lp[j + 1] - lp[j]   # < 0
+            w = (lq[i] - lp[j]) / denom  # in [0, 1]
+            W[i, j]     = 1.0 - w
+            W[i, j + 1] = w
+    return W
+
 class amethyst_state(object):
     """
     This class stores the inversion results along with intermediate results
@@ -208,17 +244,33 @@ class core(object):
 
         [self.cx.fov_latitude, self.cx.fov_longitude, self.cx.fov_time,
          self.cx.FOVangle, self.cx.Solar_zenith_angle, self.cx.Solar_azimuth_angle, self.cx.wnR, self.cx.R] = fov.fov(obs)
-        [self.cx.p, self.apriori.x0, self.apriori.xa] = fg.state_vector(obs)
-        self.cx.pressure_grid = self.cx.p[0:self.cx.xdim[0]]
-        self.cx.surfacePressure_mb = self.cx.pressure_grid[0]
+        [self.cx.p, self.apriori.x0, self.apriori.xa, sp] = fg.state_vector(obs)
+
+        # Regrid the 81-level pressure grid so its bottom level reaches the
+        # actual surface pressure (sp from fg.nc).  The first-guess grid
+        # typically ends ~3 hPa above sp, leaving the lowest RTTOV coefficient
+        # level outside the profile and causing Jacobian instability.
+        n = self.cx.xdim[0]
+        p_old = self.cx.p[0:n].copy()
+        p_new = p_old * (sp / p_old[0])        # proportional scaling to sp
+        W = _build_interp_matrix(p_old, p_new)
+        self.cx.p[0:n] = p_new
+        x0 = self.apriori.x0
+        x0[0:n]     = W @ x0[0:n]              # T
+        x0[n:2*n]   = W @ x0[n:2*n]            # log(q)
+        # x0[2n:3n] CO2 — constant, no regrid needed
+        x0[3*n:4*n] = W @ x0[3*n:4*n]          # O3
+
+        self.cx.pressure_grid = self.cx.p[0:n]
+        self.cx.surfacePressure_mb = self.cx.pressure_grid[0]   # = sp after regrid
         self.cx.observationPressure_mb = self.cx.pressure_grid[-1]
         L.log('OBS ' + str(obs) + ': Surface   Pressure = '+
               repr(self.cx.surfacePressure_mb), 4, False)
         L.log('OBS ' + str(obs) + ': Satellite Pressure = '+
               repr(self.cx.observationPressure_mb), 4, False)
 
-        # Load apriori
-        [self.apriori.Sa, self.apriori.SaInv] = apriori.covariance_matrix(obs)
+        # Load apriori covariance, regridding atmospheric blocks with the same W
+        [self.apriori.Sa, self.apriori.SaInv] = apriori.covariance_matrix(obs, W=W)
 
         # Assign values for the state vector
         xhat = np.copy(self.apriori.x0)
