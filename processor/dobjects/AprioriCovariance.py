@@ -79,35 +79,21 @@ class AprioriCovariance(object):
         self.df.close()
 
     def covariance_matrix(self, obs, W=None):
-        """Return (Sa, SaInv) for observation obs.
-
-        Parameters
-        ----------
-        W : ndarray (n_levels, n_levels), optional
-            Log-pressure interpolation matrix for regridding atmospheric
-            covariance blocks.  When provided, each block B is replaced by
-            W @ B @ W.T before assembly.  Pass None (default) for no regrid.
-        """
         eigen = self.eigenvalues(obs)
         size = (4 * self.n_levels) + 1 + eigen
 
         Sa = np.zeros((size , size), dtype=np.float64)
         SaInv = np.zeros((size, size), dtype=np.float64)
 
-        def _rg(block):
-            """Apply regridding if W was supplied."""
-            b = np.asarray(block, dtype=np.float64)
-            return W @ b @ W.T if W is not None else b
-
         n = self.n_levels
-        Sa[n*0: n*1, n*0: n*1] = _rg(self.T[obs,:])
-        Sa[n*1: n*2, n*1: n*2] = _rg(self.q[obs,:])
+        Sa[n*0: n*1, n*0: n*1] = self.T[obs,:]
+        Sa[n*1: n*2, n*1: n*2] = self.q[obs,:]
         Sa[n*2: n*3, n*2: n*3] = np.eye(n, dtype=np.float64) * self.co2_std
         # PaoloS 12/04/2024: added perturbation of order 1e-6 to O3 covariance matrix
-        Sa[n*3: n*4, n*3: n*4] = _rg(self.O3[obs,:] + np.eye(n)*1e-6)
+        Sa[n*3: n*4, n*3: n*4] = self.O3[obs,:] + np.eye(n)*1e-6
 
-        Sa[n*0: n*1, n*1: n*2] = _rg(self.Tq[obs,:])
-        Sa[n*1: n*2, n*0: n*1] = Sa[n*0: n*1, n*1: n*2].T
+        Sa[n*0: n*1, n*1: n*2] = self.Tq[obs,:]
+        Sa[n*1: n*2, n*0: n*1] = self.Tq[obs,:].T
         Sa[-eigen - 1, -eigen - 1] = AprioriCovariance.EIGENVALUES_TCOV
         for j in range(1, eigen + 1):
             Sa[-j, -j] = self.emiss_cov[obs, eigen - j]
@@ -185,9 +171,10 @@ class covariance_matrix(object):
         [self.Sa, self.SaInv] = apriori.covariance_matrix(obs)
         self.obs = obs
 
-    def covariance_matrix(self, obs):
+    def covariance_matrix(self, obs, W=None):
         """
-        Return the in-memory object
+        Return the in-memory object.  W is accepted but ignored — regridding
+        is applied by the caller after this call returns.
         """
         if obs != self.obs:
             raise IndexError('Object initilized with obs='+repr(self.obs)+

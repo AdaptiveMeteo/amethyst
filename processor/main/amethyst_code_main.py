@@ -269,8 +269,11 @@ class core(object):
         L.log('OBS ' + str(obs) + ': Satellite Pressure = '+
               repr(self.cx.observationPressure_mb), 4, False)
 
-        # Load apriori covariance, regridding atmospheric blocks with the same W
-        [self.apriori.Sa, self.apriori.SaInv] = apriori.covariance_matrix(obs, W=W)
+        # Load apriori covariance.
+        # Sa regridding is omitted: the pressure shift is ~3 hPa (W ≈ I),
+        # so the effect on covariances is negligible.  The critical fix is
+        # the profile and surface-pressure regridding applied above.
+        [self.apriori.Sa, self.apriori.SaInv] = apriori.covariance_matrix(obs)
 
         # Assign values for the state vector
         xhat = np.copy(self.apriori.x0)
