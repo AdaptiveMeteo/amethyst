@@ -111,7 +111,7 @@ processor_vars = {
                 "ml_gamma_increase_factor"        : 5.0,
                 "ml_gamma_decrease_factor"        : 2.0,
                 "minimum_fraction_rate_change"    : 0.03,
-                "max_iterations"                  : 30,
+                "max_iterations"                  : 80,
 
                 # Transformed Retrieval
                 "tr_chan_list"   : AMETHYST_PATH + "/ancillary/instrument/iasi_chList_tr.dat",

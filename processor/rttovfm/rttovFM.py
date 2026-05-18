@@ -71,6 +71,7 @@ class rttovFM(object):
         rttov.Options.Verbose        = False   # suppress coefficient-limit warnings
         rttov.Options.ApplyRegLimits = True    # clamp profiles to valid coef range
         rttov.Options.CheckProfiles  = False   # disable hard-stop on unphysical values
+        rttov.Options.EnableInterp   = True    # interpolate profile to coef grid; chain-rules Jacobians back to input levels
         rttov.Options.Nthreads       = nthreads
         rttov.loadInst()   # load all channels
 
@@ -157,9 +158,15 @@ class rttovFM(object):
 
         # 2-metre variables: use lowest model level as proxy.
         # NearSurface q2m must match the gas unit (ppmv_dry).
+        # Q2m is fixed to the FG surface value (set by the retrieval driver at
+        # iteration 0) to prevent coupling between Q2m and the state vector:
+        # when Q2m tracks the state, RTTOV perturbs both the profile level and
+        # Q2m simultaneously, inflating the surface WV Jacobian by ~2.5x and
+        # causing catastrophic overshoot at iter 3 of the LM loop.
+        _q2m = getattr(self, '_nearsurface_q2m_ppmv', float(h2o_ppmv[-1]))
         myProf.NearSurface = np.array(
             [[[float(temp_clip[-1]),
-               float(h2o_ppmv[-1]),
+               _q2m,
                0., 0., 100000.]]],
             dtype=np.float64
         )
@@ -186,8 +193,8 @@ class rttovFM(object):
         QK   = rttov.getItemK('Q')
         CO2K = rttov.getItemK('CO2')
         O3K  = rttov.getItemK('O3')
-        _SKK = rttov.SkinK     # shape (nprof, nsurf, nchan, 9); index 0 = T component
-        _SEK = rttov.SurfEmisK # shape (nprof, nsurf, nchan) or None
+        _SKK  = rttov.SkinK        # shape (nprof, nsurf, nchan, 9); index 0 = T component
+        _SEK  = rttov.SurfEmisK    # shape (nprof, nsurf, nchan) or None
 
         # --- Radiances ------------------------------------------------
         outdata['y'] = y0
@@ -197,7 +204,7 @@ class rttovFM(object):
         #             nlev+2:2n+2=WV, 2n+2:3n+2=CO2, 3n+2:4n+2=O3
         xkt = np.zeros((4 * nlev + 2, self.nchan), dtype=np.float64)
 
-        # T: TK[0] shape (nchan, nlev) in pyrttov
+        # T: TK[0] shape (nchan, nlev) in pyrttov — TOA-first, transpose to (nlev, nchan)
         xkt[0:nlev, :] = TK.T if TK.shape == (self.nchan, nlev) else TK
 
         # SKT: SkinK index 0 = temperature component; in radiance units (ADKBT=False)

@@ -7,7 +7,7 @@ Implemented 1DVar algorithm using the ForwardModel class
 
 from __future__ import print_function
 import numpy as np
-from scipy.linalg import lu, solve
+# scipy not required: using numpy.linalg.solve directly
 
 from main.ForwardModel import ForwardModel
 from main.ForwardModel import NotConvergentIteration
@@ -169,23 +169,40 @@ class core(object):
         d = (np.dot(KtSeInv, self.yobs_minus_yhat) -
              np.dot(self.state.SaInv_ret, dx))      
 
-        # Use iterative LU decomposition to determine the solution
-        # First iteration
+        # Solve A totx = d; raise on NaN/Inf before LinAlgError
         try:
-            [L, U] = lu(A, permute_l=True)
-        except ValueError:
-            raise NotConvergentIteration("Found an inf or a "
-                                         "NaN in the A matrix!")
-        y = solve(L, d.data)
-        x = solve(U, y.data)
-        
-        # Second iteration
-        r = d - np.dot(A, x)
-        dz  = solve(L, r.data)
-        ddx = solve(U, dz.data)
-        
-        # Solution
-        totx = x + ddx
+            if not np.all(np.isfinite(A)):
+                raise NotConvergentIteration("Found an inf or a "
+                                             "NaN in the A matrix!")
+            totx = np.linalg.solve(A, d)
+        except np.linalg.LinAlgError:
+            raise NotConvergentIteration("Singular A matrix in LM solve")
+
+        # Step-size limiter: scale down totx uniformly when any T or log(q)
+        # step is unphysically large.  Without this, a near-singular A matrix
+        # (at low gamma) produces steps like +689 K that drive T past RTTOV's
+        # 400 K clip limit, causing K→0 and permanent divergence.
+        # Near convergence (mspo < 2) tighter limits prevent the linearisation
+        # error from causing overshoot oscillations at low gamma.
+        _near_conv = (self.mspo < 2.0)
+        _T_lim     = 5.0  if _near_conv else 15.0
+        _WV_lim    = 2.0  if _near_conv else 5.0
+        _nlev = self.cx.xdim[0]
+        _jj   = self.cx.state_var_indx
+        _T_sel  = (_jj >= 0)      & (_jj < _nlev)
+        _WV_sel = (_jj >= _nlev)  & (_jj < 2 * _nlev)
+        _scale  = 1.0
+        if _T_sel.any():
+            _max_dT = np.max(np.abs(totx[_T_sel]))
+            if _max_dT > _T_lim:
+                _scale = min(_scale, _T_lim / _max_dT)
+        if _WV_sel.any():
+            _max_dlogq = np.max(np.abs(totx[_WV_sel]))
+            if _max_dlogq > _WV_lim:
+                _scale = min(_scale, _WV_lim / _max_dlogq)
+        if _scale < 1.0:
+            totx = totx * _scale
+
         self.state.xhat_new = self.state.xhat + totx
         # Calculate rate of change in the state vector
         # d2 is used to evaluate if convergence criterium is met
@@ -246,10 +263,12 @@ class core(object):
          self.cx.FOVangle, self.cx.Solar_zenith_angle, self.cx.Solar_azimuth_angle, self.cx.wnR, self.cx.R] = fov.fov(obs)
         [self.cx.p, self.apriori.x0, self.apriori.xa, sp] = fg.state_vector(obs)
 
-        # Regrid the 81-level pressure grid so its bottom level reaches the
-        # actual surface pressure (sp from fg.nc).  The first-guess grid
-        # typically ends ~3 hPa above sp, leaving the lowest RTTOV coefficient
-        # level outside the profile and causing Jacobian instability.
+        # Scale the profile so its bottom level reaches the actual surface
+        # pressure (sp from fg.nc).  The first-guess profile typically ends
+        # ~3 hPa above sp; extending it to sp ensures NearSurface.T = T_profile[-1]
+        # is at the true surface, and surfacePressure_mb = sp is consistent.
+        # The K-matrix error for the near-surface level (TK missing the
+        # NearSurfaceK[T2m] contribution) is corrected in rttovFM.py.
         n = self.cx.xdim[0]
         p_old = self.cx.p[0:n].copy()
         p_new = p_old * (sp / p_old[0])        # proportional scaling to sp
@@ -262,7 +281,7 @@ class core(object):
         x0[3*n:4*n] = W @ x0[3*n:4*n]          # O3
 
         self.cx.pressure_grid = self.cx.p[0:n]
-        self.cx.surfacePressure_mb = self.cx.pressure_grid[0]   # = sp after regrid
+        self.cx.surfacePressure_mb = sp          # actual surface pressure (NOT profile bottom)
         self.cx.observationPressure_mb = self.cx.pressure_grid[-1]
         L.log('OBS ' + str(obs) + ': Surface   Pressure = '+
               repr(self.cx.surfacePressure_mb), 4, False)
@@ -289,6 +308,14 @@ class core(object):
         fm = ForwardModel(self.cx, debugger = self.debugger )
         self.fm = fm
 
+        # Fix Q2m at FG surface WV to decouple NearSurface from the state.
+        # Without this, RTTOV perturbs both the surface profile level AND Q2m
+        # when computing K, inflating the surface WV Jacobian by ~2.5x.
+        _n = self.cx.xdim[0]
+        _Md, _Mw = 28.966, 18.016
+        _fg_q_kgkg = np.exp(float(x0[_n]))   # surface log(q) → kg/kg (index n = surface in surface-first layout)
+        fm.model._nearsurface_q2m_ppmv = float(_fg_q_kgkg * (_Md / _Mw) * 1e6)
+
         ems = fg.xdim[0]+fg.xdim[1]+fg.xdim[2]+fg.xdim[3]+fg.xdim[4]
         eme = fg.xdim[0]+fg.xdim[1]+fg.xdim[2]+fg.xdim[3]+fg.xdim[4]+fg.xdim[5]
 
@@ -304,6 +331,12 @@ class core(object):
         self.state.Sa_ret = self.apriori.Sa
         self.state.SaInv_ret = self.apriori.SaInv
         self.state.xa = self.apriori.xa[jj]
+
+        # Best-xhat tracker for standard LM step rejection: when a bad step is
+        # detected (mspo increases), revert xhat to the best position seen so
+        # far before computing the next (higher-gamma) step.
+        xhat_best = np.copy(xhat)
+        mspo_best = np.inf
 
         while (Iteration < self.cx.Iteration_limit):
             #
@@ -336,6 +369,12 @@ class core(object):
             self.state.xhat_pre = xhat_pre[jj]
 
             self.compute_chi_square(profile)
+
+            # Track the best position seen so far (standard LM bookkeeping)
+            if self.mspo < mspo_best:
+                mspo_best = self.mspo
+                xhat_best = np.copy(xhat)
+
             self.update_solution(fm, profile)
 
             # By setting update_xhat to True the state vector is updated
@@ -379,6 +418,10 @@ class core(object):
                     xxdel = (100.0 * (self.mspo - ref_norm) / self.mspo)
                     L.log('OBS ' + str(obs) + ': MIRTO residuals increased by ' +
                           repr(xxdel)+'%', 4, False)
+                    update_xhat = False   # standard LM: reject bad step, retry with higher gamma
+                    # Revert xhat to the best position so the next step is
+                    # computed from there (not from the current bad position)
+                    xhat[jj] = xhat_best[jj]
 
             L.log('OBS ' + str(obs) + ': Iteration = ' + repr(Iteration), 4, False)
             L.log('OBS ' + str(obs) + ': New Gamma = ' + repr(self.gamma), 4, False)

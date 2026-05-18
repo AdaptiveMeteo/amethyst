@@ -3,7 +3,6 @@
 Class to retrieve a priori Covariances.
 """
 import numpy as np
-from scipy.linalg import inv
 from netCDF4 import Dataset
 import amethyst_config
 

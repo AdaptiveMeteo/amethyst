@@ -5,7 +5,7 @@ Transform retrieved profiles in innovations for the data assimilation.
 """
 
 import numpy as np
-from scipy.linalg import svd
+from numpy.linalg import svd
 
 
 class DAresult(object):
